@@ -41,3 +41,6 @@ class Camioneta:
         pizzas_descargadas = len(self.pizzas)
         self.pizzas = []
         return pizzas_descargadas
+    
+    def esta_disponible(self):
+        return self.disponible
