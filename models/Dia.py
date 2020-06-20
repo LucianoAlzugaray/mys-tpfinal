@@ -8,12 +8,11 @@ import queue
 def limpiar_pizzas_en_camionetas(camionetas):
     pass
 
+
 class Dia:
-    def __init__(self, camionetas, minutos_maximo):
-        # TODO: ver valor de minutos_maximo, se agregó la referencia porque faltaba
+    def __init__(self, minutos_maximos):
         self.camionetas = [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
-        self.minutos_maximo = minuto_maximo
-        self.camionetas = camionetas
+        self.minutos_maximos = minutos_maximos
         self.tiempo_actual = 0
         self.pedidos_rechazado = 0
         self.cola_espera_clientes = queue.Queue()
@@ -21,6 +20,7 @@ class Dia:
         self.desperdicio_por_fin_de_dia = 0
         self.fel = []
 
+# Metodo para setup.
     def iniciar_dia(self):
         self.fel = self.generar_pedidos()
         self.ubicar_camionetas()
@@ -30,15 +30,28 @@ class Dia:
         for camioneta in self.camionetas:
             camioneta.volver_a_pizzeria()
 
+# Metodo de ejecución principal.
     def correr(self):
         while not self.termino_dia():
-            pass
-            # obtener los eventos del fel que ocurran en este minuto
-            # ejecutarlos hsta que no haya más
-            # si hay clientes en cola de espera y hay camioneta disponible
+            tiempoActual = self.get_tiempo_actual()
+            # Obtenemos los eventos que se deben realizar en este momento.
+            eventosDeEsteMinuto = self.obtener_eventos_de_ahora(tiempoActual)
+            for evento in eventosDeEsteMinuto:
+                evento.ejecutar_actividad()
+            # Si hay clientes esperando y hay camionetas disponibles.
+            if ((len(self.get_cola_de_espera())>0) and self.hay_camionetas_disponibles()):
+                print("Log -----      mandare una pizza a un cliente")
+                # [TODO] mandar la pizza al cliente
+            # Aplicamos el paso del reloj
+            self.tiempo_actual += 1
+
+            # [HECHO] obtener los eventos del fel que ocurran en este minuto
+            # [HECHO] ejecutarlos hsta que no haya más
+            # [HECHO] si hay clientes en cola de espera y hay camioneta disponible
                 # mandar la pizza al cliente.
-            # sumar un minuto más en minuto_actual
-        for camioneta in camionetas:
+            # [HECHO] sumar un minuto más en minuto_actual
+
+        for camioneta in self.get_camionetas():
             camioneta.volver_a_pizzeria()
             self.desperdicio_por_fin_de_dia += camioneta.descargarse()
         #Ver si se necesita guardar algun estado o hacer algun calculo.
@@ -79,6 +92,36 @@ class Dia:
             return self.cola_espera_clientes.get()
         else:
             return None
+    
     def hay_camionetas_disponibles(self):
-        #implementar
-        pass
+        for camioneta in self.get_camionetas():
+            if (camioneta.esta_disponible()):
+                return True
+        return False
+
+    #Getter del tiempo actual.
+    def get_tiempo_actual(self):
+        return self.tiempo_actual
+
+    #Getter de la fel.
+    def get_fel(self):
+        return self.fel
+
+    #Getter de la cola de espera de clientes.
+    def get_cola_de_espera(self):
+        return self.cola_espera_clientes
+    
+    #Getter de las camionetas del dia
+    def get_camionetas(self):
+        return self.camionetas
+
+
+    def obtener_eventos_de_ahora(self, fel):
+        nuevaLista = []
+        for evento in fel:
+            if evento.get_hora() == self.get_tiempo_actual():
+                nuevaLista.append(evento)
+        return nuevaLista
+
+    def enviar_pedido(self, camioneta, pizza):
+        self.fel.append(EntregarPizzaEvent(tiempo_entrega(), camioneta, pizza)) 
