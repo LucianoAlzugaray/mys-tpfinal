@@ -46,3 +46,6 @@ class Camioneta:
     @static_method
     def get_pizzas_maximas(cls): 
         return self.cantidad_hornos * self.tamanio_hornos
+    
+    def esta_disponible(self):
+        return self.disponible
