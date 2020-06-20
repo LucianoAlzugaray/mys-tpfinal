@@ -54,20 +54,7 @@ class LlamoClienteEvent:
     # TODO: refactorizar
     def ejecutar_actividad(self, dia):
         if self.cliente_esta_en_rango():
-            if len(camionetas_disponibles) == 0:
-                dia.encolar_cliente(self)
-            else:
-                camionetas_posibles_de_envio = self.camionetas_con_pizza_pedida(self.tipo, camionetas_disponibles)
-                if len(camionetas_posibles_de_envio) > 0:
-                    camioneta = self.obtener_camioneta_mas_cercana(self.ubicacion, camionetas_posibles_de_envio)
-                    enviar_pedido(camioneta, dia)
-                else:
-                    if cliente_convencido():
-                        # TODO: mirar TODO de generar_pizza
-                        tipo_pizza = generar_tipo_de_pizza()
-                    else:
-                        camioneta = self.obtener_camioneta_mas_cercana([0, 0], camionetas_disponibles)
-                        cargar_camioneta(camioneta)
+            dia.encolar_cliente(self)
         else:
             self.rechazar_pedido(dia)
 
