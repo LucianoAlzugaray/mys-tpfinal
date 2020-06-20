@@ -33,3 +33,11 @@ class Camioneta:
     def tiene_tipo(self, tipo):
         lista_de_pizzas_de_tipo = [pizza for pizza in self.pizzas if pizza.tipo == tipo]
         return len(lista_de_pizzas_de_tipo) > 0
+    
+    def volver_a_pizzeria(self):
+        self.ubicacion = [0,0]
+
+    def descargarse(self):
+        pizzas_descargadas = len(self.pizzas)
+        self.pizzas = []
+        return pizzas_descargadas

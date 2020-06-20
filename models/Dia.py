@@ -1,5 +1,6 @@
 from events.LlamoClienteEvent import LlamoClienteEvent
 from utils.utils import *
+from models.Camioneta import Camioneta
 import queue
 
 
@@ -7,17 +8,17 @@ import queue
 def limpiar_pizzas_en_camionetas(camionetas):
     pass
 
-
 class Dia:
-
-    def __init__(self, camionetas):
+    def __init__(self, camionetas, minutos_maximo):
         # TODO: ver valor de minutos_maximo, se agregó la referencia porque faltaba
-        self.minutos_maximo = None
+        self.camionetas = [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
+        self.minutos_maximo = minuto_maximo
         self.camionetas = camionetas
         self.tiempo_actual = 0
         self.pedidos_rechazado = 0
         self.cola_espera_clientes = queue.Queue()
         self.desperdicios = 0
+        self.desperdicio_por_fin_de_dia = 0
         self.fel = []
 
     def iniciar_dia(self):
@@ -27,7 +28,21 @@ class Dia:
 
     def ubicar_camionetas(self):
         for camioneta in self.camionetas:
-            camioneta.ubicacion = [0, 0]
+            camioneta.volver_a_pizzeria()
+
+    def correr(self):
+        while not self.termino_dia():
+            pass
+            # obtener los eventos del fel que ocurran en este minuto
+            # ejecutarlos hsta que no haya más
+            # si hay clientes en cola de espera y hay camioneta disponible
+                # mandar la pizza al cliente.
+            # sumar un minuto más en minuto_actual
+        for camioneta in camionetas:
+            camioneta.volver_a_pizzeria()
+            self.desperdicio_por_fin_de_dia += camioneta.descargarse()
+        #Ver si se necesita guardar algun estado o hacer algun calculo.
+
 
     ##TODO: Refactorizar
     def generar_pedidos_en_hora(self, hora):
@@ -64,3 +79,6 @@ class Dia:
             return self.cola_espera_clientes.get()
         else:
             return None
+    def hay_camionetas_disponibles(self):
+        #implementar
+        pass

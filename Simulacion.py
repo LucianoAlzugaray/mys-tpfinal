@@ -1,5 +1,4 @@
-from models.Camioneta import Camioneta
-
+from models.Dia import Dia
 
 class Simulacion:
     experimentos = 10
@@ -7,5 +6,14 @@ class Simulacion:
     horas_por_dia = 12
     minutos_maximo = 60 * horas_por_dia
 
-    def __init__(self):
-        self.camionetas = [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
+    def correr_simulacion(self):
+        #Correr simulacion
+        #por cada dia generar un nuevo objeto dia y correrlo
+        #  guarda el dia en una lista de dias corridos.
+        pass
+
+    def obtener_datos(self):
+        # Obtener datos finales
+        # retorna datos en np array o como sea
+        pass
+
