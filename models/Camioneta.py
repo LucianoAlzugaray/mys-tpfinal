@@ -4,7 +4,8 @@ from events.PizzaVenceEvent import PizzaVenceEvent
 
 
 class Camioneta:
-    pizzas_maximas = 40
+    cantidad_hornos = 1
+    tamanio_hornos = 40
 
     def __init__(self):
         self.ubicacion = [0, 0]
@@ -41,3 +42,7 @@ class Camioneta:
         pizzas_descargadas = len(self.pizzas)
         self.pizzas = []
         return pizzas_descargadas
+
+    @static_method
+    def get_pizzas_maximas(cls): 
+        return self.cantidad_hornos * self.tamanio_hornos

@@ -9,9 +9,12 @@ def limpiar_pizzas_en_camionetas(camionetas):
     pass
 
 class Dia:
-    def __init__(self, camionetas, minutos_maximo):
+    def __init__(self, minutos_maximo, cantidad_camionetas):
         # TODO: ver valor de minutos_maximo, se agregó la referencia porque faltaba
-        self.camionetas = [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
+        camionetas = []
+        for i in range(cantidad_camionetas):
+            camionetas.append(Camioneta())
+        self.camionetas = camionetas
         self.minutos_maximo = minuto_maximo
         self.camionetas = camionetas
         self.tiempo_actual = 0
@@ -82,3 +85,7 @@ class Dia:
     def hay_camionetas_disponibles(self):
         #implementar
         pass
+
+    def enviar_pedido(self, camioneta, pizza):
+        self.fel.append(EntregarPizzaEvent(tiempo_entrega(), camioneta, pizza))
+        

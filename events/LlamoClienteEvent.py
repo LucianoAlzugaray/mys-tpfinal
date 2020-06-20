@@ -1,15 +1,8 @@
 from utils.utils import *
 
-
-# TODO: se agregó referencia faltante
-def enviar_pedido(camioneta, dia):
-    pass
-
-
 # TODO: se agregó referencia faltante
 def cargar_camioneta(camioneta):
     pass
-
 
 # TODO: Generar ubicacion
 class LlamoClienteEvent:
@@ -46,7 +39,7 @@ class LlamoClienteEvent:
         # obtenemos distancia entre las camionetas y la ubicacion del pedido
         distancias = map(lambda camioneta: (self.obtener_distancia(camioneta.ubicacion, self.ubicacion), camioneta),
                          camionetas)
-        # obtenemos la minima distancia
+        # obtenemos la minima distanc
         distancia_minima = min(distancias, key=lambda distancia: distancia[0])
         # obtenemos camioneta
         return distancia_minima[1]
@@ -62,4 +55,6 @@ class LlamoClienteEvent:
     def rechazar_pedido(self, dia):
         dia.pedidos_rechazados += 1
 
-
+    #Getter de la hora.     
+    def get_hora(self):         
+        return self.hora
