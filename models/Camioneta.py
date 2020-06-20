@@ -2,7 +2,6 @@ from utils.utils import *
 from models.Pizza import Pizza
 from events.PizzaVenceEvent import PizzaVenceEvent
 
-
 class Camioneta:
     cantidad_hornos = 1
     tamanio_hornos = 40

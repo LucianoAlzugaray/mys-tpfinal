@@ -13,11 +13,7 @@ class Simulacion:
         for experimento in range(self.experimentos):
             #por cada dia, generar un nuevo objeto dia y correrlo
             for dia in range(self.dias_a_simular):
-<<<<<<< HEAD
                 nuevo_dia = Dia(minutos_maximo, self.cantidad_camionetas)
-=======
-                nuevo_dia = Dia(self.minutos_maximo)
->>>>>>> 1ed16c860d360cdacd012ec36696c14970205ac4
                 nuevo_dia.correr()
             #  guarda el dia en una lista de dias corridos.
             self.dias_corridos.append(nuevo_dia)
