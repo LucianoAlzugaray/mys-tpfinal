@@ -8,13 +8,12 @@ class Camioneta:
     tamanio_hornos = 40
 
     def __init__(self):
-        self.pizzas_maximas = None
         self.ubicacion = [0, 0]
         self.pizzas = []
         self.disponible = True
 
-    def cargar_camionetas(self, hora, fel):
-        cantidad_pizzas_a_cargar = self.pizzas_maximas - len(self.pizzas)
+    def cargar_pizzas(self, hora, fel):
+        cantidad_pizzas_a_cargar = self.tamanio_hornos - len(self.pizzas)
         for i in range(cantidad_pizzas_a_cargar):
             pizza = self.generar_pizza(hora, fel)
             self.pizzas.append(pizza)
@@ -50,5 +49,3 @@ class Camioneta:
     def esta_disponible(self):
         return self.disponible
 
-    def cargar_pizzas(self, tiempo_actual, fel):
-        pass
