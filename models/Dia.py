@@ -9,13 +9,17 @@ def limpiar_pizzas_en_camionetas(camionetas):
     pass
 
 
+class EntregarPizzaEvent(object):
+    pass
+
+
 class Dia:
     def __init__(self, minutos_maximo, cantidad_camionetas):
         camionetas = []
         for i in range(cantidad_camionetas):
             camionetas.append(Camioneta())
         self.camionetas = camionetas
-        self.minutos_maximo = minuto_maximo
+        self.minutos_maximo = minutos_maximo
         self.tiempo_actual = 0
         self.pedidos_rechazado = 0
         self.cola_espera_clientes = queue.Queue()

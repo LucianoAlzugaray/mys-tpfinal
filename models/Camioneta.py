@@ -2,11 +2,13 @@ from utils.utils import *
 from models.Pizza import Pizza
 from events.PizzaVenceEvent import PizzaVenceEvent
 
+
 class Camioneta:
     cantidad_hornos = 1
     tamanio_hornos = 40
 
     def __init__(self):
+        self.pizzas_maximas = None
         self.ubicacion = [0, 0]
         self.pizzas = []
         self.disponible = True
@@ -33,18 +35,20 @@ class Camioneta:
     def tiene_tipo(self, tipo):
         lista_de_pizzas_de_tipo = [pizza for pizza in self.pizzas if pizza.tipo == tipo]
         return len(lista_de_pizzas_de_tipo) > 0
-    
+
     def volver_a_pizzeria(self):
-        self.ubicacion = [0,0]
+        self.ubicacion = [0, 0]
 
     def descargarse(self):
         pizzas_descargadas = len(self.pizzas)
         self.pizzas = []
         return pizzas_descargadas
 
-    @static_method
-    def get_pizzas_maximas(cls): 
+    def get_pizzas_maximas(self):
         return self.cantidad_hornos * self.tamanio_hornos
-    
+
     def esta_disponible(self):
         return self.disponible
+
+    def cargar_pizzas(self, tiempo_actual, fel):
+        pass
