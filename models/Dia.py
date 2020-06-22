@@ -1,15 +1,13 @@
+from events.EntregarPizzaEvent import EntregarPizzaEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from utils.utils import *
 from models.Camioneta import Camioneta
 import queue
 import itertools
 
+
 # TODO: se agrega referencia faltante.
 def limpiar_pizzas_en_camionetas(camionetas):
-    pass
-
-
-class EntregarPizzaEvent(object):
     pass
 
 
@@ -21,7 +19,7 @@ class Dia:
         self.camionetas = camionetas
         self.minutos_maximo = minutos_maximo
         self.tiempo_actual = 0
-        self.pedidos_rechazado = 0
+        self.pedidos_rechazados = 0
         self.cola_espera_clientes = queue.Queue()
         self.desperdicios = 0
         self.desperdicio_por_fin_de_dia = 0
@@ -34,19 +32,18 @@ class Dia:
         self.cargar_camionetas()
 
     def ubicar_camionetas(self):
-        for camioneta in self.camionetas:
-            camioneta.volver_a_pizzeria()
+        list(map(lambda x: x.volver_a_pizzeria(), self.camionetas))
 
     # Metodo de ejecución principal.
     def correr(self):
         while not self.termino_dia():
-            tiempoActual = self.get_tiempo_actual()
+            tiempo_actual = self.get_tiempo_actual()
             # Obtenemos los eventos que se deben realizar en este momento.
-            eventosDeEsteMinuto = self.obtener_eventos_de_ahora(tiempoActual)
-            for evento in eventosDeEsteMinuto:
+            eventos_de_este_minuto = self.obtener_eventos_de_ahora()
+            for evento in eventos_de_este_minuto:
                 evento.ejecutar_actividad()
             # Si hay clientes esperando y hay camionetas disponibles.
-            if ((len(self.get_cola_de_espera()) > 0) and self.hay_camionetas_disponibles()):
+            if self.get_cola_de_espera().qsize() > 0 and self.hay_camionetas_disponibles():
                 print("Log -----      mandare una pizza a un cliente")
                 # [TODO] mandar la pizza al cliente
             # Aplicamos el paso del reloj
@@ -72,7 +69,7 @@ class Dia:
         return list(itertools.chain(*[self.generar_pedidos_en_hora(i) for i in range(12)]))
 
     def cargar_camionetas(self):
-        [camioneta.cargar_pizzas(self.tiempo_actual, self.fel) for camioneta in self.camionetas]
+        list(map(lambda camioneta: camioneta.cargar_pizzas(self.tiempo_actual, self.fel), self.camionetas))
 
     def encolar_cliente(self, cliente):
         self.cola_espera_clientes.put(cliente)
@@ -83,41 +80,26 @@ class Dia:
     def acciones_finales_del_dia(self):
         limpiar_pizzas_en_camionetas(self.camionetas)
 
-    ## OBTENER CLIENTE CON ESTA FUNCION
     def obtener_cliente_de_cola(self):
-        if not self.cola_espera_clientes.empty():
-            return self.cola_espera_clientes.get()
-        else:
-            return None
+        return self.cola_espera_clientes.get() if not self.cola_espera_clientes.empty() else None
 
     def hay_camionetas_disponibles(self):
-        for camioneta in self.get_camionetas():
-            if (camioneta.esta_disponible()):
-                return True
-        return False
+        return len(list(filter(lambda x: x.esta_disponible(), self.get_camionetas()))) > 0
 
-    # Getter del tiempo actual.
     def get_tiempo_actual(self):
         return self.tiempo_actual
 
-    # Getter de la fel.
     def get_fel(self):
         return self.fel
 
-    # Getter de la cola de espera de clientes.
     def get_cola_de_espera(self):
         return self.cola_espera_clientes
 
-    # Getter de las camionetas del dia
     def get_camionetas(self):
         return self.camionetas
 
-    def obtener_eventos_de_ahora(self, fel):
-        nuevaLista = []
-        for evento in fel:
-            if evento.get_hora() == self.get_tiempo_actual():
-                nuevaLista.append(evento)
-        return nuevaLista
+    def obtener_eventos_de_ahora(self):
+        return list(filter(lambda x: x.get_hora() == self.get_tiempo_actual(), self.fel))
 
     def enviar_pedido(self, camioneta, pizza):
         self.fel.append(EntregarPizzaEvent(tiempo_entrega(), camioneta, pizza))

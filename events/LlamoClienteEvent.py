@@ -17,7 +17,7 @@ class LlamoClienteEvent:
         cateto1 = self.ubicacion[0]
         cateto2 = self.ubicacion[1]
         # calculamos hipotenusa
-        hipotenusa = math.sqrt(math.pow(cateto1) + math.pow(cateto2))
+        hipotenusa = math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2))
         return hipotenusa <= self.limite
 
     @staticmethod
@@ -55,6 +55,6 @@ class LlamoClienteEvent:
     def rechazar_pedido(self, dia):
         dia.pedidos_rechazados += 1
 
-    #Getter de la hora.     
+    # Getter de la hora
     def get_hora(self):         
         return self.hora
