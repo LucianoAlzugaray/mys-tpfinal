@@ -1,5 +1,6 @@
 from models.Dia import Dia
 
+
 class Simulacion:
     experimentos = 10
     dias_a_simular = 365
