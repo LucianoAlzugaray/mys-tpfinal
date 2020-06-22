@@ -13,10 +13,8 @@ class Camioneta:
         self.disponible = True
 
     def cargar_pizzas(self, hora, fel):
-        cantidad_pizzas_a_cargar = self.tamanio_hornos - len(self.pizzas)
-        for i in range(cantidad_pizzas_a_cargar):
-            pizza = self.generar_pizza(hora, fel)
-            self.pizzas.append(pizza)
+        for i in range(self.tamanio_hornos - len(self.pizzas)):
+            self.pizzas.append(self.generar_pizza(hora, fel))
 
     def generar_pizza(self, hora, fel):
         tipo = generar_tipo_de_pizza()
