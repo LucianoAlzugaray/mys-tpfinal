@@ -17,21 +17,15 @@ class Camioneta:
             self.pizzas.append(self.generar_pizza(hora, fel))
 
     def generar_pizza(self, hora, fel):
-        tipo = generar_tipo_de_pizza()
-        pizza = Pizza(tipo, hora)
-        self.generar_evento_de_vencimiento(pizza, fel)
+        pizza = Pizza(generar_tipo_de_pizza(), hora)
+        fel.append(PizzaVenceEvent(pizza, self))
         return pizza
-
-    def generar_evento_de_vencimiento(self, pizza, fel):
-        vencimiento_de_pizza = PizzaVenceEvent(pizza, self)
-        fel.append(vencimiento_de_pizza)
 
     def quitar_pizza(self, pizza):
         self.pizzas.remove(pizza)
 
     def tiene_tipo(self, tipo):
-        lista_de_pizzas_de_tipo = [pizza for pizza in self.pizzas if pizza.tipo == tipo]
-        return len(lista_de_pizzas_de_tipo) > 0
+        return len(list(filter(lambda x: x.tipo == tipo, self.pizzas))) > 0
 
     def volver_a_pizzeria(self):
         self.ubicacion = [0, 0]
