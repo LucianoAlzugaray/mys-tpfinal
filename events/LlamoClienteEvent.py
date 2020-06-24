@@ -1,8 +1,10 @@
 from utils.utils import *
 
+
 # TODO: se agregó referencia faltante
 def cargar_camioneta(camioneta):
     pass
+
 
 # TODO: Generar ubicacion
 class LlamoClienteEvent:
@@ -14,28 +16,24 @@ class LlamoClienteEvent:
         self.ubicacion = generar_ubicacion_cliente()
 
     def cliente_esta_en_rango(self):
-        cateto1 = self.ubicacion[0]
-        cateto2 = self.ubicacion[1]
-        # calculamos hipotenusa
-        hipotenusa = math.sqrt(math.pow(cateto1) + math.pow(cateto2))
-        return hipotenusa <= self.limite
-
-    @staticmethod
-    def obtener_camionetas_disponibles(camionetas):
-        return [camioneta for camioneta in camionetas if camioneta.disponible]
-
-    @staticmethod
-    def camionetas_con_pizza_pedida(tipo, camionetas):
-        return [camioneta for camioneta in camionetas if camioneta.tiene_tipo(tipo)]
+        return self.obtener_distancia([0, 0], self.ubicacion) <= self.limite
 
     @staticmethod
     def obtener_distancia(punto1, punto2):
         cateto1 = punto2[0] - punto1[0]
         cateto2 = punto2[1] - punto1[1]
         # calculamos distancia
-        return math.sqrt(math.pow(cateto1) + math.pow(cateto2))
+        return math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2))
 
-    def obtener_camioneta_mas_cercana(self, ubicacion, camionetas):
+    @staticmethod
+    def obtener_camionetas_disponibles(camionetas):
+        return list(filter(lambda x: x.disponible, camionetas))
+
+    @staticmethod
+    def camionetas_con_pizza_pedida(tipo, camionetas):
+        return list(filter(lambda x: x.tiene_tipo(tipo), camionetas))
+
+    def obtener_camioneta_mas_cercana(self, camionetas):
         # obtenemos distancia entre las camionetas y la ubicacion del pedido
         distancias = map(lambda camioneta: (self.obtener_distancia(camioneta.ubicacion, self.ubicacion), camioneta),
                          camionetas)
@@ -52,9 +50,10 @@ class LlamoClienteEvent:
             self.rechazar_pedido(dia)
 
     # TODO: revisar
-    def rechazar_pedido(self, dia):
+    @staticmethod
+    def rechazar_pedido(dia):
         dia.pedidos_rechazados += 1
 
-    #Getter de la hora.     
-    def get_hora(self):         
+    # Getter de la hora
+    def get_hora(self):
         return self.hora

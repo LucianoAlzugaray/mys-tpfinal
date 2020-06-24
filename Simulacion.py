@@ -1,5 +1,6 @@
 from models.Dia import Dia
 
+
 class Simulacion:
     experimentos = 10
     dias_a_simular = 365
@@ -13,7 +14,7 @@ class Simulacion:
         for experimento in range(self.experimentos):
             #por cada dia, generar un nuevo objeto dia y correrlo
             for dia in range(self.dias_a_simular):
-                nuevo_dia = Dia(minutos_maximo, self.cantidad_camionetas)
+                nuevo_dia = Dia(self.minutos_maximo, self.cantidad_camionetas)
                 nuevo_dia.correr()
             #  guarda el dia en una lista de dias corridos.
             self.dias_corridos.append(nuevo_dia)

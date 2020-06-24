@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import random
+from models.TipoPizza import TipoPizza
 
 ## Obtiene una velocidad probabilistica para cargar pizzas
 def velocidad_carga_pizza():
@@ -33,15 +34,15 @@ def pedido_en_hora():
 def generar_tipo_de_pizza():
     opcion = random.random()
     if (opcion < 0.05):
-        return 'anana'
+        return TipoPizza.ANANA
     elif (opcion < 0.20):
-        return 'calabresa'
+        return TipoPizza.CALABRESA
     elif (opcion < 0.55):
-        return 'mozzarella'
+        return TipoPizza.MOZZARELLA
     elif (opcion < 0.75):
-        return 'fugazzeta'
+        return TipoPizza.FUGAZZETA
     else:
-        return 'napolitana'
+        return TipoPizza.NAPOLITANA
 
 
 ## Obtiene una ubicación del cliente aleatoria
