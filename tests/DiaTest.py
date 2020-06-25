@@ -1,6 +1,8 @@
 import unittest
 from models.Dia import Dia
 from events.LlamoClienteEvent import LlamoClienteEvent
+from models.actividades.EncolarCliente import EncolarCliente
+from models.actividades.RechazarPedido import RechazarPedido
 
 
 class DiaTestCase(unittest.TestCase):
@@ -31,8 +33,11 @@ class DiaTestCase(unittest.TestCase):
 
         cliente = self.dia.obtener_cliente_de_cola()
         self.assertTrue(cliente is None)
-        evento = LlamoClienteEvent(1)
-        evento.ejecutar_actividad(self.dia)
+        evento = LlamoClienteEvent(1, self.dia)
+        evento.attach(EncolarCliente())
+        evento.attach(RechazarPedido())
+        evento.notify()
+
         cliente2 = self.dia.obtener_cliente_de_cola()
         if evento.cliente_esta_en_rango():
             self.assertFalse(cliente2 is None)

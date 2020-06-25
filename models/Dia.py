@@ -4,6 +4,8 @@ from utils.utils import *
 from models.Camioneta import Camioneta
 import queue
 import itertools
+from models.actividades.RechazarPedido import RechazarPedido
+from models.actividades.EncolarCliente import EncolarCliente
 
 
 # TODO: se agrega referencia faltante.
@@ -41,6 +43,7 @@ class Dia:
             # Obtenemos los eventos que se deben realizar en este momento.
             eventos_de_este_minuto = self.obtener_eventos_de_ahora()
             for evento in eventos_de_este_minuto:
+                # evento.notify()
                 evento.ejecutar_actividad()
             # Si hay clientes esperando y hay camionetas disponibles.
             if self.get_cola_de_espera().qsize() > 0 and self.hay_camionetas_disponibles():
@@ -62,7 +65,15 @@ class Dia:
 
     @staticmethod
     def generar_pedidos_en_hora(hora):
-        return [LlamoClienteEvent(hora) for i in range(pedidos_generados())]
+        eventos = []
+        for i in range(pedidos_generados()):
+            evento = LlamoClienteEvent(hora)
+            evento.attach(EncolarCliente())
+            evento.attach(RechazarPedido())
+            eventos.append(evento)
+
+        return eventos
+        # return [LlamoClienteEvent(hora) for i in range(pedidos_generados())]
 
     # TODO: Revisar horas repetidas
     def generar_pedidos(self):
@@ -103,3 +114,6 @@ class Dia:
 
     def enviar_pedido(self, camioneta, pizza):
         self.fel.append(EntregarPizzaEvent(tiempo_entrega(), camioneta, pizza))
+
+    def rechazar_pedido(self):
+        self.pedidos_rechazados += 1

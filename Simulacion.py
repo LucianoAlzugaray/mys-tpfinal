@@ -1,7 +1,8 @@
 from models.Dia import Dia
+from models.meta.Singleton import Singleton
 
 
-class Simulacion:
+class Simulacion(metaclass=Singleton):
     experimentos = 10
     dias_a_simular = 365
     horas_por_dia = 12

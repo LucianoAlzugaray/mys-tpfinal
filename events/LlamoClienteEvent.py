@@ -1,4 +1,5 @@
 from utils.utils import *
+from events.SimulacionEvent import SimulacionEvent
 
 
 # TODO: se agregó referencia faltante
@@ -7,10 +8,13 @@ def cargar_camioneta(camioneta):
 
 
 # TODO: Generar ubicacion
-class LlamoClienteEvent:
+
+class LlamoClienteEvent(SimulacionEvent):
     limite = 2000
 
-    def __init__(self, hora):
+    def __init__(self, hora, dia=None):
+        super().__init__(hora)
+        self.dia = dia
         self.hora = pedido_en_hora() + hora * 60
         self.tipo = generar_tipo_de_pizza()
         self.ubicacion = generar_ubicacion_cliente()
@@ -41,18 +45,6 @@ class LlamoClienteEvent:
         distancia_minima = min(distancias, key=lambda distancia: distancia[0])
         # obtenemos camioneta
         return distancia_minima[1]
-
-    # TODO: refactorizar
-    def ejecutar_actividad(self, dia):
-        if self.cliente_esta_en_rango():
-            dia.encolar_cliente(self)
-        else:
-            self.rechazar_pedido(dia)
-
-    # TODO: revisar
-    @staticmethod
-    def rechazar_pedido(dia):
-        dia.pedidos_rechazados += 1
 
     # Getter de la hora
     def get_hora(self):
