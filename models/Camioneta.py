@@ -1,6 +1,6 @@
+from SimulacionExceptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
 from utils.utils import *
 from models.Pizza import Pizza
-from events.PizzaVenceEvent import PizzaVenceEvent
 
 
 class Camioneta:
@@ -12,14 +12,9 @@ class Camioneta:
         self.pizzas = []
         self.disponible = True
 
-    def cargar_pizzas(self, hora, fel):
+    def cargar_pizzas(self):
         for i in range(self.tamanio_hornos - len(self.pizzas)):
-            self.pizzas.append(self.generar_pizza(hora, fel))
-
-    def generar_pizza(self, hora, fel):
-        pizza = Pizza(generar_tipo_de_pizza(), hora)
-        fel.append(PizzaVenceEvent(pizza, self))
-        return pizza
+            self.pizzas.append(Pizza(generar_tipo_de_pizza()))
 
     def quitar_pizza(self, pizza):
         self.pizzas.remove(pizza)
@@ -41,3 +36,21 @@ class Camioneta:
     def esta_disponible(self):
         return self.disponible
 
+    def get_pizza(self, pizza):
+        pizzas = list(filter(lambda x: x.pizza == pizza, self.pizzas))
+        return None if len(pizzas) == 0 else pizzas[0]
+
+    def reservar_pizza(self, tipo: TipoPizza) -> None:
+        pizzas_disponibles = self.get_pizzas_disponibles()
+        pizza_del_tipo = list(filter(lambda x: x.tipo == tipo, pizzas_disponibles))
+        if len(pizza_del_tipo) == 0:
+            raise NoHayTipoPizzaEnCamionetaException(f"No hay pizza del tipo {tipo}")
+
+        pizza_del_tipo[0].reservada = True
+
+    def get_pizzas_disponibles(self):
+        return list(filter(lambda x: not x.vencida and not x.reservada, self.pizzas))
+
+    @property
+    def pizzas_reservadas(self):
+        return list(filter(lambda x: x.reservada, self.pizzas))

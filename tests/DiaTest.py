@@ -1,4 +1,6 @@
 import unittest
+
+from models.Camioneta import Camioneta
 from models.Dia import Dia
 from events.LlamoClienteEvent import LlamoClienteEvent
 from models.actividades.EncolarCliente import EncolarCliente
@@ -8,7 +10,7 @@ from models.actividades.RechazarPedido import RechazarPedido
 class DiaTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.dia = Dia(10, 4)
+        self.dia = Dia(10, [Camioneta(), Camioneta(), Camioneta(), Camioneta()])
 
     def test_cargar_camionetas(self):
         self.dia.cargar_camionetas()

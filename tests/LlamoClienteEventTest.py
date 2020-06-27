@@ -5,7 +5,7 @@ from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 
 
-class MyTestCase(unittest.TestCase):
+class LlamoClienteEventTest(unittest.TestCase):
 
     def setUp(self):
         self.evento = LlamoClienteEvent(10)
@@ -14,7 +14,7 @@ class MyTestCase(unittest.TestCase):
     def test_camionetas_con_pizza_pedida(self):
         for k, v in enumerate(self.camionetas):
             if k % 2 == 0:
-                self.camionetas[k].pizzas.append(Pizza(TipoPizza.ANANA, 10))
+                self.camionetas[k].pizzas.append(Pizza(TipoPizza.ANANA))
         camionetas_con_pizza_pedida = self.evento.camionetas_con_pizza_pedida(TipoPizza.ANANA, self.camionetas)
         self.assertTrue(len(camionetas_con_pizza_pedida) == 2)
         for camioneta in camionetas_con_pizza_pedida:

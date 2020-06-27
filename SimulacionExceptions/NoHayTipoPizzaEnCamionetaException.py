@@ -1,0 +1,3 @@
+
+class NoHayTipoPizzaEnCamionetaException(Exception):
+    pass

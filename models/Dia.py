@@ -14,10 +14,7 @@ def limpiar_pizzas_en_camionetas(camionetas):
 
 
 class Dia:
-    def __init__(self, minutos_maximo, cantidad_camionetas):
-        camionetas = []
-        for i in range(cantidad_camionetas):
-            camionetas.append(Camioneta())
+    def __init__(self, minutos_maximo, camionetas):
         self.camionetas = camionetas
         self.minutos_maximo = minutos_maximo
         self.tiempo_actual = 0
@@ -80,7 +77,7 @@ class Dia:
         return list(itertools.chain(*[self.generar_pedidos_en_hora(i) for i in range(12)]))
 
     def cargar_camionetas(self):
-        list(map(lambda camioneta: camioneta.cargar_pizzas(self.tiempo_actual, self.fel), self.camionetas))
+        list(map(lambda camioneta: camioneta.cargar_pizzas(), self.camionetas))
 
     def encolar_cliente(self, cliente):
         self.cola_espera_clientes.put(cliente)
