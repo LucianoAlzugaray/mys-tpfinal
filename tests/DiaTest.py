@@ -1,8 +1,10 @@
 import unittest
 
-from models.Camioneta import Camioneta
-from models.Dia import Dia
+from Simulacion import Simulacion
+from models.Cliente import Cliente
 from events.LlamoClienteEvent import LlamoClienteEvent
+from models.Pizza import Pizza
+from models.TipoPizza import TipoPizza
 from models.actividades.EncolarCliente import EncolarCliente
 from models.actividades.RechazarPedido import RechazarPedido
 
@@ -10,7 +12,7 @@ from models.actividades.RechazarPedido import RechazarPedido
 class DiaTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.dia = Dia(10, [Camioneta(), Camioneta(), Camioneta(), Camioneta()])
+        self.dia = Simulacion().dia_actual
 
     def test_cargar_camionetas(self):
         self.dia.cargar_camionetas()
@@ -35,7 +37,10 @@ class DiaTestCase(unittest.TestCase):
 
         cliente = self.dia.obtener_cliente_de_cola()
         self.assertTrue(cliente is None)
-        evento = LlamoClienteEvent(1, self.dia)
+
+        self.dia.camionetas[0].pizzas.append(Pizza(TipoPizza.ANANA))
+        evento = LlamoClienteEvent(1, Cliente(), self.dia)
+        evento.tipo_pizza = TipoPizza.ANANA
         evento.attach(EncolarCliente())
         evento.attach(RechazarPedido())
         evento.notify()
@@ -45,7 +50,7 @@ class DiaTestCase(unittest.TestCase):
             self.assertFalse(cliente2 is None)
             self.assertIsInstance(cliente2, LlamoClienteEvent)
         else:
-            self.assertEqual(1, self.dia.pedidos_rechazados)
+            self.assertEqual(1, len(self.dia.pedidos_rechazados))
 
     def test_hay_camionetas_disponibles(self):
 
@@ -66,7 +71,7 @@ class DiaTestCase(unittest.TestCase):
 
         tiempo_actual = 30
         for i in range(4):
-            evento = LlamoClienteEvent(tiempo_actual)
+            evento = LlamoClienteEvent(tiempo_actual, None)
             evento.hora = tiempo_actual
             self.dia.fel.append(evento)
 

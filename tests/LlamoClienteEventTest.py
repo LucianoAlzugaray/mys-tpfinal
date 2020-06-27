@@ -1,5 +1,6 @@
 import unittest
 from events.LlamoClienteEvent import LlamoClienteEvent
+from models.Cliente import Cliente
 from models.Camioneta import Camioneta
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
@@ -8,7 +9,7 @@ from models.TipoPizza import TipoPizza
 class LlamoClienteEventTest(unittest.TestCase):
 
     def setUp(self):
-        self.evento = LlamoClienteEvent(10)
+        self.evento = LlamoClienteEvent(10, None)
         self.camionetas = [Camioneta() for i in range(4)]
 
     def test_camionetas_con_pizza_pedida(self):
@@ -31,12 +32,16 @@ class LlamoClienteEventTest(unittest.TestCase):
 
     def test_cliente_esta_en_rango(self):
 
-        self.evento.ubicacion[0] = 1415
-        self.evento.ubicacion[1] = 1415
+        cliente = Cliente()
+
+        cliente.ubicacion[0] = 1415
+        cliente.ubicacion[1] = 1415
+        self.evento.cliente = cliente
         self.assertFalse(self.evento.cliente_esta_en_rango())
 
-        self.evento.ubicacion[0] = 1414
-        self.evento.ubicacion[1] = 1414
+        cliente.ubicacion[0] = 1414
+        cliente.ubicacion[1] = 1414
+        self.evento.cliente = cliente
         self.assertTrue(self.evento.cliente_esta_en_rango())
 
 

@@ -1,4 +1,5 @@
 from SimulacionExceptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
+from models.Pedido import Pedido
 from utils.utils import *
 from models.Pizza import Pizza
 
@@ -11,6 +12,8 @@ class Camioneta:
         self.ubicacion = [0, 0]
         self.pizzas = []
         self.disponible = True
+        self.pedido_en_curso = None
+        self.pedidos = []
 
     def cargar_pizzas(self):
         for i in range(self.tamanio_hornos - len(self.pizzas)):
@@ -20,7 +23,7 @@ class Camioneta:
         self.pizzas.remove(pizza)
 
     def tiene_tipo(self, tipo):
-        return len(list(filter(lambda x: x.tipo == tipo, self.pizzas))) > 0
+        return len(list(filter(lambda x: x.tipo == tipo, self.get_pizzas_disponibles()))) > 0
 
     def volver_a_pizzeria(self):
         self.ubicacion = [0, 0]
@@ -40,13 +43,16 @@ class Camioneta:
         pizzas = list(filter(lambda x: x.pizza == pizza, self.pizzas))
         return None if len(pizzas) == 0 else pizzas[0]
 
-    def reservar_pizza(self, tipo: TipoPizza) -> None:
+    def reservar_pizza(self, tipo: TipoPizza) -> Pizza:
         pizzas_disponibles = self.get_pizzas_disponibles()
         pizza_del_tipo = list(filter(lambda x: x.tipo == tipo, pizzas_disponibles))
         if len(pizza_del_tipo) == 0:
             raise NoHayTipoPizzaEnCamionetaException(f"No hay pizza del tipo {tipo}")
 
-        pizza_del_tipo[0].reservada = True
+        pizza = pizza_del_tipo[0]
+        pizza.reservada = True
+        return pizza
+
 
     def get_pizzas_disponibles(self):
         return list(filter(lambda x: not x.vencida and not x.reservada, self.pizzas))
@@ -54,3 +60,19 @@ class Camioneta:
     @property
     def pizzas_reservadas(self):
         return list(filter(lambda x: x.reservada, self.pizzas))
+
+    def get_pedido_by_cliente(self, cliente):
+        pedidos = list(filter(lambda x: x.cliente == cliente, self.pedidos))
+        return None if len(pedidos) == 0 else pedidos[0]
+
+    def get_siguiente_pedido(self):
+        pedido = self.pedidos[0]
+        self.pedidos.remove(pedido)
+        return pedido
+
+    def asignar_pedido(self, pedido: Pedido):
+        self.pedidos.append(pedido)
+
+
+
+

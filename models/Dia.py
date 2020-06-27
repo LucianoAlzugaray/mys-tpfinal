@@ -1,5 +1,6 @@
 from events.EntregarPizzaEvent import EntregarPizzaEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
+from models.Cliente import Cliente
 from utils.utils import *
 from models.Camioneta import Camioneta
 import queue
@@ -18,7 +19,7 @@ class Dia:
         self.camionetas = camionetas
         self.minutos_maximo = minutos_maximo
         self.tiempo_actual = 0
-        self.pedidos_rechazados = 0
+        self.pedidos_rechazados = []
         self.cola_espera_clientes = queue.Queue()
         self.desperdicios = 0
         self.desperdicio_por_fin_de_dia = 0
@@ -64,7 +65,7 @@ class Dia:
     def generar_pedidos_en_hora(hora):
         eventos = []
         for i in range(pedidos_generados()):
-            evento = LlamoClienteEvent(hora)
+            evento = LlamoClienteEvent(hora, None)
             evento.attach(EncolarCliente())
             evento.attach(RechazarPedido())
             eventos.append(evento)
@@ -107,10 +108,10 @@ class Dia:
         return self.camionetas
 
     def obtener_eventos_de_ahora(self):
-        return list(filter(lambda x: x.get_hora() == self.get_tiempo_actual(), self.fel))
+        return list(filter(lambda x: x.hora == self.get_tiempo_actual(), self.fel))
 
     def enviar_pedido(self, camioneta, pizza):
         self.fel.append(EntregarPizzaEvent(tiempo_entrega(), camioneta, pizza))
 
-    def rechazar_pedido(self):
-        self.pedidos_rechazados += 1
+    def rechazar_pedido(self, cliente: Cliente):
+        self.pedidos_rechazados.append(cliente)
