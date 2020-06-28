@@ -44,7 +44,7 @@ class Camioneta:
         pizzas = list(filter(lambda x: x.pizza == pizza, self.pizzas))
         return None if len(pizzas) == 0 else pizzas[0]
 
-    def reservar_pizza(self, tipo: TipoPizza) -> Pizza:
+    def reservar_pizza(self, tipo: TipoPizza) -> None:
         pizzas_disponibles = self.get_pizzas_disponibles()
         pizza_del_tipo = list(filter(lambda x: x.tipo == tipo, pizzas_disponibles))
 
@@ -53,7 +53,6 @@ class Camioneta:
 
         pizza = pizza_del_tipo[0]
         pizza.reservada = True
-        return pizza
 
 
     def get_pizzas_disponibles(self):
@@ -73,6 +72,7 @@ class Camioneta:
         return pedido
 
     def asignar_pedido(self, pedido: Pedido):
+        self.reservar_pizza(pedido.tipo_pizza)
         self.pedidos.append(pedido)
         if self.pedido_en_curso is None:
             self.pedido_en_curso = pedido

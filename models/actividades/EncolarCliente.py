@@ -28,8 +28,6 @@ class EncolarCliente(Actividad):
             Simulacion().add_event(CamionetaRegresaARestauranteEvent(camioneta, 10))
 
     def asignar_pedido_a_camioneta(self, camioneta, evento):
-        pizza = camioneta.reservar_pizza(evento.tipo_pizza)
-        pedido = Pedido(evento.cliente, evento.hora, camioneta, pizza)
-        camioneta.asignar_pedido(pedido)
+        camioneta.asignar_pedido(Pedido(evento.cliente, evento.hora, camioneta, evento.tipo_pizza))
         evento.dia.encolar_cliente(evento)
 

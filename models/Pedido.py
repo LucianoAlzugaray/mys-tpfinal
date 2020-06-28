@@ -1,11 +1,11 @@
 class Pedido:
 
-    def __init__(self, cliente, hora_toma, camioneta, pizza):
+    def __init__(self, cliente, hora_toma, camioneta, tipo_pizza):
         self.cliente = cliente
         self.hora_toma = hora_toma
         self.hora_entrga = None
         self.ubicacion_origen = None
-        self.pizza = pizza
+        self.tipo_pizza = tipo_pizza
         self.camioneta = camioneta
 
     @property
