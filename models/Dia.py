@@ -25,6 +25,7 @@ class Dia:
 
     # Metodo para setup.
     def iniciar_dia(self):
+        # TODO: generar eventos de pedido
         self.fel = self.generar_pedidos()
         self.ubicar_camionetas()
         self.cargar_camionetas()
@@ -39,8 +40,7 @@ class Dia:
             # Obtenemos los eventos que se deben realizar en este momento.
             eventos_de_este_minuto = self.obtener_eventos_de_ahora()
             for evento in eventos_de_este_minuto:
-                # evento.notify()
-                evento.ejecutar_actividad()
+                evento.notify()
             # Si hay clientes esperando y hay camionetas disponibles.
             if self.get_cola_de_espera().qsize() > 0 and self.hay_camionetas_disponibles():
                 print("Log -----      mandare una pizza a un cliente")
@@ -108,10 +108,6 @@ class Dia:
 
     def obtener_eventos_de_ahora(self):
         return list(filter(lambda x: x.hora == self.get_tiempo_actual(), self.fel))
-
-    def enviar_pedido(self, camioneta, pizza):
-        from Simulacion import Simulacion
-        self.fel.append(EntregarPizzaEvent(Simulacion().utils.tiempo_entrega(), camioneta, pizza))
 
     def rechazar_pedido(self, cliente: Cliente):
         self.pedidos_rechazados.append(cliente)

@@ -18,7 +18,7 @@ class LlamoClienteEvent(SimulacionEvent):
         self.dia = dia
         self.cliente = cliente
         from Simulacion import Simulacion
-        self.hora = Simulacion().utils.pedido_en_hora() + hora * 60
+        self.hora = hora
         self.tipo_pizza = Simulacion().utils.generar_tipo_de_pizza()
 
     def cliente_esta_en_rango(self):

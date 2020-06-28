@@ -89,6 +89,8 @@ class SimulacionTest(unittest.TestCase):
                 return False
 
         simulacion = Simulacion()
+        self.assertFalse(simulacion.volver_al_terminar_todos_los_pedidos)
+
         simulacion.utils = TestableUtils()
         for k, camioneta in enumerate(simulacion.dia_actual.camionetas):
             camioneta.descargarse()
@@ -107,6 +109,23 @@ class SimulacionTest(unittest.TestCase):
         expected = simulacion.dia_actual.camionetas[3]
         actual = eventos[0].camioneta
         self.assertTrue(expected == actual)
+
+    def test_debe_regresat_camioneta_mas_proxima_a_liberarse_cuando_cliente_no_convencido(self):
+        class TestableUtils(Utils):
+
+            @staticmethod
+            def convencer_al_cliente():
+                return False
+
+        simulacion = Simulacion()
+        self.assertFalse(simulacion.volver_al_terminar_todos_los_pedidos)
+
+        simulacion.utils = TestableUtils()
+        for k, camioneta in enumerate(simulacion.dia_actual.camionetas):
+            camioneta.descargarse()
+            self.asignar_pedido_a_camioneta(TipoPizza.ANANA, k)
+
+        self.assertEqual(True, True)
 
     def asignar_pedido_a_camioneta(self, tipo_de_pizza, camioneta):
         Simulacion().dia_actual.camionetas[camioneta].pizzas.append(Pizza(tipo_de_pizza))

@@ -1,8 +1,10 @@
 import itertools
 import math
 
+from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Cliente import Cliente
 from models.Dia import Dia
+from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.meta.Singleton import Singleton
 from utils.utils import Utils
@@ -24,12 +26,14 @@ class Simulacion(metaclass=Singleton):
     dia_actual = Dia(minutos_maximo, camionetas)
     utils = Utils()
     volver_al_terminar_todos_los_pedidos = False
+    pedidos = []
 
-    def correr_simulacion(self):
+    def run(self):
         # Correr simulacion
         for experimento in range(self.experimentos):
             # por cada dia, generar un nuevo objeto dia y correrlo
             for dia in range(self.dias_a_simular):
+                self.dia_actual.iniciar_dia()
                 self.dia_actual.correr()
                 self.dias_corridos.append(self.dia_actual)
                 self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
@@ -97,7 +101,8 @@ class Simulacion(metaclass=Singleton):
         return math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2))
 
     def get_tipos_disponibles_en_camionetas(self):
-        pizzas_disponibles = list(itertools.chain(*map(lambda x: x.get_pizzas_disponibles(), self.dia_actual.camionetas)))
+        pizzas_disponibles = list(
+            itertools.chain(*map(lambda x: x.get_pizzas_disponibles(), self.dia_actual.camionetas)))
         return list(set(map(lambda x: x.tipo, pizzas_disponibles)))
 
     def obtener_camioneta_a_volver_al_restaurante(self):
@@ -112,3 +117,14 @@ class Simulacion(metaclass=Singleton):
 
     def obtener_camioneta_mas_cercana_al_restaurante(self):
         return self.ordenar_camionetas_por_ubicacion([0, 0], 'get_ubicacion_siguiente_pedido')[0]
+
+    def remover_evento_vencimiento_pizza(self, pizza: Pizza):
+        evento = self.get_pizza_vence_by_pizza(pizza)
+        if evento is not None:
+            self.dia_actual.fel.remove(evento)
+
+    def get_pizza_vence_by_pizza(self, pizza):
+        return next((lambda x: isinstance(x, PizzaVenceEvent) and x.pizza == pizza, self.dia_actual.fel))
+
+    def add_pedido(self, pedido):
+        self.pedidos.append(pedido)
