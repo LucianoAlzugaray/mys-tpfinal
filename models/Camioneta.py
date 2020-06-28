@@ -16,8 +16,9 @@ class Camioneta:
         self.pedidos = []
 
     def cargar_pizzas(self):
+        from Simulacion import Simulacion
         for i in range(self.tamanio_hornos - len(self.pizzas)):
-            self.pizzas.append(Pizza(generar_tipo_de_pizza()))
+            self.pizzas.append(Pizza(Simulacion().utils.generar_tipo_de_pizza()))
 
     def quitar_pizza(self, pizza):
         self.pizzas.remove(pizza)
@@ -46,6 +47,7 @@ class Camioneta:
     def reservar_pizza(self, tipo: TipoPizza) -> Pizza:
         pizzas_disponibles = self.get_pizzas_disponibles()
         pizza_del_tipo = list(filter(lambda x: x.tipo == tipo, pizzas_disponibles))
+
         if len(pizza_del_tipo) == 0:
             raise NoHayTipoPizzaEnCamionetaException(f"No hay pizza del tipo {tipo}")
 
@@ -72,7 +74,17 @@ class Camioneta:
 
     def asignar_pedido(self, pedido: Pedido):
         self.pedidos.append(pedido)
+        if self.pedido_en_curso is None:
+            self.pedido_en_curso = pedido
 
+    def get_ubicacion_siguiente_pedido(self):
+        return self.pedido_en_curso.ubicacion
+
+    def get_ubicacion_ultimo_pedido(self):
+        return self.pedidos[len(self.pedidos) - 1].ubicacion
+
+    def get_ubicacion(self):
+        return self.ubicacion
 
 
 

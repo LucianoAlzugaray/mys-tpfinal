@@ -1,4 +1,5 @@
-from utils.utils import *
+import math
+
 from events.SimulacionEvent import SimulacionEvent
 
 
@@ -16,8 +17,9 @@ class LlamoClienteEvent(SimulacionEvent):
         super().__init__(hora)
         self.dia = dia
         self.cliente = cliente
-        self.hora = pedido_en_hora() + hora * 60
-        self.tipo_pizza = generar_tipo_de_pizza()
+        from Simulacion import Simulacion
+        self.hora = Simulacion().utils.pedido_en_hora() + hora * 60
+        self.tipo_pizza = Simulacion().utils.generar_tipo_de_pizza()
 
     def cliente_esta_en_rango(self):
         return self.obtener_distancia([0, 0], self.cliente.ubicacion) <= self.limite

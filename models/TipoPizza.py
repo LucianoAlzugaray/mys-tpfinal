@@ -9,3 +9,4 @@ class TipoPizza(Enum):
     FUGAZZETA = 'fugazzeta'
     NAPOLITANA = 'napolitana'
 
+

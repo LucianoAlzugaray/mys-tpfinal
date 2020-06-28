@@ -1,10 +1,11 @@
+import itertools
 import math
 
-from SimulacionExceptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
 from models.Cliente import Cliente
 from models.Dia import Dia
 from models.TipoPizza import TipoPizza
 from models.meta.Singleton import Singleton
+from utils.utils import Utils
 
 
 def generar_camionetas():
@@ -21,6 +22,8 @@ class Simulacion(metaclass=Singleton):
     camionetas = generar_camionetas()
     events = []
     dia_actual = Dia(minutos_maximo, camionetas)
+    utils = Utils()
+    volver_al_terminar_todos_los_pedidos = False
 
     def correr_simulacion(self):
         # Correr simulacion
@@ -61,19 +64,22 @@ class Simulacion(metaclass=Singleton):
         return None if len(camionetas) == 0 else camionetas[0]
 
     def seleccionar_camioneta(self, cliente: Cliente, tipo: TipoPizza):
+        camionetas = self.ordenar_camionetas_por_ubicacion(cliente.ubicacion, 'get_ubicacion')
 
-        for camioneta in self.ordenar_camionetas_por_ubicacion(cliente.ubicacion):
+        for camioneta in camionetas:
             if camioneta.tiene_tipo(tipo):
                 return camioneta
 
-        raise NoHayTipoPizzaEnCamionetaException(f"No hay pizas del tipo {tipo}")
+        return None
 
-    def ordenar_camionetas_por_ubicacion(self, ubicacion):
+    def ordenar_camionetas_por_ubicacion(self, ubicacion, method_name):
 
         distancias = {}
 
         for camioneta in self.dia_actual.camionetas:
-            distancia = self.obtener_distancia(ubicacion, camioneta.ubicacion)
+            metodo = getattr(camioneta, method_name)
+            ubicacion_camioneta = metodo()
+            distancia = self.obtener_distancia(ubicacion, ubicacion_camioneta)
             distancias[camioneta] = distancia
 
         aux = sorted(distancias.items(), key=lambda x: x[1])
@@ -90,7 +96,19 @@ class Simulacion(metaclass=Singleton):
         cateto2 = punto2[1] - punto1[1]
         return math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2))
 
+    def get_tipos_disponibles_en_camionetas(self):
+        pizzas_disponibles = list(itertools.chain(*map(lambda x: x.get_pizzas_disponibles(), self.dia_actual.camionetas)))
+        return list(set(map(lambda x: x.tipo, pizzas_disponibles)))
 
+    def obtener_camioneta_a_volver_al_restaurante(self):
+        if self.volver_al_terminar_todos_los_pedidos:
+            return self.obtener_camioneta_mas_proxima_a_liberarse()
 
+        return self.obtener_camioneta_mas_cercana_al_restaurante()
 
+    def obtener_camioneta_mas_proxima_a_liberarse(self):
+        # TODO: la camioneta debe calcular cuanto va a tardar en liberarse
+        return self.ordenar_camionetas_por_ubicacion([0, 0], 'cuanto_tardas_en_linerarte')[0]
 
+    def obtener_camioneta_mas_cercana_al_restaurante(self):
+        return self.ordenar_camionetas_por_ubicacion([0, 0], 'get_ubicacion_siguiente_pedido')[0]

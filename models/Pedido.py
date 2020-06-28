@@ -7,3 +7,7 @@ class Pedido:
         self.ubicacion_origen = None
         self.pizza = pizza
         self.camioneta = camioneta
+
+    @property
+    def ubicacion(self):
+        return self.cliente.ubicacion

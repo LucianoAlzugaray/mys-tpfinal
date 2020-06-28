@@ -1,8 +1,6 @@
 from events.EntregarPizzaEvent import EntregarPizzaEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from models.Cliente import Cliente
-from utils.utils import *
-from models.Camioneta import Camioneta
 import queue
 import itertools
 from models.actividades.RechazarPedido import RechazarPedido
@@ -64,7 +62,8 @@ class Dia:
     @staticmethod
     def generar_pedidos_en_hora(hora):
         eventos = []
-        for i in range(pedidos_generados()):
+        from Simulacion import Simulacion
+        for i in range(Simulacion().utils.pedidos_generados()):
             evento = LlamoClienteEvent(hora, None)
             evento.attach(EncolarCliente())
             evento.attach(RechazarPedido())
@@ -111,7 +110,8 @@ class Dia:
         return list(filter(lambda x: x.hora == self.get_tiempo_actual(), self.fel))
 
     def enviar_pedido(self, camioneta, pizza):
-        self.fel.append(EntregarPizzaEvent(tiempo_entrega(), camioneta, pizza))
+        from Simulacion import Simulacion
+        self.fel.append(EntregarPizzaEvent(Simulacion().utils.tiempo_entrega(), camioneta, pizza))
 
     def rechazar_pedido(self, cliente: Cliente):
         self.pedidos_rechazados.append(cliente)
