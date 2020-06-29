@@ -4,7 +4,7 @@ class Pedido:
         from Simulacion import Simulacion
         self.cliente = cliente
         self.hora_toma = hora_toma
-        self.tiempo_de_demora = Simulacion.utils.tiempo_entrega()
+        self.tiempo_de_demora = Simulacion().utils.tiempo_entrega()
         self.hora_entrega = None
         self.ubicacion_origen = None
         self.tipo_pizza = tipo_pizza

@@ -16,17 +16,20 @@ def generar_camionetas():
 
 
 class Simulacion(metaclass=Singleton):
-    experimentos = 10
-    dias_a_simular = 365
-    horas_por_dia = 12
-    minutos_maximo = 60 * horas_por_dia
-    dias_corridos = []
-    camionetas = generar_camionetas()
-    events = []
-    dia_actual = Dia(minutos_maximo, camionetas)
-    utils = Utils()
-    volver_al_terminar_todos_los_pedidos = False
-    pedidos = []
+
+    def __init__(self):
+
+        self.experimentos = 10
+        self.dias_a_simular = 365
+        self.horas_por_dia = 12
+        self.minutos_maximo = 60 * self.horas_por_dia
+        self.dias_corridos = []
+        self.camionetas = generar_camionetas()
+        self.events = []
+        self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
+        self.utils = Utils()
+        self.volver_al_terminar_todos_los_pedidos = False
+        self.pedidos = []
 
     def run(self):
         # Correr simulacion
@@ -124,7 +127,8 @@ class Simulacion(metaclass=Singleton):
             self.dia_actual.fel.remove(evento)
 
     def get_pizza_vence_by_pizza(self, pizza):
-        return next((lambda x: isinstance(x, PizzaVenceEvent) and x.pizza == pizza, self.dia_actual.fel))
+        eventos = list(filter(lambda x: isinstance(x, PizzaVenceEvent) and x.pizza == pizza, self.dia_actual.fel))
+        return None if len(eventos) == 0 else eventos[0]
 
     def add_pedido(self, pedido):
         self.pedidos.append(pedido)

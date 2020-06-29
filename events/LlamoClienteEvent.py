@@ -1,14 +1,6 @@
 import math
-
 from events.SimulacionEvent import SimulacionEvent
 
-
-# TODO: se agregó referencia faltante
-def cargar_camioneta(camioneta):
-    pass
-
-
-# TODO: Generar ubicacion
 
 class LlamoClienteEvent(SimulacionEvent):
     limite = 2000

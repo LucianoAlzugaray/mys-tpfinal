@@ -1,6 +1,7 @@
 import unittest
 
 from events.CamionetaRegresaARestauranteEvent import CamionetaRegresaARestauranteEvent
+from events.EnviarPedidoEvent import EnviarPedidoEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from Simulacion import Simulacion
 from models.Cliente import Cliente
@@ -95,6 +96,9 @@ class SimulacionTest(unittest.TestCase):
         for k, camioneta in enumerate(simulacion.dia_actual.camionetas):
             camioneta.descargarse()
             self.asignar_pedido_a_camioneta(TipoPizza.ANANA, k)
+
+        for evento in list(filter(lambda x: isinstance(x, EnviarPedidoEvent), simulacion.dia_actual.fel)):
+            evento.notify()
 
         simulacion.dia_actual.camionetas[3].pedido_en_curso.cliente.ubicacion = [0, 0]
 

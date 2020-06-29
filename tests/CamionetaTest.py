@@ -2,14 +2,11 @@ import unittest
 
 from Simulacion import Simulacion
 from SimulacionExceptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
-from events.LlamoClienteEvent import LlamoClienteEvent
 from models.Camioneta import Camioneta
 from models.Cliente import Cliente
 from models.Pedido import Pedido
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
-from models.actividades.EncolarCliente import EncolarCliente
-from models.actividades.RechazarPedido import RechazarPedido
 
 
 class CamionetaTest(unittest.TestCase):
@@ -61,35 +58,12 @@ class CamionetaTest(unittest.TestCase):
 
         self.assertRaises(NoHayTipoPizzaEnCamionetaException, self.camioneta.reservar_pizza, pedido)
 
-
+    # TODO: implementar
     def test_debe_enviar_pedido_asignado_cuando_no_tiene_pedido_en_curso_y_cambiar_pedido_en_curso_al_enviar(self):
 
-        Simulacion().dia_actual.tiempo_actual = 120
-        Simulacion().dias_a_simular = 1
-        Simulacion().experimentos = 1
+        pass
 
-        cliente = self.generar_cliente_en_rango()
-        evento = self.generar_evento(cliente, None)
-        Simulacion().add_event(evento)
-        Simulacion().run()
 
-        self.assertTrue(True)
-
-    @staticmethod
-    def generar_cliente_en_rango():
-        cliente = Cliente()
-        cliente.ubicacion[0] = 1414
-        cliente.ubicacion[1] = 1414
-        return cliente
-
-    @staticmethod
-    def generar_evento(cliente, tipo_pizza):
-        evento = LlamoClienteEvent(121, cliente, Simulacion().dia_actual)
-        if tipo_pizza is not None:
-            evento.tipo_pizza = tipo_pizza
-        evento.attach(RechazarPedido())
-        evento.attach(EncolarCliente())
-        return evento
 
         # self.camioneta.pizzas.append(Pizza(TipoPizza.NAPOLITANA))
         # pedido2 = Pedido(cliente, 10, self.camioneta, TipoPizza.NAPOLITANA)

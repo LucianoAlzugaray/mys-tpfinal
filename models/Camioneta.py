@@ -24,6 +24,20 @@ class Camioneta:
     def quitar_pizza(self, pizza):
         self.pizzas.remove(pizza)
 
+    def entregar_pedido(self, pedido: Pedido):
+        self.quitar_pizza(pedido.pizza)
+        self.ubicacion = pedido.cliente.ubicacion
+        self.pedido_en_curso = None
+        pedido.entregado = True
+        if len(self.pedidos) > 0:
+            self.generar_evento_enviar_pedido(self.pedidos[0])
+
+    def generar_evento_enviar_pedido(self, pedido):
+        from Simulacion import Simulacion
+        evento = EnviarPedidoEvent(Simulacion().get_hora() + 1, pedido)
+        evento.attach(EnviarPedido())
+        Simulacion().add_event(evento)
+
     def tiene_tipo(self, tipo):
         return len(list(filter(lambda x: x.tipo == tipo, self.get_pizzas_disponibles()))) > 0
 
@@ -77,10 +91,7 @@ class Camioneta:
         self.reservar_pizza(pedido)
         self.pedidos.append(pedido)
         if self.pedido_en_curso is None:
-            from Simulacion import Simulacion
-            evento = EnviarPedidoEvent(Simulacion().get_hora() + 1, pedido)
-            evento.attach(EnviarPedido())
-            Simulacion().add_event(evento)
+            self.generar_evento_enviar_pedido(pedido)
 
     def get_ubicacion_siguiente_pedido(self):
         return self.pedido_en_curso.ubicacion

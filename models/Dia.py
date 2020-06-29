@@ -1,3 +1,5 @@
+import math
+
 from events.EntregarPizzaEvent import EntregarPizzaEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from models.Cliente import Cliente
@@ -26,7 +28,7 @@ class Dia:
     # Metodo para setup.
     def iniciar_dia(self):
         # TODO: generar eventos de pedido
-        self.fel = self.generar_pedidos()
+        # self.fel = self.generar_pedidos()
         self.ubicar_camionetas()
         self.cargar_camionetas()
 
@@ -36,28 +38,13 @@ class Dia:
     # Metodo de ejecución principal.
     def correr(self):
         while not self.termino_dia():
-            tiempo_actual = self.get_tiempo_actual()
-            # Obtenemos los eventos que se deben realizar en este momento.
-            eventos_de_este_minuto = self.obtener_eventos_de_ahora()
-            for evento in eventos_de_este_minuto:
+            for evento in self.obtener_eventos_de_ahora():
                 evento.notify()
-            # Si hay clientes esperando y hay camionetas disponibles.
-            if self.get_cola_de_espera().qsize() > 0 and self.hay_camionetas_disponibles():
-                print("Log -----      mandare una pizza a un cliente")
-                # [TODO] mandar la pizza al cliente
-            # Aplicamos el paso del reloj
             self.tiempo_actual += 1
-
-            # [HECHO] obtener los eventos del fel que ocurran en este minuto
-            # [HECHO] ejecutarlos hsta que no haya más
-            # [HECHO] si hay clientes en cola de espera y hay camioneta disponible
-            # mandar la pizza al cliente.
-            # [HECHO] sumar un minuto más en minuto_actual
 
         for camioneta in self.get_camionetas():
             camioneta.volver_a_pizzeria()
             self.desperdicio_por_fin_de_dia += camioneta.descargarse()
-        # Ver si se necesita guardar algun estado o hacer algun calculo.
 
     @staticmethod
     def generar_pedidos_en_hora(hora):
@@ -107,7 +94,7 @@ class Dia:
         return self.camionetas
 
     def obtener_eventos_de_ahora(self):
-        return list(filter(lambda x: x.hora == self.get_tiempo_actual(), self.fel))
+        return list(filter(lambda x: math.trunc(x.hora) == math.trunc(self.get_tiempo_actual()), self.fel))
 
     def rechazar_pedido(self, cliente: Cliente):
         self.pedidos_rechazados.append(cliente)

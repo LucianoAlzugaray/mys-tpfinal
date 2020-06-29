@@ -8,8 +8,7 @@ class EntregarPizza(Actividad):
         self.pedido = pedido
 
     def _ejecutar(self, evento: EntregarPizzaEvent):
-        evento.pedido.camioneta.quitar_pizza(evento.pedido.pizza)
+        evento.pedido.camioneta.entregar_pedido(evento.pedido)
         from Simulacion import Simulacion
         Simulacion().remover_evento_vencimiento_pizza(evento.pedido.pizza)
-        evento.pedido.entregado = True
 
