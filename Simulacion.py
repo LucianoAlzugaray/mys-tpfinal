@@ -30,20 +30,19 @@ class Simulacion(metaclass=Singleton):
         self.utils = Utils()
         self.volver_al_terminar_todos_los_pedidos = False
         self.pedidos = []
+        self.clientes_rechazados = []
+        self.rango_de_atencion = 2000
 
     def run(self):
-        # Correr simulacion
         for experimento in range(self.experimentos):
-            # por cada dia, generar un nuevo objeto dia y correrlo
             for dia in range(self.dias_a_simular):
                 self.dia_actual.iniciar_dia()
                 self.dia_actual.correr()
+                self.clientes_rechazados += self.dia_actual.pedidos_rechazados
                 self.dias_corridos.append(self.dia_actual)
                 self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
 
     def obtener_datos(self):
-        # Obtener datos finales
-        # retorna datos en np array o como sea
         pass
 
     def add_event(self, event):
@@ -132,3 +131,6 @@ class Simulacion(metaclass=Singleton):
 
     def add_pedido(self, pedido):
         self.pedidos.append(pedido)
+
+    def cliente_esta_en_rango(self, cliente: Cliente):
+        return self.obtener_distancia([0, 0], cliente.ubicacion) <= self.rango_de_atencion

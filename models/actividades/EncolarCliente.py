@@ -8,25 +8,25 @@ from ..Pedido import Pedido
 class EncolarCliente(Actividad):
 
     def _ejecutar(self, evento: LlamoClienteEvent):
-        if evento.cliente_esta_en_rango():
-            from Simulacion import Simulacion
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
 
-            camioneta = Simulacion().seleccionar_camioneta(evento.cliente, evento.tipo_pizza)
+        if simulacion.cliente_esta_en_rango(evento.cliente):
+            camioneta = simulacion.seleccionar_camioneta(evento.cliente, evento.tipo_pizza)
 
             if camioneta is not None:
                 self.asignar_pedido_a_camioneta(camioneta, evento)
                 return True
 
-            if Simulacion().utils.convencer_al_cliente():
-                tipos_de_pizza_disponibles_en_camionetas = Simulacion().get_tipos_disponibles_en_camionetas()
-                tipo_pizza = tipos_de_pizza_disponibles_en_camionetas[0]
+            if simulacion.utils.convencer_al_cliente():
+                tipo_pizza = simulacion.get_tipos_disponibles_en_camionetas()[0]
                 evento.tipo_pizza = tipo_pizza
-                camioneta = Simulacion().seleccionar_camioneta(evento.cliente, evento.tipo_pizza)
+                camioneta = simulacion.seleccionar_camioneta(evento.cliente, evento.tipo_pizza)
                 self.asignar_pedido_a_camioneta(camioneta, evento)
                 return True
 
-            camioneta = Simulacion().obtener_camioneta_a_volver_al_restaurante()
-            Simulacion().add_event(CamionetaRegresaARestauranteEvent(camioneta, 10))
+            camioneta = simulacion.obtener_camioneta_a_volver_al_restaurante()
+            simulacion.add_event(CamionetaRegresaARestauranteEvent(camioneta, 10))
 
     def asignar_pedido_a_camioneta(self, camioneta, evento):
         from Simulacion import Simulacion

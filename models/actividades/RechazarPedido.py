@@ -5,6 +5,7 @@ from .Actividad import Actividad
 class RechazarPedido(Actividad):
 
     def _ejecutar(self, evento: LlamoClienteEvent):
-        if not evento.cliente_esta_en_rango():
-            from Simulacion import Simulacion
-            Simulacion().rechazar_pedido(evento.cliente)
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        if not simulacion.cliente_esta_en_rango(evento.cliente):
+            simulacion.rechazar_pedido(evento.cliente)
