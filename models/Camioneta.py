@@ -1,4 +1,4 @@
-from SimulacionExceptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
+from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
 from events.EnviarPedidoEvent import EnviarPedidoEvent
 from models.Pedido import Pedido
 from models.actividades.EnviarPedido import EnviarPedido

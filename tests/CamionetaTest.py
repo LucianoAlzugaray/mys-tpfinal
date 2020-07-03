@@ -1,7 +1,7 @@
 import unittest
 
 from Simulacion import Simulacion
-from SimulacionExceptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
+from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
 from models.Camioneta import Camioneta
 from models.Cliente import Cliente
 from models.Pedido import Pedido

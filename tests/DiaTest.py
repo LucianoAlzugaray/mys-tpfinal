@@ -46,7 +46,7 @@ class DiaTestCase(unittest.TestCase):
         evento.notify()
 
         cliente2 = self.dia.obtener_cliente_de_cola()
-        if evento.cliente_esta_en_rango():
+        if Simulacion().cliente_esta_en_rango( evento.cliente):
             self.assertFalse(cliente2 is None)
             self.assertIsInstance(cliente2, LlamoClienteEvent)
         else:

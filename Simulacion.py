@@ -1,5 +1,6 @@
 import itertools
 import math
+from datetime import timedelta, datetime
 
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Cliente import Cliente
@@ -15,10 +16,22 @@ def generar_camionetas():
     return [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
 
 
+class Reloj(object):
+
+    def __init__(self):
+        self.dia = None
+
+    def iniciar_dia(self):
+        self.dia = datetime.now()
+
+    def avanzar(self, minutos):
+        self.dia = self.dia + timedelta(minutes=minutos)
+
 class Simulacion(metaclass=Singleton):
 
     def __init__(self):
 
+        self.reloj = Reloj()
         self.experimentos = 10
         self.dias_a_simular = 365
         self.horas_por_dia = 12
@@ -134,3 +147,15 @@ class Simulacion(metaclass=Singleton):
 
     def cliente_esta_en_rango(self, cliente: Cliente):
         return self.obtener_distancia([0, 0], cliente.ubicacion) <= self.rango_de_atencion
+
+    def avanzar_reloj(self, minutos):
+        self.reloj.avanzar(minutos)
+
+    @property
+    def dia(self):
+        return self.reloj.dia
+
+    def iniciar_dia(self):
+        self.reloj.iniciar_dia()
+
+
