@@ -157,5 +157,3 @@ class Simulacion(metaclass=Singleton):
 
     def iniciar_dia(self):
         self.reloj.iniciar_dia()
-
-
