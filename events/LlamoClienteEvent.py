@@ -1,4 +1,5 @@
 import math
+from models.Cliente import Cliente
 from events.SimulacionEvent import SimulacionEvent
 
 
@@ -18,3 +19,9 @@ class LlamoClienteEvent(SimulacionEvent):
     @staticmethod
     def camionetas_con_pizza_pedida(tipo, camionetas):
         return list(filter(lambda x: x.tiene_tipo(tipo), camionetas))
+
+    # TODO : Metodo agregado para que funcione el test LlamoClienteEventTest --> test_cliente_esta_en_rango.
+    def cliente_esta_en_rango(self):
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        return simulacion.cliente_esta_en_rango(self.cliente)
