@@ -27,6 +27,7 @@ class Utils:
         for hora in range(horas):
             for pedido in range(np.random.poisson(20)):
                 tiempo_exacto = math.trunc(random.uniform(0, 60)) + 60 * hora
+
                 eventos_en_hora.append(tiempo_exacto)
         return eventos_en_hora
 

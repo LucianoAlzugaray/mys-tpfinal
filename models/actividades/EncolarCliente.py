@@ -1,5 +1,4 @@
 from events.CamionetaRegresaARestauranteEvent import CamionetaRegresaARestauranteEvent
-from events.EntregarPizzaEvent import EntregarPizzaEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from .Actividad import Actividad
 from ..Pedido import Pedido
@@ -33,5 +32,4 @@ class EncolarCliente(Actividad):
         pedido = Pedido(evento.cliente, evento.hora, camioneta, evento.tipo_pizza)
         Simulacion().add_pedido(pedido)
         camioneta.asignar_pedido(pedido)
-        evento.dia.encolar_cliente(evento)
 

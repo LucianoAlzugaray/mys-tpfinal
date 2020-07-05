@@ -1,6 +1,6 @@
 import itertools
 import math
-from datetime import timedelta, datetime
+from datetime import time, datetime
 
 from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
@@ -21,9 +21,43 @@ def generar_camionetas():
 
 class Simulacion(metaclass=Singleton):
 
-    def __init__(self):
+    CANTIDAD_HORAS_LABORALES = 12
+    CANTIDAD_MINUTOS_LABORALES = CANTIDAD_HORAS_LABORALES * 60
+    HORA_DE_CIERRE = 23
+    MINUTOS_DE_CIERRE = 0
+    HORA_FIN_TOMA_DE_PEDIDOS = 22
+    MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
 
-        self.reloj = Reloj(23,0,22,30) #Le pasamos la hora y minutos de cierre del local.
+    DIA_INICIO = 5
+    MES_INICIO = 7
+    ANIO_INICIO = 2020
+    HORA_INICIO = 11
+    MINUTOS_INICIO = 0
+    TIEMPO_INICIO = datetime(
+        ANIO_INICIO,
+        MES_INICIO,
+        DIA_INICIO,
+        HORA_INICIO,
+        MINUTOS_INICIO
+    )
+
+    DIA_FIN = 5
+    MES_FIN = 7
+    ANIO_FIN = 2020
+    HORA_FIN = 11
+    MINUTOS_FIN = 0
+    TIEMPO_FIN = datetime(
+        ANIO_FIN,
+        MES_FIN,
+        DIA_FIN,
+        HORA_FIN,
+        MINUTOS_FIN
+    )
+
+
+
+    def __init__(self):
+        self.reloj = Reloj()
         self.experimentos = 10
         self.dias_a_simular = 365
         self.horas_por_dia = 12
@@ -31,6 +65,7 @@ class Simulacion(metaclass=Singleton):
         self.dias_corridos = []
         self.camionetas = generar_camionetas()
         self.events = []
+        # TODO: ahora dia actual va a ser un Date(ANIO_INICIO, MES_INICIO, DIA_INICIO)
         self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
         self.utils = Utils()
         self.volver_al_terminar_todos_los_pedidos = False
@@ -41,8 +76,15 @@ class Simulacion(metaclass=Singleton):
     def run(self):
         for experimento in range(self.experimentos):
             for dia in range(self.dias_a_simular):
-                self.dia_actual.iniciar_dia()
-                self.dia_actual.correr()
+                self.iniciar_dia()
+                while not self.termino_dia():
+                    for evento in self.obtener_eventos_de_ahora():
+                        evento.notify()
+                    self.avanzar_reloj(1)
+
+                for camioneta in self.camionetas:
+                    camioneta.volver_a_pizzeria()
+
                 self.clientes_rechazados += self.dia_actual.pedidos_rechazados
                 self.dias_corridos.append(self.dia_actual)
                 self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
@@ -148,12 +190,14 @@ class Simulacion(metaclass=Singleton):
         return self.reloj.dia
 
     def iniciar_dia(self):
-        self.reloj.iniciar_dia()
-        self.generar_pedidos()
+        # self.generar_pedidos()
         self.inicializar_camionetas()
 
     def generar_pedidos(self):
         for hora_de_pedido in self.utils.get_horas_de_pedidos(self.horas_por_dia):
+            # si hora de pedido es un time solamente tengo que agarrar el date de la simulacion y concatenarle el time
+            # hora = datetime(self.dia_actual.year, self.dia_actual.month, self.dia_actual.day, hora_de_pedido.hour, hora_de_pedido.minute)
+            # evento = LlamoClienteEvent(hora, Cliente())
             evento = LlamoClienteEvent(hora_de_pedido, Cliente())
             evento.attach(EncolarCliente())
             evento.attach(RechazarPedido())
@@ -162,3 +206,17 @@ class Simulacion(metaclass=Singleton):
     def inicializar_camionetas(self):
         list(map(lambda camioneta: camioneta.volver_a_pizzeria(), self.camionetas))
         list(map(lambda camioneta: camioneta.cargar_pizzas(), self.camionetas))
+
+    @property
+    def tiempo_inicio(self):
+        return self.TIEMPO_INICIO
+
+    @property
+    def tiempo_fin(self):
+        return self.TIEMPO_FIN
+
+    def termino_dia(self):
+        return self.reloj.termino_dia()
+
+    def obtener_eventos_de_ahora(self):
+        return list(filter(lambda x: math.trunc(x.hora) == math.trunc(self.get_tiempo_actual()), self.fel))
