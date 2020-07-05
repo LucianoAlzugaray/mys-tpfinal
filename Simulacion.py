@@ -19,7 +19,7 @@ def generar_camionetas():
 class Simulacion(metaclass=Singleton):
 
     HORA_DE_CIERRE = 23
-    MINUTOS_DE_CIERRE = 30
+    MINUTOS_DE_CIERRE = 0
     HORA_FIN_TOMA_DE_PEDIDOS = 22
     MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
 

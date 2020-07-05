@@ -25,22 +25,23 @@ class Reloj(object):
                                               hour=self.hora_cierre,
                                               minute=self.minutos_cierre,
                                               second=0)
-        return self.dia<dt_fin_de_dia
+        return self.dia > dt_fin_de_dia
 
     def termino_horario_de_toma_de_pedido(self):
         dt_fin_horario_de_toma_de_pedido = datetime.now()
-        dt_fin_horario_de_toma_de_pedido = dt_fin_horario_de_toma_de_pedido.replace(year=dt_fin_horario_de_toma_de_pedido.year,
-                                              month=dt_fin_horario_de_toma_de_pedido.month,
-                                              day=dt_fin_horario_de_toma_de_pedido.day,
-                                              hour=self.hora_fin_toma_de_pedidos,
-                                              minute=self.minuto_fin_toma_de_pedidos,
-                                              second=0)
+        dt_fin_horario_de_toma_de_pedido = dt_fin_horario_de_toma_de_pedido.replace(
+            year=dt_fin_horario_de_toma_de_pedido.year,
+            month=dt_fin_horario_de_toma_de_pedido.month,
+            day=dt_fin_horario_de_toma_de_pedido.day,
+            hour=self.hora_fin_toma_de_pedidos,
+            minute=self.minuto_fin_toma_de_pedidos,
+            second=0)
 
-        return self.dia<dt_fin_horario_de_toma_de_pedido
+        return self.dia > dt_fin_horario_de_toma_de_pedido
 
     def get_diferencia_hora_actual(self, dt_hora):
-     horas_parametro = dt_hora.hour
-     horas_reloj = self.dia.hour
-     minutos_por_hora_parametro = horas_parametro*60
-     minutos_por_hora_reloj = horas_reloj*60
-     return abs((self.dia.minute + minutos_por_hora_reloj) - (dt_hora.minute + minutos_por_hora_parametro))
+        horas_parametro = dt_hora.hour
+        horas_reloj = self.dia.hour
+        minutos_por_hora_parametro = horas_parametro * 60
+        minutos_por_hora_reloj = horas_reloj * 60
+        return abs((self.dia.minute + minutos_por_hora_reloj) - (dt_hora.minute + minutos_por_hora_parametro))
