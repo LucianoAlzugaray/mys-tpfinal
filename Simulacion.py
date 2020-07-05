@@ -18,9 +18,14 @@ def generar_camionetas():
 
 class Simulacion(metaclass=Singleton):
 
-    def __init__(self):
+    HORA_DE_CIERRE = 23
+    MINUTOS_DE_CIERRE = 30
+    HORA_FIN_TOMA_DE_PEDIDOS = 22
+    MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
 
-        self.reloj = Reloj(23,0,22,30) #Le pasamos la hora y minutos de cierre del local.
+
+    def __init__(self):
+        self.reloj = Reloj()
         self.experimentos = 10
         self.dias_a_simular = 365
         self.horas_por_dia = 12
@@ -146,5 +151,3 @@ class Simulacion(metaclass=Singleton):
 
     def iniciar_dia(self):
         self.reloj.iniciar_dia()
-
-
