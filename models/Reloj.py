@@ -24,3 +24,6 @@ class Reloj(object):
         minutos_por_hora_parametro = horas_parametro * 60
         minutos_por_hora_reloj = horas_reloj * 60
         return abs((self.dia.minute + minutos_por_hora_reloj) - (dt_hora.minute + minutos_por_hora_parametro))
+
+    def obtener_dt_futuro(self, minutos):
+        return self.dia + timedelta(minutes=minutos)
