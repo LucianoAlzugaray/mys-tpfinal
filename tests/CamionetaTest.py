@@ -44,10 +44,10 @@ class CamionetaTest(unittest.TestCase):
         self.assertTrue(len(self.camioneta.pizzas) == 40)
 
     def test_sabe_reservar_una_pizza(self):
-        cantidad_de_eventos = len(Simulacion().dia_actual.fel)
+        cantidad_de_eventos = len(Simulacion().fel)
         self.camioneta = Camioneta()
         self.camioneta.pizzas.append(Pizza(TipoPizza.ANANA))
-        self.assertEqual(cantidad_de_eventos + 1, len(Simulacion().dia_actual.fel))
+        self.assertEqual(cantidad_de_eventos + 1, len(Simulacion().fel))
 
         cliente = Cliente()
         cliente.ubicacion = [1414, 1414]

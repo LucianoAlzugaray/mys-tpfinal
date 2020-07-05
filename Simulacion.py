@@ -14,6 +14,7 @@ from models.meta.Singleton import Singleton
 from utils.utils import Utils
 from models.Reloj import Reloj
 
+
 def generar_camionetas():
     from models.Camioneta import Camioneta
     return [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
@@ -65,13 +66,13 @@ class Simulacion(metaclass=Singleton):
         self.dias_corridos = []
         self.camionetas = generar_camionetas()
         self.events = []
-        # TODO: ahora dia actual va a ser un Date(ANIO_INICIO, MES_INICIO, DIA_INICIO)
-        self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
         self.utils = Utils()
         self.volver_al_terminar_todos_los_pedidos = False
         self.pedidos = []
         self.clientes_rechazados = []
         self.rango_de_atencion = 2000
+        self.fel = []
+        self.pedidos_rechazados_en_llamada = []
 
     def run(self):
         for experimento in range(self.experimentos):
@@ -87,33 +88,28 @@ class Simulacion(metaclass=Singleton):
 
                 self.clientes_rechazados += self.dia_actual.pedidos_rechazados
                 self.dias_corridos.append(self.dia_actual)
+                # TODO preguntar que poner
                 self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
 
     def obtener_datos(self):
         pass
 
     def add_event(self, event):
-        self.dia_actual.fel.append(event)
+        self.fel.append(event)
 
     def get_hora(self):
-        return self.dia_actual.get_tiempo_actual()
+        return self.dia
 
     def get_camioneta_by_pizza(self, pizza):
-        camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.dia_actual.camionetas))
+        camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.camionetas))
         return None if len(camionetas) == 0 else camionetas[0]
 
-    def get_fel(self):
-        return self.dia_actual.get_fel()
-
-    @property
-    def pedidos_rechazados(self) -> int:
-        return self.dia_actual.pedidos_rechazados
-
     def rechazar_pedido(self, cliente: Cliente) -> None:
-        self.dia_actual.rechazar_pedido(cliente)
+        self.pedidos_rechazados_en_llamada.append(cliente)
+
 
     def get_camioneta_by_cliente(self, cliente: Cliente):
-        camionetas = list(filter(lambda x: x.get_pedido_by_cliente(cliente) is not None, self.dia_actual.camionetas))
+        camionetas = list(filter(lambda x: x.get_pedido_by_cliente(cliente) is not None, self.camionetas))
         return None if len(camionetas) == 0 else camionetas[0]
 
     def seleccionar_camioneta(self, cliente: Cliente, tipo: TipoPizza):
@@ -129,7 +125,7 @@ class Simulacion(metaclass=Singleton):
 
         distancias = {}
 
-        for camioneta in self.dia_actual.camionetas:
+        for camioneta in self.camionetas:
             metodo = getattr(camioneta, method_name)
             ubicacion_camioneta = metodo()
             distancia = self.obtener_distancia(ubicacion, ubicacion_camioneta)
@@ -151,7 +147,7 @@ class Simulacion(metaclass=Singleton):
 
     def get_tipos_disponibles_en_camionetas(self):
         pizzas_disponibles = list(
-            itertools.chain(*map(lambda x: x.get_pizzas_disponibles(), self.dia_actual.camionetas)))
+            itertools.chain(*map(lambda x: x.get_pizzas_disponibles(), self.camionetas)))
         return list(set(map(lambda x: x.tipo, pizzas_disponibles)))
 
     def obtener_camioneta_a_volver_al_restaurante(self):
@@ -170,10 +166,10 @@ class Simulacion(metaclass=Singleton):
     def remover_evento_vencimiento_pizza(self, pizza: Pizza):
         evento = self.get_pizza_vence_by_pizza(pizza)
         if evento is not None:
-            self.dia_actual.fel.remove(evento)
+            self.fel.remove(evento)
 
     def get_pizza_vence_by_pizza(self, pizza):
-        eventos = list(filter(lambda x: isinstance(x, PizzaVenceEvent) and x.pizza == pizza, self.dia_actual.fel))
+        eventos = list(filter(lambda x: isinstance(x, PizzaVenceEvent) and x.pizza == pizza, self.fel))
         return None if len(eventos) == 0 else eventos[0]
 
     def add_pedido(self, pedido):
@@ -190,7 +186,7 @@ class Simulacion(metaclass=Singleton):
         return self.reloj.dia
 
     def iniciar_dia(self):
-        # self.generar_pedidos()
+        self.generar_pedidos()
         self.inicializar_camionetas()
 
     def generar_pedidos(self):
@@ -201,7 +197,7 @@ class Simulacion(metaclass=Singleton):
             evento = LlamoClienteEvent(hora_de_pedido, Cliente())
             evento.attach(EncolarCliente())
             evento.attach(RechazarPedido())
-            self.dia_actual.fel.append(evento)
+            self.fel.append(evento)
 
     def inicializar_camionetas(self):
         list(map(lambda camioneta: camioneta.volver_a_pizzeria(), self.camionetas))
@@ -219,4 +215,4 @@ class Simulacion(metaclass=Singleton):
         return self.reloj.termino_dia()
 
     def obtener_eventos_de_ahora(self):
-        return list(filter(lambda x: math.trunc(x.hora) == math.trunc(self.get_tiempo_actual()), self.fel))
+        return list(filter(lambda x: math.trunc(x.hora) == math.trunc(self.dia.time()), self.fel))

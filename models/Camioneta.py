@@ -3,7 +3,7 @@ from events.EnviarPedidoEvent import EnviarPedidoEvent
 from models.Pedido import Pedido
 from models.actividades.EnviarPedido import EnviarPedido
 from models.Pizza import Pizza
-
+from datetime import timedelta
 
 class Camioneta:
     cantidad_hornos = 1
@@ -34,7 +34,7 @@ class Camioneta:
 
     def generar_evento_enviar_pedido(self, pedido):
         from Simulacion import Simulacion
-        evento = EnviarPedidoEvent(Simulacion().get_hora() + 1, pedido)
+        evento = EnviarPedidoEvent(Simulacion().get_hora() + timedelta(minutes=1), pedido)
         evento.attach(EnviarPedido())
         Simulacion().add_event(evento)
 

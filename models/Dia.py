@@ -27,23 +27,11 @@ class Dia:
     def encolar_cliente(self, cliente):
         self.cola_espera_clientes.put(cliente)
 
-    def termino_dia(self):
-        return self.tiempo_actual > self.minutos_maximo
-
     def obtener_cliente_de_cola(self):
         return self.cola_espera_clientes.get() if not self.cola_espera_clientes.empty() else None
 
     def get_tiempo_actual(self):
         return self.tiempo_actual
-
-    def get_fel(self):
-        return self.fel
-
-    def get_cola_de_espera(self):
-        return self.cola_espera_clientes
-
-    def get_camionetas(self):
-        return self.camionetas
 
     def obtener_eventos_de_ahora(self):
         return list(filter(lambda x: math.trunc(x.hora) == math.trunc(self.get_tiempo_actual()), self.fel))
