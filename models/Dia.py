@@ -5,6 +5,7 @@ from events.LlamoClienteEvent import LlamoClienteEvent
 from models.Cliente import Cliente
 import queue
 import itertools
+
 from models.actividades.RechazarPedido import RechazarPedido
 from models.actividades.EncolarCliente import EncolarCliente
 
@@ -28,7 +29,7 @@ class Dia:
     # Metodo para setup.
     def iniciar_dia(self):
         # TODO: generar eventos de pedido
-        # self.fel = self.generar_pedidos()
+        self.generar_pedidos()
         self.ubicar_camionetas()
         self.cargar_camionetas()
 
@@ -51,7 +52,8 @@ class Dia:
         eventos = []
         from Simulacion import Simulacion
         for i in range(Simulacion().utils.pedidos_generados()):
-            evento = LlamoClienteEvent(hora, None)
+            tiempo_exacto = Simulacion().utils.pedido_en_hora() + 60 * hora
+            evento = LlamoClienteEvent(tiempo_exacto, None)
             evento.attach(EncolarCliente())
             evento.attach(RechazarPedido())
             eventos.append(evento)
@@ -61,7 +63,7 @@ class Dia:
 
     # TODO: Revisar horas repetidas
     def generar_pedidos(self):
-        return list(itertools.chain(*[self.generar_pedidos_en_hora(i) for i in range(12)]))
+        self.fel = (itertools.chain(*[self.generar_pedidos_en_hora(i) for i in range(12)]))
 
     def cargar_camionetas(self):
         list(map(lambda camioneta: camioneta.cargar_pizzas(), self.camionetas))
