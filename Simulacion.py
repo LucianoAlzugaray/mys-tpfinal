@@ -9,29 +9,18 @@ from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.meta.Singleton import Singleton
 from utils.utils import Utils
-
+from models.Reloj import Reloj
 
 def generar_camionetas():
     from models.Camioneta import Camioneta
     return [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
 
 
-class Reloj(object):
-
-    def __init__(self):
-        self.dia = None
-
-    def iniciar_dia(self):
-        self.dia = datetime.now()
-
-    def avanzar(self, minutos):
-        self.dia = self.dia + timedelta(minutes=minutos)
-
 class Simulacion(metaclass=Singleton):
 
     def __init__(self):
 
-        self.reloj = Reloj()
+        self.reloj = Reloj(23,0,22,30) #Le pasamos la hora y minutos de cierre del local.
         self.experimentos = 10
         self.dias_a_simular = 365
         self.horas_por_dia = 12
