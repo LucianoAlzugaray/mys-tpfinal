@@ -4,7 +4,7 @@ from datetime import timedelta, datetime
 from Simulacion import Simulacion
 
 
-class MyTestCase(unittest.TestCase):
+class RelojTest(unittest.TestCase):
 
     def test_something(self):
 
