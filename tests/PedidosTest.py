@@ -10,12 +10,8 @@ class PedidosTest(unittest.TestCase):
 
     def test_pedidos_se_generan_correctamente(self):
         simulacion = Simulacion()
-        dia = simulacion.dia_actual
-        dia.generar_pedidos()
-        fel = dia.fel
-        self.assertTrue(len(fel) > 0)
-
-        for evento in dia.fel:
-            self.assertIsInstance(evento, LlamoClienteEvent)
+        self.assertTrue(len(simulacion.dia_actual.fel) == 0)
+        simulacion.iniciar_dia()
+        self.assertTrue(len(simulacion.dia_actual.fel) > 0)
 
 

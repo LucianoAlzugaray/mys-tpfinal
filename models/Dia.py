@@ -19,16 +19,6 @@ class Dia:
         self.desperdicio_por_fin_de_dia = 0
         self.fel = []
 
-    # Metodo para setup.
-    def iniciar_dia(self):
-        # TODO: generar eventos de pedido
-        self.generar_pedidos()
-        self.ubicar_camionetas()
-        self.cargar_camionetas()
-
-    def ubicar_camionetas(self):
-        list(map(lambda x: x.volver_a_pizzeria(), self.camionetas))
-
     # Metodo de ejecución principal.
     def correr(self):
         while not self.termino_dia():
@@ -38,13 +28,6 @@ class Dia:
 
         for camioneta in self.get_camionetas():
             camioneta.volver_a_pizzeria()
-
-    def generar_pedidos(self):
-        from Simulacion import Simulacion
-        Simulacion().generar_pedidos()
-
-    def cargar_camionetas(self):
-        list(map(lambda camioneta: camioneta.cargar_pizzas(), self.camionetas))
 
     def encolar_cliente(self, cliente):
         self.cola_espera_clientes.put(cliente)
@@ -57,9 +40,6 @@ class Dia:
 
     def obtener_cliente_de_cola(self):
         return self.cola_espera_clientes.get() if not self.cola_espera_clientes.empty() else None
-
-    def hay_camionetas_disponibles(self):
-        return len(list(filter(lambda x: x.esta_disponible(), self.get_camionetas()))) > 0
 
     def get_tiempo_actual(self):
         return self.tiempo_actual

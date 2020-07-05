@@ -14,18 +14,6 @@ class DiaTestCase(unittest.TestCase):
     def setUp(self):
         self.dia = Simulacion().dia_actual
 
-    def test_cargar_camionetas(self):
-        self.dia.cargar_camionetas()
-        for camioneta in self.dia.camionetas:
-            self.assertTrue(len(camioneta.pizzas) == 40)
-
-    def test_ubicar_camionetas(self):
-        self.dia.camionetas[0].ubicacion = [1, 1]
-        self.assertTrue(self.dia.camionetas[0].ubicacion == [1, 1])
-        self.dia.ubicar_camionetas()
-        for camioneta in self.dia.camionetas:
-            self.assertTrue(camioneta.ubicacion == [0, 0])
-
     def test_generar_pedidos(self):
         Simulacion().generar_pedidos()
         self.assertFalse(len(self.dia.fel) == 0)
@@ -48,19 +36,6 @@ class DiaTestCase(unittest.TestCase):
             self.assertIsInstance(cliente2, LlamoClienteEvent)
         else:
             self.assertEqual(1, len(self.dia.pedidos_rechazados))
-
-    def test_hay_camionetas_disponibles(self):
-
-        for camioneta in self.dia.camionetas:
-            self.assertTrue(camioneta.disponible)
-        self.assertTrue(self.dia.hay_camionetas_disponibles())
-
-        for camioneta in self.dia.camionetas:
-            camioneta.disponible = False
-
-        for camioneta in self.dia.camionetas:
-            self.assertFalse(camioneta.disponible)
-        self.assertFalse(self.dia.hay_camionetas_disponibles())
 
 
 if __name__ == '__main__':

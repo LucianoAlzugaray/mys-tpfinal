@@ -149,6 +149,8 @@ class Simulacion(metaclass=Singleton):
 
     def iniciar_dia(self):
         self.reloj.iniciar_dia()
+        self.generar_pedidos()
+        self.inicializar_camionetas()
 
     def generar_pedidos(self):
         for hora_de_pedido in self.utils.get_horas_de_pedidos(self.horas_por_dia):
@@ -156,3 +158,7 @@ class Simulacion(metaclass=Singleton):
             evento.attach(EncolarCliente())
             evento.attach(RechazarPedido())
             self.dia_actual.fel.append(evento)
+
+    def inicializar_camionetas(self):
+        list(map(lambda camioneta: camioneta.volver_a_pizzeria(), self.camionetas))
+        list(map(lambda camioneta: camioneta.cargar_pizzas(), self.camionetas))
