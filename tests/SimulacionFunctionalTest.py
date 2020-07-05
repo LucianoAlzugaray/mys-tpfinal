@@ -13,6 +13,10 @@ from models.actividades.RechazarPedido import RechazarPedido
 
 
 class TestableDia(Dia):
+
+    def iniciar_dia(self):
+        pass
+
     def cargar_camionetas(self):
         pass
 

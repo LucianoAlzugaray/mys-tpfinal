@@ -30,8 +30,8 @@ class DiaTestCase(unittest.TestCase):
         pedidos_en_hora = self.dia.generar_pedidos_en_hora(1)
         self.assertFalse(len(pedidos_en_hora) == 0)
 
-        pedidos = self.dia.generar_pedidos()
-        self.assertFalse(len(pedidos) == 0)
+        self.dia.generar_pedidos()
+        self.assertFalse(len(self.dia.fel) == 0)
 
     def test_obtener_cliente_de_la_cola(self):
 
@@ -64,21 +64,6 @@ class DiaTestCase(unittest.TestCase):
         for camioneta in self.dia.camionetas:
             self.assertFalse(camioneta.disponible)
         self.assertFalse(self.dia.hay_camionetas_disponibles())
-
-    def test_obtener_eventos_de_ahora(self):
-        eventos_de_ahora = self.dia.obtener_eventos_de_ahora()
-        self.assertTrue(len(eventos_de_ahora) == 0)
-
-        tiempo_actual = 30
-        for i in range(4):
-            evento = LlamoClienteEvent(tiempo_actual, None)
-            evento.hora = tiempo_actual
-            self.dia.fel.append(evento)
-
-        self.dia.tiempo_actual = tiempo_actual
-
-        eventos_de_ahora = self.dia.obtener_eventos_de_ahora()
-        self.assertTrue(len(eventos_de_ahora) == 4)
 
 
 if __name__ == '__main__':

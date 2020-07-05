@@ -17,14 +17,12 @@ class Reloj(object):
         self.dia = self.dia + timedelta(minutes=minutos)
 
     def termino_dia(self):
-        if ((self.dia.minute >= self.minutos_cierre) or (self.dia.hour > self.hora_cierre) and (
-                self.dia.hour == self.hora_cierre)):
+        if ((self.dia.minute >= self.minutos_cierre) or (self.dia.hour > self.hora_cierre)) and (self.dia.hour == self.hora_cierre):
             return True
         return False
 
     def termino_horario_de_toma_de_pedido(self):
-        if ((self.dia.minute >= self.minuto_fin_toma_de_pedidos) or (self.dia.hour > self.hora_fin_toma_de_pedidos)
-                and (self.dia.hour == self.hora_fin_toma_de_pedidos)):
+        if ((self.dia.minute >= self.minuto_fin_toma_de_pedidos) or (self.dia.hour > self.hora_fin_toma_de_pedidos)) and (self.dia.hour == self.hora_fin_toma_de_pedidos):
             return True
         return False
 
