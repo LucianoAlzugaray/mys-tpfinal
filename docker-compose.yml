@@ -1,0 +1,28 @@
+version: '3'
+services:
+  broker:
+    image: eclipse-mosquitto 
+    container_name: "broker"
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    networks:
+      tp4-net:
+        ipv4_address: 172.16.240.10
+
+  publisher:
+    build: .
+    container_name: "publisher"
+    ports:
+      - "1880:1880"
+    networks:
+      tp4-net:
+        ipv4_address: 172.16.240.20 
+
+networks:
+  tp4-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.240.0/24
+        
