@@ -1,4 +1,5 @@
 import math
+from models.Cliente import Cliente
 from events.SimulacionEvent import SimulacionEvent
 
 

@@ -31,18 +31,20 @@ class LlamoClienteEventTest(unittest.TestCase):
         self.assertTrue(len(self.evento.obtener_camionetas_disponibles(self.camionetas)) == 4)
 
     def test_cliente_esta_en_rango(self):
-
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
         cliente = Cliente()
 
         cliente.ubicacion[0] = 1415
         cliente.ubicacion[1] = 1415
         self.evento.cliente = cliente
-        self.assertFalse(self.evento.cliente_esta_en_rango())
+
+        self.assertFalse(simulacion.cliente_esta_en_rango(cliente))
 
         cliente.ubicacion[0] = 1414
         cliente.ubicacion[1] = 1414
         self.evento.cliente = cliente
-        self.assertTrue(self.evento.cliente_esta_en_rango())
+        self.assertTrue(simulacion.cliente_esta_en_rango(cliente))
 
 
 if __name__ == '__main__':

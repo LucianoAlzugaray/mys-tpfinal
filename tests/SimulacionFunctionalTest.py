@@ -16,6 +16,9 @@ class TestableDia(Dia):
     def cargar_camionetas(self):
         pass
 
+    def ubicar_camionetas(self):
+        pass
+
 
 class SimulacionFunctionalTest(unittest.TestCase):
 
@@ -57,6 +60,26 @@ class SimulacionFunctionalTest(unittest.TestCase):
         self.assertTrue(len(simulacion.pedidos) == 1)
         self.assertTrue(simulacion.pedidos[0].entregado)
         self.assertTrue(camioneta.pedido_en_curso is None)
+
+    def test_debe_asignar_el_pedido_a_la_camioneta_mas_cercana(self):
+
+        simulacion = self.get_simulacion()
+        simulacion.dia_actual.tiempo_actual = 120
+        simulacion.dia_actual.camionetas.append(Camioneta())
+
+        simulacion.dia_actual.camionetas[0].pizzas.append(Pizza(TipoPizza.ANANA))
+        simulacion.dia_actual.camionetas[1].pizzas.append(Pizza(TipoPizza.ANANA))
+
+        cliente = self.generar_cliente_en_rango()
+        simulacion.dia_actual.camionetas[1].ubicacion = cliente.ubicacion
+
+        evento = self.generar_evento(cliente, TipoPizza.ANANA)
+        simulacion.add_event(evento)
+
+        simulacion.run()
+
+        self.assertEqual(simulacion.camionetas[1], simulacion.pedidos[0].camioneta)
+        self.assertTrue(simulacion.pedidos[0].entregado)
 
     @staticmethod
     def generar_cliente_en_rango():
