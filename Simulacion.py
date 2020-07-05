@@ -85,6 +85,7 @@ class Simulacion(metaclass=Singleton):
         self.dia_actual.fel.append(event)
 
     def get_hora(self):
+        # TODO: pedirle la hora al reloj
         return self.dia_actual.get_tiempo_actual()
 
     def get_camioneta_by_pizza(self, pizza):

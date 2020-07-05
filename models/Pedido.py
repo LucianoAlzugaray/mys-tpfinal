@@ -4,6 +4,7 @@ class Pedido:
         from Simulacion import Simulacion
         self.cliente = cliente
         self.hora_toma = hora_toma
+        # TODO: quitar (se pasa a la actividad Entregar pedido)
         self.tiempo_de_demora = Simulacion().utils.tiempo_entrega()
         self.hora_entrega = None
         self.ubicacion_origen = None

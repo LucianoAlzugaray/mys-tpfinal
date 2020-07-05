@@ -1,5 +1,4 @@
 from events.CamionetaRegresaARestauranteEvent import CamionetaRegresaARestauranteEvent
-from events.EntregarPizzaEvent import EntregarPizzaEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from .Actividad import Actividad
 from ..Pedido import Pedido
