@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from dateutil.parser import parse
+
 
 class Reloj(object):
 
