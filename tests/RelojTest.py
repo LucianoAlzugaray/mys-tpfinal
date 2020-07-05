@@ -15,7 +15,6 @@ class RelojTest(unittest.TestCase):
 
         self.assertFalse(simulacion.reloj.termino_dia())
         self.assertFalse(simulacion.reloj.termino_horario_de_toma_de_pedido())
-
         simulacion.avanzar_reloj(simulacion.CANTIDAD_MINUTOS_LABORALES)
         self.assertTrue(simulacion.termino_dia())
         self.assertTrue(simulacion.reloj.termino_horario_de_toma_de_pedido())

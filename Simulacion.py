@@ -14,7 +14,6 @@ from models.meta.Singleton import Singleton
 from utils.utils import Utils
 from models.Reloj import Reloj
 
-
 def generar_camionetas():
     from models.Camioneta import Camioneta
     return [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
@@ -97,8 +96,9 @@ class Simulacion(metaclass=Singleton):
     def add_event(self, event):
         self.fel.append(event)
 
-    def get_hora(self):
-        return self.dia
+    @property
+    def hora(self):
+        return self.reloj.dia.time()
 
     def get_camioneta_by_pizza(self, pizza):
         camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.camionetas))
@@ -213,6 +213,9 @@ class Simulacion(metaclass=Singleton):
 
     def termino_dia(self):
         return self.reloj.termino_dia()
+
+    def obtener_dt_futuro(self, minutos):
+        return self.reloj.obtener_dt_futuro(minutos)
 
     def obtener_eventos_de_ahora(self):
         return list(filter(lambda x: math.trunc(x.hora) == math.trunc(self.dia.time()), self.fel))
