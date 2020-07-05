@@ -48,21 +48,23 @@ class Dia:
             camioneta.volver_a_pizzeria()
             self.desperdicio_por_fin_de_dia += camioneta.descargarse()
 
+    # TODO: quitar
     @staticmethod
     def generar_pedidos_en_hora(hora):
         eventos = []
         from Simulacion import Simulacion
         for i in range(Simulacion().utils.pedidos_generados()):
             tiempo_exacto = Simulacion().utils.pedido_en_hora() + 60 * hora
-            evento = LlamoClienteEvent(tiempo_exacto, None)
+            evento = LlamoClienteEvent(tiempo_exacto, Cliente())
             evento.attach(EncolarCliente())
             evento.attach(RechazarPedido())
             eventos.append(evento)
 
         return eventos
 
-    # TODO: Revisar horas repetidas
+    # TODO: debe quedar asi self.fel = Simulacion().utils.generar_pedidos()
     def generar_pedidos(self):
+
         self.fel = list((itertools.chain(*[self.generar_pedidos_en_hora(i) for i in range(12)])))
 
     def cargar_camionetas(self):

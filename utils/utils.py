@@ -25,14 +25,17 @@ class Utils:
 
 
     ## Obtiene pedidos generados en una hora
+    # TODO: renombrar a generar pedidos y que ya devuelta una lista de horas distribuidas
     @staticmethod
     def pedidos_generados():
         return np.random.poisson(20)
 
+    # TODO: quitar
     @staticmethod
     def distribuir_pedidos(cantidad, minimo, maximo):
         return np.random.uniform(minimo, maximo, cantidad)
 
+    # TODO: quitar
     ## Obtiene el minuto  de un pedido en una hora
     @staticmethod
     def pedido_en_hora():
