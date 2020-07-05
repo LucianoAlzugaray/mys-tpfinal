@@ -7,7 +7,6 @@ from Simulacion import Simulacion
 class RelojTest(unittest.TestCase):
 
     def test_something(self):
-
         simulacion = Simulacion()
         simulacion.iniciar_dia()
         dia_actual = simulacion.dia
