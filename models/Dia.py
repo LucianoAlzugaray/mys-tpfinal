@@ -59,11 +59,10 @@ class Dia:
             eventos.append(evento)
 
         return eventos
-        # return [LlamoClienteEvent(hora) for i in range(pedidos_generados())]
 
     # TODO: Revisar horas repetidas
     def generar_pedidos(self):
-        self.fel = (itertools.chain(*[self.generar_pedidos_en_hora(i) for i in range(12)]))
+        self.fel = list((itertools.chain(*[self.generar_pedidos_en_hora(i) for i in range(12)])))
 
     def cargar_camionetas(self):
         list(map(lambda camioneta: camioneta.cargar_pizzas(), self.camionetas))
