@@ -1,7 +1,6 @@
 import unittest
-from Simulacion import Simulacion
-import numpy as np
 
+from Simulacion import Simulacion
 from events.LlamoClienteEvent import LlamoClienteEvent
 from models.Camioneta import Camioneta
 from models.Dia import Dia
@@ -10,11 +9,10 @@ from models.Dia import Dia
 class PedidosTest(unittest.TestCase):
 
     def test_pedidos_se_generan_correctamente(self):
-        dia = Dia(10, [Camioneta()])
-        dia.iniciar_dia()
-
+        simulacion = Simulacion()
+        dia = simulacion.dia_actual
+        dia.generar_pedidos()
         fel = dia.fel
-
         self.assertTrue(len(fel) > 0)
 
         for evento in dia.fel:

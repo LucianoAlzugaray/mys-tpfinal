@@ -27,10 +27,7 @@ class DiaTestCase(unittest.TestCase):
             self.assertTrue(camioneta.ubicacion == [0, 0])
 
     def test_generar_pedidos(self):
-        pedidos_en_hora = self.dia.generar_pedidos_en_hora(1)
-        self.assertFalse(len(pedidos_en_hora) == 0)
-
-        self.dia.generar_pedidos()
+        Simulacion().generar_pedidos()
         self.assertFalse(len(self.dia.fel) == 0)
 
     def test_obtener_cliente_de_la_cola(self):

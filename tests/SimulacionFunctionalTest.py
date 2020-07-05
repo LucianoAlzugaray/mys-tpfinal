@@ -123,6 +123,5 @@ class SimulacionFunctionalTest(unittest.TestCase):
         simulacion.clientes_rechazados = []
         simulacion.dias_corridos = []
 
-
 if __name__ == '__main__':
     unittest.main()

@@ -8,7 +8,6 @@ from models.Pedido import Pedido
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 
-
 class CamionetaTest(unittest.TestCase):
 
     def setUp(self):
@@ -81,9 +80,6 @@ class CamionetaTest(unittest.TestCase):
         #     cuando se produce un evento de pizza entregada
         #         hay que decirle a la camioneta enviar_siguiente_pedido
         #             si no tiene pedidos que entregar debe se queda donde está
-
-
-
 
 if __name__ == '__main__':
     unittest.main()

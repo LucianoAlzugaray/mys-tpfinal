@@ -2,11 +2,14 @@ import itertools
 import math
 from datetime import timedelta, datetime
 
+from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Cliente import Cliente
 from models.Dia import Dia
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
+from models.actividades.EncolarCliente import EncolarCliente
+from models.actividades.RechazarPedido import RechazarPedido
 from models.meta.Singleton import Singleton
 from utils.utils import Utils
 from models.Reloj import Reloj
@@ -146,3 +149,10 @@ class Simulacion(metaclass=Singleton):
 
     def iniciar_dia(self):
         self.reloj.iniciar_dia()
+
+    def generar_pedidos(self):
+        for hora_de_pedido in self.utils.get_horas_de_pedidos(self.horas_por_dia):
+            evento = LlamoClienteEvent(hora_de_pedido, Cliente())
+            evento.attach(EncolarCliente())
+            evento.attach(RechazarPedido())
+            self.dia_actual.fel.append(evento)

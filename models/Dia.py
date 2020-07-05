@@ -1,14 +1,6 @@
 import math
-from datetime import datetime
-
-from events.EntregarPizzaEvent import EntregarPizzaEvent
-from events.LlamoClienteEvent import LlamoClienteEvent
 from models.Cliente import Cliente
 import queue
-import itertools
-
-from models.actividades.RechazarPedido import RechazarPedido
-from models.actividades.EncolarCliente import EncolarCliente
 
 
 # TODO: se agrega referencia faltante.
@@ -46,26 +38,10 @@ class Dia:
 
         for camioneta in self.get_camionetas():
             camioneta.volver_a_pizzeria()
-            self.desperdicio_por_fin_de_dia += camioneta.descargarse()
 
-    # TODO: quitar
-    @staticmethod
-    def generar_pedidos_en_hora(hora):
-        eventos = []
-        from Simulacion import Simulacion
-        for i in range(Simulacion().utils.pedidos_generados()):
-            tiempo_exacto = Simulacion().utils.pedido_en_hora() + 60 * hora
-            evento = LlamoClienteEvent(tiempo_exacto, Cliente())
-            evento.attach(EncolarCliente())
-            evento.attach(RechazarPedido())
-            eventos.append(evento)
-
-        return eventos
-
-    # TODO: debe quedar asi self.fel = Simulacion().utils.generar_pedidos()
     def generar_pedidos(self):
-
-        self.fel = list((itertools.chain(*[self.generar_pedidos_en_hora(i) for i in range(12)])))
+        from Simulacion import Simulacion
+        Simulacion().generar_pedidos()
 
     def cargar_camionetas(self):
         list(map(lambda camioneta: camioneta.cargar_pizzas(), self.camionetas))

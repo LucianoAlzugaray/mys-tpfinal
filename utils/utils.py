@@ -1,46 +1,40 @@
-import numpy as np
 import math
+
+import numpy as np
 import random
+
 from models.TipoPizza import TipoPizza
 
-
 class Utils:
-
     ## Obtiene una velocidad probabilistica para cargar pizzas
     @staticmethod
     def velocidad_carga_pizza():
         return np.random.exponential(1 / 10)
-
 
     ## Obtiene un tiempo de entrega probabilistico
     @staticmethod
     def tiempo_entrega():
         return np.random.exponential(10)
 
-
     ## Obtiene si se convenció al cliente o no de cambiar el tipo de pizza
     @staticmethod
     def convencer_al_cliente():
         return np.random.binomial(1, 0.3) == 1
 
-
     ## Obtiene pedidos generados en una hora
     # TODO: renombrar a generar pedidos y que ya devuelta una lista de horas distribuidas
     @staticmethod
-    def pedidos_generados():
+    def cantidad_de_pedidos_en_una_hora():
         return np.random.poisson(20)
 
-    # TODO: quitar
     @staticmethod
-    def distribuir_pedidos(cantidad, minimo, maximo):
-        return np.random.uniform(minimo, maximo, cantidad)
-
-    # TODO: quitar
-    ## Obtiene el minuto  de un pedido en una hora
-    @staticmethod
-    def pedido_en_hora():
-        return math.trunc(random.uniform(0, 60))
-
+    def get_horas_de_pedidos(horas):
+        eventos_en_hora = []
+        for hora in range(horas):
+            for pedido in range(Utils.cantidad_de_pedidos_en_una_hora()):
+                tiempo_exacto = math.trunc(random.uniform(0, 60)) + 60 * hora
+                eventos_en_hora.append(tiempo_exacto)
+        return eventos_en_hora
 
     ## Genera tipo de pizza aleatorio
     @staticmethod
