@@ -1,31 +1,27 @@
 import unittest
 from datetime import timedelta, datetime
-
 from Simulacion import Simulacion
 
 
+# TODO: ver aserts de isInstance reloj.dia = datetime, y metodo reloj.get_diferencia_hora_actual
 class RelojTest(unittest.TestCase):
 
-    def test_something(self):
-
+    def test_debe_inicializarse_segun_el_timestamp_de_la_configuracion_de_la_simulacion(self):
         simulacion = Simulacion()
-        simulacion.iniciar_dia()
-        dia_actual = simulacion.dia
-        dt_una_hora = datetime.now()
+        self.assertEqual(simulacion.tiempo_inicio, simulacion.reloj.dia)
+
+    # TODO: renombrar
+    def test_debe_terminar_el_dia_corectamente(self):
+        simulacion = Simulacion()
+
         self.assertFalse(simulacion.reloj.termino_dia())
         self.assertFalse(simulacion.reloj.termino_horario_de_toma_de_pedido())
-        self.assertIsInstance(simulacion.dia, datetime.now().__class__)
-        simulacion.avanzar_reloj(15)
-        self.assertEqual(simulacion.dia, dia_actual + timedelta(minutes=15))
-        simulacion.reloj.dia = simulacion.reloj.dia.replace(minute=20, hour=23, second=0,
-                                                            year=simulacion.reloj.dia.year,
-                                                            month=simulacion.reloj.dia.month,
-                                                            day=simulacion.reloj.dia.day)
-        self.assertTrue(simulacion.reloj.termino_dia())
+
+        simulacion.avanzar_reloj(simulacion.CANTIDAD_MINUTOS_LABORALES)
+        self.assertTrue(simulacion.termino_dia())
         self.assertTrue(simulacion.reloj.termino_horario_de_toma_de_pedido())
-        dt_una_hora = dt_una_hora.replace(minute=20, hour=22, second=0, year=simulacion.reloj.dia.year,
-                                          month=simulacion.reloj.dia.month, day=simulacion.reloj.dia.day)
-        self.assertEqual(simulacion.reloj.get_diferencia_hora_actual(dt_una_hora), 60)
+
+
 
 if __name__ == '__main__':
     unittest.main()
