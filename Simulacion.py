@@ -1,6 +1,6 @@
 import itertools
 import math
-from datetime import timedelta, datetime
+from datetime import time, datetime
 
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Cliente import Cliente
@@ -18,10 +18,39 @@ def generar_camionetas():
 
 class Simulacion(metaclass=Singleton):
 
+    CANTIDAD_HORAS_LABORALES = 12
+    CANTIDAD_MINUTOS_LABORALES = CANTIDAD_HORAS_LABORALES * 60
     HORA_DE_CIERRE = 23
     MINUTOS_DE_CIERRE = 0
     HORA_FIN_TOMA_DE_PEDIDOS = 22
     MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
+
+    DIA_INICIO = 5
+    MES_INICIO = 7
+    ANIO_INICIO = 2020
+    HORA_INICIO = 11
+    MINUTOS_INICIO = 0
+    TIEMPO_INICIO = datetime(
+        ANIO_INICIO,
+        MES_INICIO,
+        DIA_INICIO,
+        HORA_INICIO,
+        MINUTOS_INICIO
+    )
+
+    DIA_FIN = 5
+    MES_FIN = 7
+    ANIO_FIN = 2020
+    HORA_FIN = 11
+    MINUTOS_FIN = 0
+    TIEMPO_FIN = datetime(
+        ANIO_FIN,
+        MES_FIN,
+        DIA_FIN,
+        HORA_FIN,
+        MINUTOS_FIN
+    )
+
 
 
     def __init__(self):
@@ -56,6 +85,7 @@ class Simulacion(metaclass=Singleton):
         self.dia_actual.fel.append(event)
 
     def get_hora(self):
+        # TODO: pedirle la hora al reloj
         return self.dia_actual.get_tiempo_actual()
 
     def get_camioneta_by_pizza(self, pizza):
@@ -151,3 +181,14 @@ class Simulacion(metaclass=Singleton):
 
     def iniciar_dia(self):
         self.reloj.iniciar_dia()
+
+    @property
+    def tiempo_inicio(self):
+        return self.TIEMPO_INICIO
+
+    @property
+    def tiempo_fin(self):
+        return self.TIEMPO_FIN
+
+    def termino_dia(self):
+        return self.reloj.termino_dia()
