@@ -31,6 +31,7 @@ class TestableSimulacion(Simulacion):
         self.utils = TestableUtils()
 
     CANTIDAD_DE_EXPERIMENTOS = 1
+
     def iniciar_dia(self):
         pass
 
@@ -44,6 +45,7 @@ class TestableSimulacion(Simulacion):
     def dias_a_simular(self):
         return 1
 
+
 class SimulacionFunctionalTest(unittest.TestCase):
 
     def test_debe_rechazarse_un_pedido_cuando_cliente_no_esta_en_rango(self):
@@ -51,7 +53,6 @@ class SimulacionFunctionalTest(unittest.TestCase):
         simulacion.utils.set_en_rango(False)
         self.assertTrue(len(simulacion.pedidos) == 0)
         self.assertTrue(len(simulacion.pedidos_rechazados) == 0)
-
 
         evento = self.generar_evento(TipoPizza.ANANA)
         simulacion.add_event(evento)
@@ -63,9 +64,8 @@ class SimulacionFunctionalTest(unittest.TestCase):
         self.assertFalse(len(simulacion.pedidos_rechazados) == 0)
 
     def test_debe_entregarse_una_pizza_cuando_cliente_esta_en_rango(self):
-
         simulacion = self.get_simulacion()
-        simulacion.tiempo_actual = 120
+        simulacion.tiempo_actual = 120 # TODO : refactorizar este tiempo
         camioneta = simulacion.camionetas[0]
         camioneta.pizzas.append(Pizza(TipoPizza.ANANA))
 
@@ -89,7 +89,6 @@ class SimulacionFunctionalTest(unittest.TestCase):
         self.assertTrue(camioneta.pedido_en_curso is None)
 
     def test_debe_asignar_el_pedido_a_la_camioneta_mas_cercana(self):
-
         simulacion = self.get_simulacion()
         simulacion.tiempo_actual = 120
         simulacion.camionetas.append(Camioneta())
@@ -104,7 +103,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
         simulacion.add_event(evento)
 
         simulacion.run()
-
+        algo = 1
         self.assertEqual(simulacion.camionetas[1], simulacion.pedidos[0].camioneta)
         self.assertTrue(simulacion.pedidos[0].entregado)
 
@@ -125,6 +124,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
     def clean_up(simulacion):
         simulacion.pedidos = []
         simulacion.pedidos_rechazados = []
+
 
 if __name__ == '__main__':
     unittest.main()

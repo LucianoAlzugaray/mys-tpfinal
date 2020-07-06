@@ -94,7 +94,10 @@ class Camioneta:
             self.generar_evento_enviar_pedido(pedido)
 
     def get_ubicacion_siguiente_pedido(self):
-        return self.pedido_en_curso.ubicacion
+        if self.pedido_en_curso is not None:
+            return self.pedido_en_curso.ubicacion
+        return None
+
 
     def get_ubicacion_ultimo_pedido(self):
         return self.pedidos[len(self.pedidos) - 1].ubicacion

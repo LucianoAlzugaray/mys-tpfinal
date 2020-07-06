@@ -13,12 +13,17 @@ class Reloj(object):
     def avanzar(self, minutos):
         self.dia = self.dia + timedelta(minutes=minutos)
 
+    def avanzar_time(self, time: datetime):
+        if (self.dia<time):
+            self.dia = time
+
     def termino_dia(self):
         return self.dia.time() >= self.cirre_at
 
     def termino_horario_de_toma_de_pedido(self):
         return self.dia.time() >= self.finaliza_toma_pedidos_at
 
+#TODO : REFACTOR - metodo no usado, borrable.
     def get_diferencia_hora_actual(self, dt_hora):
         horas_parametro = dt_hora.hour
         horas_reloj = self.dia.hour

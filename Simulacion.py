@@ -4,6 +4,7 @@ from datetime import datetime
 
 from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
+from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
 from models.Camioneta import Camioneta
 from models.Pedido import Pedido
 from models.Pizza import Pizza
@@ -14,6 +15,9 @@ from models.meta.Singleton import Singleton
 from utils.utils import Utils
 from models.Reloj import Reloj
 
+class Restaurante():
+    def __init__(self):
+        self.ubicacion = [0,0]
 
 class Simulacion(metaclass=Singleton):
     CANTIDAD_HORAS_LABORALES = 12
@@ -56,6 +60,7 @@ class Simulacion(metaclass=Singleton):
     def __init__(self):
         self.utils = Utils()
         self.reloj = Reloj()
+        self.restaurante = Restaurante()
         self.camionetas = [Camioneta() for i in range(self.CANTIDAD_DE_CAMIONETAS)]
         self.experimentos = self.CANTIDAD_DE_EXPERIMENTOS
         self.rango_de_atencion = self.RANGO_DE_ATENCION
@@ -73,7 +78,18 @@ class Simulacion(metaclass=Singleton):
                 while not self.termino_dia():
                     for evento in self.obtener_eventos_de_ahora():
                         evento.notify()
-                    self.avanzar_reloj(1)
+                    if (len(self.fel)>0):
+                        evento = self.fel[0]
+                        self.avanzar_reloj_time(evento.time)
+                    else:
+                        dt_fin_del_dia = datetime(year=self.dia.year,
+                                                     month=self.dia.month,
+                                                     day=self.dia.day,
+                                                     hour=self.HORA_DE_CIERRE,
+                                                     minute=self.MINUTOS_DE_CIERRE,
+                                                     second=0)
+                        self.avanzar_reloj_time(dt_fin_del_dia)
+
 
                 for camioneta in self.camionetas:
                     camioneta.volver_a_pizzeria()
@@ -104,7 +120,6 @@ class Simulacion(metaclass=Singleton):
         for camioneta in camionetas:
             if camioneta.tiene_tipo(tipo):
                 return camioneta
-
         return None
 
     def ordenar_camionetas_por_ubicacion(self, ubicacion, method_name):
@@ -117,7 +132,8 @@ class Simulacion(metaclass=Singleton):
             distancia = self.obtener_distancia(ubicacion, ubicacion_camioneta)
             distancias[camioneta] = distancia
 
-        aux = sorted(distancias.items(), key=lambda x: x[1])
+        if self.is_lista_inicializada(distancias):
+            aux = sorted(distancias.items(), key=lambda x: x[1])
 
         camionetas = []
         for i in aux:
@@ -125,11 +141,16 @@ class Simulacion(metaclass=Singleton):
 
         return camionetas
 
+
+
     @staticmethod
     def obtener_distancia(punto1, punto2):
-        cateto1 = punto2[0] - punto1[0]
-        cateto2 = punto2[1] - punto1[1]
-        return math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2))
+        if ((punto1 is None )or(punto2 is None)):
+            return None
+        else:
+            cateto1 = punto2[0] - punto1[0]
+            cateto2 = punto2[1] - punto1[1]
+            return math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2))
 
     def get_tipos_disponibles_en_camionetas(self):
         pizzas_disponibles = list(
@@ -144,10 +165,10 @@ class Simulacion(metaclass=Singleton):
 
     def obtener_camioneta_mas_proxima_a_liberarse(self):
         # TODO: la camioneta debe calcular cuanto va a tardar en liberarse
-        return self.ordenar_camionetas_por_ubicacion([0, 0], 'cuanto_tardas_en_linerarte')[0]
+        return self.ordenar_camionetas_por_ubicacion(self.restaurante.ubicacion, 'cuanto_tardas_en_linerarte')[0]
 
     def obtener_camioneta_mas_cercana_al_restaurante(self):
-        return self.ordenar_camionetas_por_ubicacion([0, 0], 'get_ubicacion_siguiente_pedido')[0]
+        return self.ordenar_camionetas_por_ubicacion(self.restaurante.ubicacion, 'get_ubicacion_siguiente_pedido')[0]
 
     def remover_evento_vencimiento_pizza(self, pizza: Pizza):
         evento = self.get_pizza_vence_by_pizza(pizza)
@@ -159,11 +180,12 @@ class Simulacion(metaclass=Singleton):
         return None if len(eventos) == 0 else eventos[0]
 
     def cliente_esta_en_rango(self, pedido : Pedido):
-        return self.obtener_distancia([0, 0], pedido.ubicacion) <= self.rango_de_atencion
+        return self.obtener_distancia(self.restaurante.ubicacion, pedido.ubicacion) <= self.rango_de_atencion
 
     def avanzar_reloj(self, minutos):
         self.reloj.avanzar(minutos)
-
+    def avanzar_reloj_time(self, time: datetime):
+        self.reloj.avanzar_time(time)
     def iniciar_dia(self):
         self.generar_pedidos()
         self.inicializar_camionetas()
@@ -216,3 +238,8 @@ class Simulacion(metaclass=Singleton):
     def horas_por_dia(self):
         return self.CANTIDAD_HORAS_LABORALES
 
+    def is_lista_inicializada(self,lista):
+        for valor in lista:
+            if valor is None:#TODO: BUG - arreglar esta condicion --> deberia devolver falso si alguna instancia de la lista es none pero esta lista es distinta, tiene objetos camioneta como indice, entonces cuando no le asignamos ningun valor y deberia ser None, toma el valor de la camioneta.
+                return False
+        return True
