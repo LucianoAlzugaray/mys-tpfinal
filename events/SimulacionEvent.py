@@ -4,8 +4,9 @@ class SimulacionEvent(object):
         self.actividades = []
         self.hora = hora #TODO: Esta hora ahora es un time, arreglar impacto.
 
-    def attach(self, actividad) -> None:
+    def attach(self, actividad):
         self.actividades.append(actividad)
+        return self
 
     def detach(self, actividad) -> None:
         self.actividades.remove(actividad)

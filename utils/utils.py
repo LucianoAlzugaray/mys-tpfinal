@@ -1,8 +1,6 @@
 import math
-
 import numpy as np
 import random
-
 from models.TipoPizza import TipoPizza
 from datetime import timedelta
 
@@ -25,11 +23,13 @@ class Utils:
     @staticmethod
     def get_horas_de_pedidos(horas):
         eventos_en_hora = []
+
         for hora in range(horas):
             for pedido in range(np.random.poisson(20)):
                 tiempo_exacto = math.trunc(random.uniform(0, 60)) + 60 * hora
-
-                eventos_en_hora.append(tiempo_exacto)
+                from Simulacion import Simulacion
+                timestamp = Simulacion().tiempo_inicio + timedelta(minutes=tiempo_exacto)
+                eventos_en_hora.append(timestamp)
         return eventos_en_hora
 
     ## Genera tipo de pizza aleatorio

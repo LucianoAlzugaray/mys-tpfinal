@@ -1,11 +1,10 @@
 import itertools
 import math
-from datetime import time, datetime
+from datetime import datetime
 
 from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Cliente import Cliente
-from models.Dia import Dia
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.actividades.EncolarCliente import EncolarCliente
@@ -14,13 +13,13 @@ from models.meta.Singleton import Singleton
 from utils.utils import Utils
 from models.Reloj import Reloj
 
+
 def generar_camionetas():
     from models.Camioneta import Camioneta
     return [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
 
 
 class Simulacion(metaclass=Singleton):
-
     CANTIDAD_HORAS_LABORALES = 12
     CANTIDAD_MINUTOS_LABORALES = CANTIDAD_HORAS_LABORALES * 60
     HORA_DE_CIERRE = 23
@@ -54,13 +53,9 @@ class Simulacion(metaclass=Singleton):
         MINUTOS_FIN
     )
 
-
-
     def __init__(self):
         self.reloj = Reloj()
         self.experimentos = 10
-        self.dias_a_simular = 365
-        self.horas_por_dia = 12
         self.minutos_maximo = 60 * self.horas_por_dia
         self.dias_corridos = []
         self.camionetas = generar_camionetas()
@@ -96,17 +91,12 @@ class Simulacion(metaclass=Singleton):
     def add_event(self, event):
         self.fel.append(event)
 
-    @property
-    def time(self):
-        return self.reloj.dia
-
     def get_camioneta_by_pizza(self, pizza):
         camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.camionetas))
         return None if len(camionetas) == 0 else camionetas[0]
 
     def rechazar_pedido(self, cliente: Cliente) -> None:
         self.pedidos_rechazados_en_llamada.append(cliente)
-
 
     def get_camioneta_by_cliente(self, cliente: Cliente):
         camionetas = list(filter(lambda x: x.get_pedido_by_cliente(cliente) is not None, self.camionetas))
@@ -181,35 +171,21 @@ class Simulacion(metaclass=Singleton):
     def avanzar_reloj(self, minutos):
         self.reloj.avanzar(minutos)
 
-    @property
-    def dia(self):
-        return self.reloj.dia
-
     def iniciar_dia(self):
         self.generar_pedidos()
         self.inicializar_camionetas()
 
     def generar_pedidos(self):
-        for hora_de_pedido in self.utils.get_horas_de_pedidos(self.horas_por_dia):
-            # si hora de pedido es un time solamente tengo que agarrar el date de la simulacion y concatenarle el time
-            # hora = datetime(self.dia_actual.year, self.dia_actual.month, self.dia_actual.day, hora_de_pedido.hour, hora_de_pedido.minute)
-            # evento = LlamoClienteEvent(hora, Cliente())
-            evento = LlamoClienteEvent(hora_de_pedido, Cliente())
-            evento.attach(EncolarCliente())
-            evento.attach(RechazarPedido())
-            self.fel.append(evento)
+        list(map(lambda hora_de_pedido: self.generar_llamo_cliente_event(hora_de_pedido), self.utils.get_horas_de_pedidos(self.horas_por_dia)))
+
+    def generar_llamo_cliente_event(self, hora_de_pedido):
+        self.fel.append(
+            LlamoClienteEvent(hora_de_pedido, Cliente(), self.generar_tipo_de_pizza()).attach(EncolarCliente()).attach(RechazarPedido())
+        )
 
     def inicializar_camionetas(self):
         list(map(lambda camioneta: camioneta.volver_a_pizzeria(), self.camionetas))
         list(map(lambda camioneta: camioneta.cargar_pizzas(), self.camionetas))
-
-    @property
-    def tiempo_inicio(self):
-        return self.TIEMPO_INICIO
-
-    @property
-    def tiempo_fin(self):
-        return self.TIEMPO_FIN
 
     def termino_dia(self):
         return self.reloj.termino_dia()
@@ -219,3 +195,31 @@ class Simulacion(metaclass=Singleton):
 
     def obtener_eventos_de_ahora(self):
         return list(filter(lambda x: x.hora == self.time, self.fel))
+
+    def generar_tipo_de_pizza(self):
+        return self.utils.generar_tipo_de_pizza()
+
+    @property
+    def time(self):
+        return self.reloj.dia
+
+    @property
+    def dia(self):
+        return self.reloj.dia
+
+    @property
+    def tiempo_inicio(self):
+        return self.TIEMPO_INICIO
+
+    @property
+    def tiempo_fin(self):
+        return self.TIEMPO_FIN
+
+    @property
+    def dias_a_simular(self):
+        return self.tiempo_fin.date().day - self.tiempo_inicio.date().day
+
+    @property
+    def horas_por_dia(self):
+        return self.CANTIDAD_HORAS_LABORALES
+
