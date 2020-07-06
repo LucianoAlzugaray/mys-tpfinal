@@ -1,6 +1,7 @@
 from events.SimulacionEvent import SimulacionEvent
 from datetime import timedelta
 
+
 class PizzaVenceEvent(SimulacionEvent):
     tiempo_vencimiento_de_pizza = timedelta(minutes=120)
 

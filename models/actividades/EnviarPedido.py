@@ -13,6 +13,6 @@ class EnviarPedido(Actividad):
     def _ejecutar(self, evento: EnviarPedidoEvent):
         evento.pedido.camioneta.enviar_pedido()
         from Simulacion import Simulacion
-        entregar_pizza_event = EntregarPizzaEvent(Simulacion.obtener_dt_futuro(self.demora).time(), evento.pedido)
+        entregar_pizza_event = EntregarPizzaEvent(Simulacion().obtener_dt_futuro(self.demora).time(), evento.pedido)
         entregar_pizza_event.attach(EntregarPizza(evento.pedido))
         Simulacion().add_event(entregar_pizza_event)

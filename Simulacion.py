@@ -85,10 +85,10 @@ class Simulacion(metaclass=Singleton):
                 for camioneta in self.camionetas:
                     camioneta.volver_a_pizzeria()
 
-                self.clientes_rechazados += self.dia_actual.pedidos_rechazados
+                self.clientes_rechazados += self.pedidos_rechazados
                 self.dias_corridos.append(self.dia_actual)
                 # TODO preguntar que poner
-                self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
+                # self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
 
     def obtener_datos(self):
         pass
@@ -97,8 +97,8 @@ class Simulacion(metaclass=Singleton):
         self.fel.append(event)
 
     @property
-    def hora(self):
-        return self.reloj.dia.time()
+    def time(self):
+        return self.reloj.dia
 
     def get_camioneta_by_pizza(self, pizza):
         camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.camionetas))
@@ -218,4 +218,4 @@ class Simulacion(metaclass=Singleton):
         return self.reloj.obtener_dt_futuro(minutos)
 
     def obtener_eventos_de_ahora(self):
-        return list(filter(lambda x: math.trunc(x.hora) == math.trunc(self.dia.time()), self.fel))
+        return list(filter(lambda x: x.hora == self.time, self.fel))

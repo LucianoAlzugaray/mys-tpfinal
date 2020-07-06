@@ -34,7 +34,7 @@ class Camioneta:
 
     def generar_evento_enviar_pedido(self, pedido):
         from Simulacion import Simulacion
-        evento = EnviarPedidoEvent(Simulacion().get_hora() + timedelta(minutes=1), pedido)
+        evento = EnviarPedidoEvent(Simulacion().time + timedelta(minutes=1), pedido)
         evento.attach(EnviarPedido())
         Simulacion().add_event(evento)
 

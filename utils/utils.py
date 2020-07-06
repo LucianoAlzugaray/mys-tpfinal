@@ -4,17 +4,18 @@ import numpy as np
 import random
 
 from models.TipoPizza import TipoPizza
+from datetime import timedelta
 
 class Utils:
     ## Obtiene una velocidad probabilistica para cargar pizzas
     @staticmethod
     def velocidad_carga_pizza():
-        return np.random.exponential(1 / 10)
+        return math.trunc(np.random.exponential(10))
 
     ## Obtiene un tiempo de entrega probabilistico
     @staticmethod
     def tiempo_entrega():
-        return np.random.exponential(10)
+        return math.trunc(np.random.exponential(10))
 
     ## Obtiene si se convenció al cliente o no de cambiar el tipo de pizza
     @staticmethod
@@ -51,3 +52,7 @@ class Utils:
     @staticmethod
     def generar_ubicacion_cliente():
         return np.random.normal(0, 10, 2) * 100  ##Para que quede como maximo 2000 como en el gráfico de bruno
+
+    @staticmethod
+    def sumar_minutos_a_hora(hora, minutos):
+        return (datetime.combine(date.today(), hora) + timedelta(minutes=minutos)).time()

@@ -8,6 +8,7 @@ from models.Pedido import Pedido
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 
+
 class CamionetaTest(unittest.TestCase):
 
     def setUp(self):
@@ -51,7 +52,7 @@ class CamionetaTest(unittest.TestCase):
 
         cliente = Cliente()
         cliente.ubicacion = [1414, 1414]
-        pedido = Pedido(cliente, Simulacion().get_hora(), self.camioneta, TipoPizza.ANANA)
+        pedido = Pedido(cliente, Simulacion().time, self.camioneta, TipoPizza.ANANA)
         self.camioneta.reservar_pizza(pedido)
         self.assertEqual(len(self.camioneta.pizzas_reservadas), 1)
 

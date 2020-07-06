@@ -34,7 +34,7 @@ class Dia:
         return self.tiempo_actual
 
     def obtener_eventos_de_ahora(self):
-        return list(filter(lambda x: math.trunc(x.hora) == math.trunc(self.get_tiempo_actual()), self.fel))
+        return list(filter(lambda x: math.trunc(x.time) == math.trunc(self.get_tiempo_actual()), self.fel))
 
     def rechazar_pedido(self, cliente: Cliente):
         self.pedidos_rechazados.append(cliente)
