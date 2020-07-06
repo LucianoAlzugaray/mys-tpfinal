@@ -4,19 +4,15 @@ from datetime import datetime
 
 from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
-from models.Cliente import Cliente
+from models.Camioneta import Camioneta
+from models.Pedido import Pedido
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
-from models.actividades.EncolarCliente import EncolarCliente
+from models.actividades.EncolarPedido import EncolarPedido
 from models.actividades.RechazarPedido import RechazarPedido
 from models.meta.Singleton import Singleton
 from utils.utils import Utils
 from models.Reloj import Reloj
-
-
-def generar_camionetas():
-    from models.Camioneta import Camioneta
-    return [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
 
 
 class Simulacion(metaclass=Singleton):
@@ -53,20 +49,22 @@ class Simulacion(metaclass=Singleton):
         MINUTOS_FIN
     )
 
+    CANTIDAD_DE_CAMIONETAS = 4
+    CANTIDAD_DE_EXPERIMENTOS = 10
+    RANGO_DE_ATENCION = 2000
+
     def __init__(self):
-        self.reloj = Reloj()
-        self.experimentos = 10
-        self.minutos_maximo = 60 * self.horas_por_dia
-        self.dias_corridos = []
-        self.camionetas = generar_camionetas()
-        self.events = []
         self.utils = Utils()
-        self.volver_al_terminar_todos_los_pedidos = False
-        self.pedidos = []
-        self.clientes_rechazados = []
-        self.rango_de_atencion = 2000
+        self.reloj = Reloj()
+        self.camionetas = [Camioneta() for i in range(self.CANTIDAD_DE_CAMIONETAS)]
+        self.experimentos = self.CANTIDAD_DE_EXPERIMENTOS
+        self.rango_de_atencion = self.RANGO_DE_ATENCION
+        self.events = []
         self.fel = []
-        self.pedidos_rechazados_en_llamada = []
+        self.pedidos = []
+        self.pedidos_rechazados = []
+        # TODO: refactorizar
+        self.volver_al_terminar_todos_los_pedidos = False
 
     def run(self):
         for experimento in range(self.experimentos):
@@ -80,8 +78,6 @@ class Simulacion(metaclass=Singleton):
                 for camioneta in self.camionetas:
                     camioneta.volver_a_pizzeria()
 
-                self.clientes_rechazados += self.pedidos_rechazados
-                self.dias_corridos.append(self.dia_actual)
                 # TODO preguntar que poner
                 # self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
 
@@ -95,15 +91,15 @@ class Simulacion(metaclass=Singleton):
         camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.camionetas))
         return None if len(camionetas) == 0 else camionetas[0]
 
-    def rechazar_pedido(self, cliente: Cliente) -> None:
-        self.pedidos_rechazados_en_llamada.append(cliente)
+    def rechazar_pedido(self, pedido: Pedido) -> None:
+        self.pedidos_rechazados.append(pedido)
 
-    def get_camioneta_by_cliente(self, cliente: Cliente):
-        camionetas = list(filter(lambda x: x.get_pedido_by_cliente(cliente) is not None, self.camionetas))
+    def get_camioneta_by_cliente(self, pedido: Pedido):
+        camionetas = list(filter(lambda x: x.get_pedido_by_cliente(pedido) is not None, self.camionetas))
         return None if len(camionetas) == 0 else camionetas[0]
 
-    def seleccionar_camioneta(self, cliente: Cliente, tipo: TipoPizza):
-        camionetas = self.ordenar_camionetas_por_ubicacion(cliente.ubicacion, 'get_ubicacion')
+    def seleccionar_camioneta(self, pedido: Pedido, tipo: TipoPizza):
+        camionetas = self.ordenar_camionetas_por_ubicacion(pedido.ubicacion, 'get_ubicacion')
 
         for camioneta in camionetas:
             if camioneta.tiene_tipo(tipo):
@@ -162,11 +158,8 @@ class Simulacion(metaclass=Singleton):
         eventos = list(filter(lambda x: isinstance(x, PizzaVenceEvent) and x.pizza == pizza, self.fel))
         return None if len(eventos) == 0 else eventos[0]
 
-    def add_pedido(self, pedido):
-        self.pedidos.append(pedido)
-
-    def cliente_esta_en_rango(self, cliente: Cliente):
-        return self.obtener_distancia([0, 0], cliente.ubicacion) <= self.rango_de_atencion
+    def cliente_esta_en_rango(self, pedido : Pedido):
+        return self.obtener_distancia([0, 0], pedido.ubicacion) <= self.rango_de_atencion
 
     def avanzar_reloj(self, minutos):
         self.reloj.avanzar(minutos)
@@ -180,7 +173,7 @@ class Simulacion(metaclass=Singleton):
 
     def generar_llamo_cliente_event(self, hora_de_pedido):
         self.fel.append(
-            LlamoClienteEvent(hora_de_pedido, Cliente(), self.generar_tipo_de_pizza()).attach(EncolarCliente()).attach(RechazarPedido())
+            LlamoClienteEvent(hora_de_pedido).attach(EncolarPedido()).attach(RechazarPedido())
         )
 
     def inicializar_camionetas(self):
@@ -194,7 +187,7 @@ class Simulacion(metaclass=Singleton):
         return self.reloj.obtener_dt_futuro(minutos)
 
     def obtener_eventos_de_ahora(self):
-        return list(filter(lambda x: x.hora == self.time, self.fel))
+        return list(filter(lambda x: x.time == self.time, self.fel))
 
     def generar_tipo_de_pizza(self):
         return self.utils.generar_tipo_de_pizza()

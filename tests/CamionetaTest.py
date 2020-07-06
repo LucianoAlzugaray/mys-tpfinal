@@ -52,7 +52,8 @@ class CamionetaTest(unittest.TestCase):
 
         cliente = Cliente()
         cliente.ubicacion = [1414, 1414]
-        pedido = Pedido(cliente, Simulacion().time, self.camioneta, TipoPizza.ANANA)
+        pedido = Pedido(Simulacion().time)
+        pedido.camioneta = self.camioneta
         self.camioneta.reservar_pizza(pedido)
         self.assertEqual(len(self.camioneta.pizzas_reservadas), 1)
 

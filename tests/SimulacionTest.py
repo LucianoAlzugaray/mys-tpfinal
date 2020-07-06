@@ -4,11 +4,10 @@ from events.CamionetaRegresaARestauranteEvent import CamionetaRegresaARestaurant
 from events.EnviarPedidoEvent import EnviarPedidoEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from Simulacion import Simulacion
-from models.Cliente import Cliente
 from models.Pedido import Pedido
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
-from models.actividades.EncolarCliente import EncolarCliente
+from models.actividades.EncolarPedido import EncolarPedido
 from models.actividades.RechazarPedido import RechazarPedido
 from utils.utils import Utils
 
@@ -16,14 +15,14 @@ from utils.utils import Utils
 class SimulacionTest(unittest.TestCase):
 
     def test_debe_rechazar_pedido_cuando_cliente_no_esta_en_rango(self):
-        pedidos_rechazados = len(Simulacion().pedidos_rechazados_en_llamada)
+        pedidos_rechazados = len(Simulacion().pedidos_rechazados)
         self.assertEqual(0, pedidos_rechazados)
 
         cliente = self.generar_cliente_fuera_de_rango()
         evento = self.generar_evento(cliente, None)
         evento.notify()
 
-        self.assertEqual(pedidos_rechazados + 1, len(Simulacion().pedidos_rechazados_en_llamada))
+        self.assertEqual(pedidos_rechazados + 1, len(Simulacion().pedidos_rechazados))
 
     def test_debe_asignar_pedido_a_camioneta_cuando_cliente_esta_en_rango(self):
         simulacion = Simulacion()
@@ -38,7 +37,7 @@ class SimulacionTest(unittest.TestCase):
 
         self.assertEqual(camioneta, simulacion.camionetas[2])
         self.assertEqual(pedido.tipo_pizza, evento.tipo_pizza)
-        self.assertEqual(pedido.hora_toma, evento.hora)
+        self.assertEqual(pedido.hora_toma, evento.time)
 
     def test_debe_asignar_el_pedido_a_la_camioneta_mas_cercana(self):
         simulacion = Simulacion()
@@ -55,7 +54,7 @@ class SimulacionTest(unittest.TestCase):
 
         self.assertEqual(camioneta, simulacion.camionetas[3])
         self.assertEqual(pedido.tipo_pizza, evento.tipo_pizza)
-        self.assertEqual(pedido.hora_toma, evento.hora)
+        self.assertEqual(pedido.hora_toma, evento.time)
 
     def test_debe_tratar_de_convencer_al_cliente_si_no_hay_camioneta_con_tipo(self):
         class TestableUtils(Utils):
@@ -80,7 +79,7 @@ class SimulacionTest(unittest.TestCase):
 
         self.assertEqual(2, len(tipos_disponibles_en_camionetas))
         self.assertEqual(pedido.tipo_pizza, tipos_disponibles_en_camionetas[0])
-        self.assertEqual(pedido.hora_toma, evento.hora)
+        self.assertEqual(pedido.hora_toma, evento.time)
 
     def test_debe_regresar_camioneta_mas_cercana_cuando_cliente_no_convencido(self):
         class TestableUtils(Utils):
@@ -131,11 +130,13 @@ class SimulacionTest(unittest.TestCase):
 
         self.assertEqual(True, True)
 
-    def asignar_pedido_a_camioneta(self, tipo_de_pizza, camioneta):
-        Simulacion().camionetas[camioneta].pizzas.append(Pizza(tipo_de_pizza))
-        cliente0 = self.generar_cliente_en_rango()
-        pedido0 = Pedido(cliente0, 10, Simulacion().camionetas[camioneta], tipo_de_pizza)
-        Simulacion().camionetas[camioneta].asignar_pedido(pedido0)
+    def asignar_pedido_a_camioneta(self, tipo_de_pizza, _camioneta):
+
+        camioneta = Simulacion().camionetas[_camioneta]
+        camioneta.pizzas.append(Pizza(tipo_de_pizza))
+        pedido = Pedido(10)
+        pedido.camioneta = camioneta
+        camioneta.asignar_pedido(pedido)
 
     @staticmethod
     def generar_cliente_fuera_de_rango():
@@ -157,7 +158,7 @@ class SimulacionTest(unittest.TestCase):
         if tipo_pizza is not None:
             evento.tipo_pizza = tipo_pizza
         evento.attach(RechazarPedido())
-        evento.attach(EncolarCliente())
+        evento.attach(EncolarPedido())
         return evento
 
 

@@ -26,7 +26,7 @@ class Camioneta:
 
     def entregar_pedido(self, pedido: Pedido):
         self.quitar_pizza(pedido.pizza)
-        self.ubicacion = pedido.cliente.ubicacion
+        self.ubicacion = pedido.ubicacion
         self.pedido_en_curso = None
         pedido.entregado = True
         if len(self.pedidos) > 0:
@@ -77,9 +77,9 @@ class Camioneta:
     def pizzas_reservadas(self):
         return list(filter(lambda x: x.reservada, self.pizzas))
 
-    def get_pedido_by_cliente(self, cliente):
-        pedidos = list(filter(lambda x: x.cliente == cliente, self.pedidos))
-        if self.pedido_en_curso is not None and self.pedido_en_curso.cliente == cliente:
+    def get_pedido_by_cliente(self, pedido):
+        pedidos = list(filter(lambda x: x == pedido, self.pedidos))
+        if self.pedido_en_curso is not None and self.pedido_en_curso.ubicacion == pedido.ubicacion:
             pedidos.append(self.pedido_en_curso)
 
         return None if len(pedidos) == 0 else pedidos[0]
