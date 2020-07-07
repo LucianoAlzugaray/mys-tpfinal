@@ -44,13 +44,13 @@ class SimulacionTest(unittest.TestCase):
         simulacion.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA))
         simulacion.camionetas[3].pizzas.append(Pizza(TipoPizza.ANANA))
 
-        cliente = self.generar_cliente_en_rango()
-        evento = self.generar_evento(cliente, TipoPizza.ANANA)
-        simulacion.camionetas[3].ubicacion = evento.cliente.ubicacion
+        pedido = self.generar_cliente_en_rango()
+        evento = self.generar_evento(pedido, TipoPizza.ANANA)
+        simulacion.camionetas[3].ubicacion = evento.pedido.ubicacion
         evento.notify()
 
-        camioneta = Simulacion().get_camioneta_by_cliente(cliente)
-        pedido = camioneta.get_pedido_by_cliente(cliente)
+        camioneta = Simulacion().get_camioneta_by_cliente(pedido)
+        pedido = camioneta.get_pedido_by_cliente(pedido)
 
         self.assertEqual(camioneta, simulacion.camionetas[3])
         self.assertEqual(pedido.tipo_pizza, evento.tipo_pizza)
@@ -70,8 +70,8 @@ class SimulacionTest(unittest.TestCase):
         simulacion.camionetas[3].pizzas.append(Pizza(TipoPizza.ANANA))
         tipos_disponibles_en_camionetas = simulacion.get_tipos_disponibles_en_camionetas()
 
-        cliente = self.generar_cliente_en_rango()
-        evento = self.generar_evento(cliente, TipoPizza.NAPOLITANA)
+        pedido = self.generar_cliente_en_rango()
+        evento = self.generar_evento(pedido, TipoPizza.NAPOLITANA)
         evento.notify()
 
         camioneta = Simulacion().get_camioneta_by_cliente(cliente)
@@ -101,8 +101,8 @@ class SimulacionTest(unittest.TestCase):
 
         simulacion.camionetas[3].pedido_en_curso.cliente.ubicacion = [0, 0]
 
-        cliente = self.generar_cliente_en_rango()
-        evento = self.generar_evento(cliente, TipoPizza.NAPOLITANA)
+        pedido = self.generar_cliente_en_rango()
+        evento = self.generar_evento(TipoPizza.NAPOLITANA)
         evento.notify()
 
         eventos = list(filter(lambda x: isinstance(x, CamionetaRegresaARestauranteEvent), simulacion.fel))
@@ -140,21 +140,22 @@ class SimulacionTest(unittest.TestCase):
 
     @staticmethod
     def generar_cliente_fuera_de_rango():
-        cliente = Cliente()
-        cliente.ubicacion[0] = 1415
-        cliente.ubicacion[1] = 1415
-        return cliente
+        pedido = Pedido(Simulacion().time)
+        pedido.ubicacion[0] = 1415
+        pedido.ubicacion[1] = 1415
+        return pedido
 
     @staticmethod
     def generar_cliente_en_rango():
-        cliente = Cliente()
-        cliente.ubicacion[0] = 1414
-        cliente.ubicacion[1] = 1414
-        return cliente
+        pedido = Pedido(Simulacion().time)
+        pedido.ubicacion[0] = 1414
+        pedido.ubicacion[1] = 1414
+        return pedido
 
     @staticmethod
-    def generar_evento(cliente, tipo_pizza):
-        evento = LlamoClienteEvent(0, cliente, Simulacion())
+    def generar_evento(pedido, tipo_pizza):
+        evento = LlamoClienteEvent(Simulacion().time)
+        evento.pedido = pedido
         if tipo_pizza is not None:
             evento.tipo_pizza = tipo_pizza
         evento.attach(RechazarPedido())

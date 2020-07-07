@@ -2,33 +2,31 @@ import unittest
 
 from Simulacion import Simulacion
 from events.LlamoClienteEvent import LlamoClienteEvent
-from models.Cliente import Cliente
 from models.Camioneta import Camioneta
-
+from models.Pedido import Pedido
+from datetime import datetime
 
 class LlamoClienteEventTest(unittest.TestCase):
 
     def setUp(self):
         from Simulacion import Simulacion
         self.simulacion = Simulacion()
-        self.evento = LlamoClienteEvent(10, Cliente(), Simulacion().generar_tipo_de_pizza())
+        self.evento = LlamoClienteEvent(datetime.now())
         self.camionetas = [Camioneta() for i in range(4)]
 
     def test_cliente_esta_en_rango(self):
         from Simulacion import Simulacion
-        cliente = Cliente()
 
-        cliente.ubicacion[0] = 1415
-        cliente.ubicacion[1] = 1415
-        self.evento.cliente = cliente
-
+        pedido = self.evento.pedido
+        pedido.ubicacion[0] = 1415
+        pedido.ubicacion[1] = 1415
         self.simulacion = Simulacion()
-        self.assertFalse(self.simulacion.cliente_esta_en_rango(cliente))
+        self.assertFalse(self.simulacion.cliente_esta_en_rango(pedido))
 
-        cliente.ubicacion[0] = 1414
-        cliente.ubicacion[1] = 1414
-        self.evento.cliente = cliente
-        self.assertTrue(self.simulacion.cliente_esta_en_rango(cliente))
+        pedido.ubicacion[0] = 1414
+        pedido.ubicacion[1] = 1414
+
+        self.assertTrue(self.simulacion.cliente_esta_en_rango(pedido))
 
 if __name__ == '__main__':
     unittest.main()

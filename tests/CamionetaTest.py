@@ -3,11 +3,9 @@ import unittest
 from Simulacion import Simulacion
 from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
 from models.Camioneta import Camioneta
-from models.Cliente import Cliente
 from models.Pedido import Pedido
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
-
 
 class CamionetaTest(unittest.TestCase):
 
@@ -50,9 +48,9 @@ class CamionetaTest(unittest.TestCase):
         self.camioneta.pizzas.append(Pizza(TipoPizza.ANANA))
         self.assertEqual(cantidad_de_eventos + 1, len(Simulacion().fel))
 
-        cliente = Cliente()
-        cliente.ubicacion = [1414, 1414]
         pedido = Pedido(Simulacion().time)
+        pedido.ubicacion = [1414, 1414]
+        pedido.tipo_pizza = TipoPizza.ANANA
         pedido.camioneta = self.camioneta
         self.camioneta.reservar_pizza(pedido)
         self.assertEqual(len(self.camioneta.pizzas_reservadas), 1)
@@ -61,10 +59,7 @@ class CamionetaTest(unittest.TestCase):
 
     # TODO: implementar
     def test_debe_enviar_pedido_asignado_cuando_no_tiene_pedido_en_curso_y_cambiar_pedido_en_curso_al_enviar(self):
-
         pass
-
-
 
         # self.camioneta.pizzas.append(Pizza(TipoPizza.NAPOLITANA))
         # pedido2 = Pedido(cliente, 10, self.camioneta, TipoPizza.NAPOLITANA)
@@ -74,14 +69,13 @@ class CamionetaTest(unittest.TestCase):
         # self.camioneta.enviar_pedido()
         # self.assertEqual(pedido2, self.camioneta.pedido_en_curso)
 
-
-
         # calcular variable aleatoria de tiempo de entrega
         # generar un evento de pizza entregada
         #
         #     cuando se produce un evento de pizza entregada
         #         hay que decirle a la camioneta enviar_siguiente_pedido
         #             si no tiene pedidos que entregar debe se queda donde está
+
 
 if __name__ == '__main__':
     unittest.main()

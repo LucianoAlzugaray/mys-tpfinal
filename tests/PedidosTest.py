@@ -3,8 +3,6 @@ import unittest
 from Simulacion import Simulacion
 from events.LlamoClienteEvent import LlamoClienteEvent
 from models.Camioneta import Camioneta
-from models.Dia import Dia
-
 
 class PedidosTest(unittest.TestCase):
 
