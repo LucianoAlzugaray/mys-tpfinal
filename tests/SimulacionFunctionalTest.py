@@ -14,6 +14,7 @@ from utils.utils import Utils
 
 
 class TestableUtils(Utils):
+    en_rango = True
 
     def set_en_rango(self, en_rango):
         self.en_rango = en_rango

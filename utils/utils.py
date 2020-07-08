@@ -2,7 +2,8 @@ import math
 import numpy as np
 import random
 from models.TipoPizza import TipoPizza
-from datetime import timedelta
+from datetime import timedelta, datetime, date
+
 
 class Utils:
     ## Obtiene una velocidad probabilistica para cargar pizzas

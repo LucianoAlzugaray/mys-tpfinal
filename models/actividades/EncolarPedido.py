@@ -24,7 +24,7 @@ class EncolarPedido(Actividad):
                     # TODO : WARNING - Rechazar pedido o hacer que la camioneta vuelva a cargar.
                     tipo_pizza = None #TODO : BUG - Arreglar aca, tapa el error al usar None.
                 evento.tipo_pizza = tipo_pizza
-                camioneta = simulacion.seleccionar_camioneta(evento.pedido.ubicacion, evento.tipo_pizza)
+                camioneta = simulacion.seleccionar_camioneta(evento.pedido, evento.tipo_pizza)
                 self.asignar_pedido_a_camioneta(camioneta, evento)
                 return True
 

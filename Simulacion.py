@@ -132,8 +132,8 @@ class Simulacion(metaclass=Singleton):
             distancia = self.obtener_distancia(ubicacion, ubicacion_camioneta)
             distancias[camioneta] = distancia
 
-        if self.is_lista_inicializada(distancias):
-            aux = sorted(distancias.items(), key=lambda x: x[1])
+
+        aux = sorted(distancias.items(), key=lambda x: x[1])
 
         camionetas = []
         for i in aux:
