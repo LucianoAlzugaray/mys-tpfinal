@@ -69,7 +69,9 @@ class DiaTestCase(unittest.TestCase):
         eventos_de_ahora = self.dia.obtener_eventos_de_ahora()
         self.assertTrue(len(eventos_de_ahora) == 0)
 
-        tiempo_actual = 30
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        tiempo_actual = simulacion.dia
         for i in range(4):
             evento = LlamoClienteEvent(tiempo_actual, None)
             evento.hora = tiempo_actual

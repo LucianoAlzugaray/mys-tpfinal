@@ -1,4 +1,5 @@
 import unittest
+from datetime import timedelta
 
 from Simulacion import Simulacion
 from events.LlamoClienteEvent import LlamoClienteEvent
@@ -38,7 +39,6 @@ class SimulacionFunctionalTest(unittest.TestCase):
     def test_debe_entregarse_una_pizza_cuando_cliente_esta_en_rango(self):
 
         simulacion = self.get_simulacion()
-        simulacion.dia_actual.tiempo_actual = 120
         camioneta = simulacion.dia_actual.camionetas[0]
         camioneta.pizzas.append(Pizza(TipoPizza.ANANA))
 
@@ -64,7 +64,6 @@ class SimulacionFunctionalTest(unittest.TestCase):
     def test_debe_asignar_el_pedido_a_la_camioneta_mas_cercana(self):
 
         simulacion = self.get_simulacion()
-        simulacion.dia_actual.tiempo_actual = 120
         simulacion.dia_actual.camionetas.append(Camioneta())
 
         simulacion.dia_actual.camionetas[0].pizzas.append(Pizza(TipoPizza.ANANA))
@@ -97,7 +96,8 @@ class SimulacionFunctionalTest(unittest.TestCase):
 
     @staticmethod
     def generar_evento(cliente, tipo_pizza):
-        evento = LlamoClienteEvent(121, cliente, Simulacion().dia_actual)
+        hora = Simulacion.TIEMPO_INICIO + timedelta(minutes=5)
+        evento = LlamoClienteEvent(hora, cliente, Simulacion().dia_actual)
         if tipo_pizza is not None:
             evento.tipo_pizza = tipo_pizza
         evento.attach(RechazarPedido())

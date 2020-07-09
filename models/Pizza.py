@@ -8,7 +8,7 @@ class Pizza:
         self.tipo = tipo
         self.vencida = False
         self.reservada = False
-        self.hora = Simulacion().get_hora()
+        self.hora = Simulacion().get_hora() # TODO : esta hora ahora es un datetime, arreglar impacto.
         evento = PizzaVenceEvent(self)
         evento.attach(VencerPizza())
         Simulacion().add_event(evento)
