@@ -27,7 +27,7 @@ class Simulacion(metaclass=Singleton):
     HORA_FIN_TOMA_DE_PEDIDOS = 22
     MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
 
-    DIA_INICIO = 5
+    DIA_INICIO = 9
     MES_INICIO = 7
     ANIO_INICIO = 2020
     HORA_INICIO = 11
@@ -40,10 +40,10 @@ class Simulacion(metaclass=Singleton):
         MINUTOS_INICIO
     )
 
-    DIA_FIN = 5
+    DIA_FIN = 9
     MES_FIN = 7
     ANIO_FIN = 2020
-    HORA_FIN = 11
+    HORA_FIN = 23
     MINUTOS_FIN = 0
     TIEMPO_FIN = datetime(
         ANIO_FIN,
@@ -56,6 +56,7 @@ class Simulacion(metaclass=Singleton):
     def __init__(self):
         self.reloj = Reloj()
         self.experimentos = 10
+        self.dias_a_simular = 365
         self.minutos_maximo = 60 * self.horas_por_dia
         self.dias_corridos = []
         self.camionetas = generar_camionetas()
@@ -80,8 +81,8 @@ class Simulacion(metaclass=Singleton):
                 for camioneta in self.camionetas:
                     camioneta.volver_a_pizzeria()
 
-                self.clientes_rechazados += self.pedidos_rechazados
-                self.dias_corridos.append(self.dia_actual)
+                # self.clientes_rechazados += self.pedidos_rechazados
+                # self.dias_corridos.append(self.dia_actual)
                 # TODO preguntar que poner
                 # self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
 
@@ -151,7 +152,7 @@ class Simulacion(metaclass=Singleton):
         return self.ordenar_camionetas_por_ubicacion([0, 0], 'cuanto_tardas_en_linerarte')[0]
 
     def obtener_camioneta_mas_cercana_al_restaurante(self):
-        return self.ordenar_camionetas_por_ubicacion([0, 0], 'get_ubicacion_siguiente_pedido')[0]
+        return self.ordenar_camionetas_por_ubicacion([0, 0], 'get_ubicacion_pedido_en_curso')[0]
 
     def remover_evento_vencimiento_pizza(self, pizza: Pizza):
         evento = self.get_pizza_vence_by_pizza(pizza)
@@ -215,9 +216,9 @@ class Simulacion(metaclass=Singleton):
     def tiempo_fin(self):
         return self.TIEMPO_FIN
 
-    @property
-    def dias_a_simular(self):
-        return self.tiempo_fin.date().day - self.tiempo_inicio.date().day
+    # @property
+    # def dias_a_simular(self):
+    #     return self.tiempo_fin.date().day - self.tiempo_inicio.date().day
 
     @property
     def horas_por_dia(self):

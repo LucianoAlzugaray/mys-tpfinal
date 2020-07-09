@@ -1,18 +1,37 @@
 import unittest
+from datetime import timedelta
 
 from Simulacion import Simulacion
 from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Camioneta import Camioneta
 from models.Cliente import Cliente
-from models.Dia import Dia
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.actividades.EncolarCliente import EncolarCliente
 from models.actividades.RechazarPedido import RechazarPedido
-from datetime import timedelta
+from utils.utils import Utils
 
-class TestableSimulation(Simulacion):
+
+class TestableUtils(Utils):
+    en_rango = True
+
+    def set_en_rango(self, en_rango):
+        self.en_rango = en_rango
+
+    def generar_ubicacion_cliente(self):
+        if self.en_rango:
+            return [1414, 1414]
+        return [1415, 1415]
+
+
+class TestableSimulacion(Simulacion):
+
+    def __init__(self):
+        super().__init__()
+        self.utils = TestableUtils()
+
+    CANTIDAD_DE_EXPERIMENTOS = 1
 
     def iniciar_dia(self):
         pass
@@ -28,7 +47,6 @@ class SimulacionFunctionalTest(unittest.TestCase):
 
     def test_debe_rechazarse_un_pedido_cuando_cliente_no_esta_en_rango(self):
         simulacion = self.get_simulacion()
-
         cliente = self.generar_cliente_fuera_de_rango()
         evento = self.generar_evento(cliente, TipoPizza.ANANA)
         simulacion.add_event(evento)
@@ -42,23 +60,22 @@ class SimulacionFunctionalTest(unittest.TestCase):
     def test_debe_entregarse_una_pizza_cuando_cliente_esta_en_rango(self):
 
         simulacion = self.get_simulacion()
-        simulacion.tiempo_actual = 120
         camioneta = simulacion.camionetas[0]
         camioneta.pizzas.append(Pizza(TipoPizza.ANANA))
 
         cliente = self.generar_cliente_en_rango()
         evento = self.generar_evento(cliente, TipoPizza.ANANA)
         simulacion.add_event(evento)
-        dia = simulacion
+        dia = simulacion.dia
 
-        pizza_vence_event = list(filter(lambda x: isinstance(x, PizzaVenceEvent), dia.fel))[0]
+        pizza_vence_event = list(filter(lambda x: isinstance(x, PizzaVenceEvent), simulacion.fel))[0]
         self.assertIsInstance(pizza_vence_event, PizzaVenceEvent)
         self.assertTrue(len(camioneta.pizzas) == 1)
         self.assertTrue(len(simulacion.pedidos) == 0)
 
         simulacion.run()
 
-        eventos = list(filter(lambda x: isinstance(x, PizzaVenceEvent), dia.fel))
+        eventos = list(filter(lambda x: isinstance(x, PizzaVenceEvent), simulacion.fel))
         self.assertEqual(len(eventos), 0)
         self.assertTrue(len(camioneta.pizzas) == 0)
         self.assertTrue(len(simulacion.pedidos) == 1)
@@ -68,7 +85,6 @@ class SimulacionFunctionalTest(unittest.TestCase):
     def test_debe_asignar_el_pedido_a_la_camioneta_mas_cercana(self):
 
         simulacion = self.get_simulacion()
-        simulacion.tiempo_actual = 120
         simulacion.camionetas.append(Camioneta())
 
         simulacion.camionetas[0].pizzas.append(Pizza(TipoPizza.ANANA))
@@ -101,7 +117,8 @@ class SimulacionFunctionalTest(unittest.TestCase):
 
     @staticmethod
     def generar_evento(cliente, tipo_pizza):
-        evento = LlamoClienteEvent((Simulacion().dia + timedelta(121)).time, cliente, )
+        hora = Simulacion.TIEMPO_INICIO + timedelta(minutes=5)
+        evento = LlamoClienteEvent(hora, cliente, Simulacion().dia)
         if tipo_pizza is not None:
             evento.tipo_pizza = tipo_pizza
         evento.attach(RechazarPedido())
@@ -109,7 +126,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
         return evento
 
     def get_simulacion(self):
-        simulacion = TestableSimulation()
+        simulacion = TestableSimulacion()
         self.clean_up(simulacion)
         simulacion.dias_a_simular = 1
         simulacion.experimentos = 1
@@ -121,6 +138,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
         simulacion.pedidos = []
         simulacion.clientes_rechazados = []
         simulacion.dias_corridos = []
+
 
 if __name__ == '__main__':
     unittest.main()
