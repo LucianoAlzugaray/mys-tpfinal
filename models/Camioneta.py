@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
 from events.EnviarPedidoEvent import EnviarPedidoEvent
 from models.Pedido import Pedido
@@ -53,7 +55,7 @@ class Camioneta:
 
         self.distancia_recorrida += self.obtener_distancia(self.ubicacion, pedido.cliente.ubicacion)
         from Simulacion import Simulacion
-        evento = EnviarPedidoEvent(Simulacion().get_hora() + 1, pedido)
+        evento = EnviarPedidoEvent(Simulacion().get_hora() + timedelta(minutes=1), pedido)
         evento.attach(EnviarPedido())
         Simulacion().add_event(evento)
 
@@ -124,6 +126,7 @@ class Camioneta:
 
     def enviar_pedido(self):
         pedido = self.get_siguiente_pedido()
+        pedido.ubicacion_origen = self.ubicacion
         self.pedidos.remove(pedido)
         self.pedido_en_curso = pedido
 

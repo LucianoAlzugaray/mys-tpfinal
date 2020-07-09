@@ -28,7 +28,7 @@ class Simulacion(metaclass=Singleton):
     HORA_FIN_TOMA_DE_PEDIDOS = 22
     MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
 
-    DIA_INICIO = 5
+    DIA_INICIO = 9
     MES_INICIO = 7
     ANIO_INICIO = 2020
     HORA_INICIO = 11
@@ -41,10 +41,10 @@ class Simulacion(metaclass=Singleton):
         MINUTOS_INICIO
     )
 
-    DIA_FIN = 5
+    DIA_FIN = 9
     MES_FIN = 7
     ANIO_FIN = 2020
-    HORA_FIN = 11
+    HORA_FIN = 23
     MINUTOS_FIN = 0
     TIEMPO_FIN = datetime(
         ANIO_FIN,
@@ -86,7 +86,8 @@ class Simulacion(metaclass=Singleton):
         self.dia_actual.fel.append(event)
 
     def get_hora(self):
-        return self.dia_actual.get_tiempo_actual()
+        return self.dia_actual.tiempo_actual
+        # return self.reloj.dia
 
     def get_camioneta_by_pizza(self, pizza):
         camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.dia_actual.camionetas))
@@ -96,7 +97,7 @@ class Simulacion(metaclass=Singleton):
         return self.dia_actual.get_fel()
 
     @property
-    def pedidos_rechazados(self) -> int:
+    def pedidos_rechazados(self):
         return self.dia_actual.pedidos_rechazados
 
     def rechazar_pedido(self, cliente: Cliente) -> None:
@@ -193,6 +194,8 @@ class Simulacion(metaclass=Singleton):
     def termino_dia(self):
         return self.reloj.termino_dia()
 
+    def obtener_dt_futuro(self, minutos):
+        return self.reloj.obtener_dt_futuro(minutos)
 
     def get_diferencia_hora_actual(self, dt_hora):
         return self.reloj.get_diferencia_hora_actual(dt_hora)

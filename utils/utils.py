@@ -15,7 +15,7 @@ class Utils:
     ## Obtiene un tiempo de entrega probabilistico
     @staticmethod
     def tiempo_entrega():
-        return np.random.exponential(10)
+        return math.trunc(np.random.exponential(10))
 
 
     ## Obtiene si se convenció al cliente o no de cambiar el tipo de pizza

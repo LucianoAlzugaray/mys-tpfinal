@@ -11,8 +11,8 @@ from models.TipoPizza import TipoPizza
 from models.actividades.EncolarCliente import EncolarCliente
 from models.actividades.RechazarPedido import RechazarPedido
 from utils.utils import Utils
-
 from models.Camioneta import Camioneta
+
 
 class SimulacionTest(unittest.TestCase):
 
@@ -27,7 +27,7 @@ class SimulacionTest(unittest.TestCase):
         self.assertEqual(pedidos_rechazados + 1, len(Simulacion().pedidos_rechazados))
 
     def test_debe_asignar_pedido_a_camioneta_cuando_cliente_esta_en_rango(self):
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
         simulacion.dia_actual.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA))
 
         cliente = self.generar_cliente_en_rango()
@@ -42,7 +42,7 @@ class SimulacionTest(unittest.TestCase):
         self.assertEqual(pedido.hora_toma, evento.hora)
 
     def test_debe_asignar_el_pedido_a_la_camioneta_mas_cercana(self):
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
         simulacion.dia_actual.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA))
         simulacion.dia_actual.camionetas[3].pizzas.append(Pizza(TipoPizza.ANANA))
 
@@ -65,7 +65,7 @@ class SimulacionTest(unittest.TestCase):
             def convencer_al_cliente():
                 return True
 
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
         simulacion.utils = TestableUtils()
         simulacion.dia_actual.camionetas[2].pizzas.append(Pizza(TipoPizza.MOZZARELLA))
         simulacion.dia_actual.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA))
@@ -90,7 +90,7 @@ class SimulacionTest(unittest.TestCase):
             def convencer_al_cliente():
                 return False
 
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
         self.assertFalse(simulacion.volver_al_terminar_todos_los_pedidos)
 
         simulacion.utils = TestableUtils()
@@ -122,7 +122,7 @@ class SimulacionTest(unittest.TestCase):
             def convencer_al_cliente():
                 return False
 
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
         self.assertFalse(simulacion.volver_al_terminar_todos_los_pedidos)
 
         simulacion.utils = TestableUtils()
@@ -133,7 +133,7 @@ class SimulacionTest(unittest.TestCase):
         self.assertEqual(True, True)
 
     def test_debe_retornar_la_cantidad_de_pizzas_vendidas_segun_tipo(self):
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
 
         cliente1 = self.generar_cliente_en_rango()
 
@@ -170,7 +170,7 @@ class SimulacionTest(unittest.TestCase):
         self.assertIsInstance(cantidad_de_pizzas_por_tipo, dict)
 
     def test_debe_retornar_el_tiempo_promedio_de_espera(self):
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
         cliente12 = self.generar_cliente_en_rango()
 
         camioneta12 = Camioneta()
@@ -208,7 +208,7 @@ class SimulacionTest(unittest.TestCase):
         self.assertEqual(tiempo_espera, 5)
 
     def test_debe_retornar_pedidos_perdidos(self):
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
         cliente13 = self.generar_cliente_en_rango()
 
         camioneta13 = Camioneta()
@@ -249,7 +249,7 @@ class SimulacionTest(unittest.TestCase):
         self.assertEqual(len(pedidos), 3)
 
     def test_debe_retornar_distancia_recorrida_por_camionetas(self):
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
         cliente14 = self.generar_cliente_en_rango()
 
         camioneta14 = Camioneta()
@@ -294,6 +294,17 @@ class SimulacionTest(unittest.TestCase):
         evento.attach(RechazarPedido())
         evento.attach(EncolarCliente())
         return evento
+
+    def get_simulacion(self):
+        simulacion = Simulacion()
+        simulacion.pedidos = []
+        simulacion.clientes_rechazados = []
+        simulacion.dias_corridos = []
+        simulacion.dias_a_simular = 1
+        simulacion.experimentos = 1
+        simulacion.camionetas = []
+        return simulacion
+
 
 
 if __name__ == '__main__':
