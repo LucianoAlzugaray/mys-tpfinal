@@ -82,11 +82,6 @@ class Simulacion(metaclass=Singleton):
                 for camioneta in self.camionetas:
                     camioneta.volver_a_pizzeria()
 
-                # self.clientes_rechazados += self.pedidos_rechazados
-                # self.dias_corridos.append(self.dia_actual)
-                # TODO preguntar que poner
-                # self.dia_actual = Dia(self.minutos_maximo, self.camionetas)
-
     def obtener_datos(self):
         pass
 
