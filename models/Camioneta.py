@@ -1,9 +1,11 @@
+import math
+
 from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
 from events.EnviarPedidoEvent import EnviarPedidoEvent
 from models.Pedido import Pedido
 from models.actividades.EnviarPedido import EnviarPedido
 from models.Pizza import Pizza
-from datetime import timedelta
+
 
 class Camioneta:
     cantidad_hornos = 1
@@ -15,26 +17,44 @@ class Camioneta:
         self.disponible = True
         self.pedido_en_curso = None
         self.pedidos = []
+        self.distancia_recorrida = 0
+        self.tiempo_entre_recargas = []
+        self.tiempo_ultima_recarga = None
 
     def cargar_pizzas(self):
         from Simulacion import Simulacion
         for i in range(self.tamanio_hornos - len(self.pizzas)):
             self.pizzas.append(Pizza(Simulacion().utils.generar_tipo_de_pizza()))
 
+        if self.tiempo_ultima_recarga is not None:
+            self.tiempo_entre_recargas.append(Simulacion().get_diferencia_hora_actual(self.tiempo_ultima_recarga))
+        self.tiempo_ultima_recarga = Simulacion().get_hora()
+
+
     def quitar_pizza(self, pizza):
         self.pizzas.remove(pizza)
 
     def entregar_pedido(self, pedido: Pedido):
+        from Simulacion import Simulacion
         self.quitar_pizza(pedido.pizza)
         self.ubicacion = pedido.cliente.ubicacion
         self.pedido_en_curso = None
         pedido.entregado = True
+        #TODO cambiar por Simulacion().time
+        pedido.hora_entrega = Simulacion().reloj.dia
         if len(self.pedidos) > 0:
             self.generar_evento_enviar_pedido(self.pedidos[0])
 
+    def obtener_distancia(self, punto1, punto2):
+        cateto1 = punto2[0] - punto1[0]
+        cateto2 = punto2[1] - punto1[1]
+        return math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2))
+
     def generar_evento_enviar_pedido(self, pedido):
+
+        self.distancia_recorrida += self.obtener_distancia(self.ubicacion, pedido.cliente.ubicacion)
         from Simulacion import Simulacion
-        evento = EnviarPedidoEvent(Simulacion().time + timedelta(minutes=1), pedido)
+        evento = EnviarPedidoEvent(Simulacion().get_hora() + 1, pedido)
         evento.attach(EnviarPedido())
         Simulacion().add_event(evento)
 
@@ -104,6 +124,7 @@ class Camioneta:
 
     def enviar_pedido(self):
         pedido = self.get_siguiente_pedido()
+        pedido.ubicacion_origen = self.ubicacion
         self.pedidos.remove(pedido)
         self.pedido_en_curso = pedido
 

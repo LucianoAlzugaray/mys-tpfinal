@@ -6,6 +6,7 @@ from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Camioneta import Camioneta
 from models.Cliente import Cliente
+from models.Dia import Dia
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.actividades.EncolarCliente import EncolarCliente
@@ -47,6 +48,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
 
     def test_debe_rechazarse_un_pedido_cuando_cliente_no_esta_en_rango(self):
         simulacion = self.get_simulacion()
+
         cliente = self.generar_cliente_fuera_de_rango()
         evento = self.generar_evento(cliente, TipoPizza.ANANA)
         simulacion.add_event(evento)

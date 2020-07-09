@@ -1,6 +1,9 @@
 import itertools
 import math
 from datetime import datetime
+from functools import reduce
+
+import numpy as np
 
 from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
@@ -96,6 +99,13 @@ class Simulacion(metaclass=Singleton):
         camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.camionetas))
         return None if len(camionetas) == 0 else camionetas[0]
 
+    def get_fel(self):
+        return self.dia_actual.get_fel()
+
+    @property
+    def pedidos_rechazados(self) -> int:
+        return self.dia_actual.pedidos_rechazados
+
     def rechazar_pedido(self, cliente: Cliente) -> None:
         self.pedidos_rechazados_en_llamada.append(cliente)
 
@@ -177,11 +187,13 @@ class Simulacion(metaclass=Singleton):
         self.inicializar_camionetas()
 
     def generar_pedidos(self):
-        list(map(lambda hora_de_pedido: self.generar_llamo_cliente_event(hora_de_pedido), self.utils.get_horas_de_pedidos(self.horas_por_dia)))
+        list(map(lambda hora_de_pedido: self.generar_llamo_cliente_event(hora_de_pedido),
+                 self.utils.get_horas_de_pedidos(self.horas_por_dia)))
 
     def generar_llamo_cliente_event(self, hora_de_pedido):
         self.fel.append(
-            LlamoClienteEvent(hora_de_pedido, Cliente(), self.generar_tipo_de_pizza()).attach(EncolarCliente()).attach(RechazarPedido())
+            LlamoClienteEvent(hora_de_pedido, Cliente(), self.generar_tipo_de_pizza()).attach(EncolarCliente()).attach(
+                RechazarPedido())
         )
 
     def inicializar_camionetas(self):
@@ -208,6 +220,9 @@ class Simulacion(metaclass=Singleton):
     def dia(self):
         return self.reloj.dia
 
+    def iniciar_dia(self):
+        self.reloj.iniciar_dia()
+
     @property
     def tiempo_inicio(self):
         return self.TIEMPO_INICIO
@@ -224,3 +239,89 @@ class Simulacion(metaclass=Singleton):
     def horas_por_dia(self):
         return self.CANTIDAD_HORAS_LABORALES
 
+
+    def get_diferencia_hora_actual(self, dt_hora):
+        return self.reloj.get_diferencia_hora_actual(dt_hora)
+
+    '''Pedidos que fueron entregados realmente'''
+
+    def pedidos_entregados(self):
+        return list(filter(lambda pedido: pedido.entregado == True, self.pedidos))
+
+    '''Pedidos que fueron rechazados'''
+
+    # TODO el nombre rechazado en el dashboard no me parece correcto deberia ser perdido
+    def pedidos_perdidos(self):
+        return list(filter(lambda pedido: pedido.entregado == False, self.pedidos))
+
+    '''Devuelve un diccionario tipo_pizza: cantidad'''
+
+    def pizzas_pedidas_por_tipo(self):
+        cont_anana = 0
+        cont_mozzarela = 0
+        cont_napolitana = 0
+        cont_calabresa = 0
+        cont_fugazzeta = 0
+
+        for pedido in self.pedidos_entregados():
+            if pedido.pizza.tipo == TipoPizza.FUGAZZETA:
+                cont_fugazzeta += 1
+            elif pedido.pizza.tipo == TipoPizza.NAPOLITANA:
+                cont_napolitana += 1
+            elif pedido.pizza.tipo == TipoPizza.ANANA:
+                cont_anana += 1
+            elif pedido.pizza.tipo == TipoPizza.CALABRESA:
+                cont_calabresa += 1
+            else:
+                cont_mozzarela += 1
+
+        return {'Anana': cont_anana, 'Mozzarella': cont_mozzarela, 'Napolitana': cont_napolitana,
+                'Calabresa': cont_calabresa, 'Fugazzeta': cont_fugazzeta}
+
+    '''Tiempo promedio de espera de los clientes a nivel simulacion'''
+
+    def tiempo_espera(self):
+
+        minutos_espera = list(map(lambda pedido: pedido.hora_entrega - pedido.hora_toma, self.pedidos_entregados()))
+
+        return np.mean(minutos_espera)
+
+    '''El porcentaje de desperdicios a nivel corrida (365 dias)'''
+
+    def porcentaje_desperdicio(self):
+        desperdicio_total = []
+
+        for dia in range(self.dias_a_simular):
+            desperdicio_diario = dia.desperdicios + dia.desperdicio_por_fin_de_dia
+            desperdicio_total.append(desperdicio_diario)
+
+        return np.mean(desperdicio_total)
+
+    '''devuelve la cantidad de clientes atendidos (que recibieron una pizza) por hora'''
+
+    def clientes_atendidos_por_hora(self):
+
+        clientes_atendidos_por_hora = []
+        for hora in range(self.horas_por_dia):
+            # TODO pedido.hora_entrega.hour por el timestamp, hacer diccionario?
+            clientes_atendidos = list(
+                filter(lambda pedido: pedido.hora_entrega.hour == (hora + 10), self.pedidos_entregados()))
+            clientes_atendidos_por_hora.append(len(clientes_atendidos))
+
+        return clientes_atendidos_por_hora
+
+    '''las camionetas deberian llevar su distancia recorrida'''
+
+    def distacia_recorrida(self):
+
+        distancias_camionetas = list(map(lambda x: x.distancia_recorrida, self.camionetas))
+
+        return reduce(lambda acumulador, distancia_camioneta: acumulador + distancia_camioneta, distancias_camionetas)
+
+    ''' tiempo promedio entre recargas a nivel simulación'''
+
+    def tiempo_entre_recargas(self):
+
+        tiempo_promedio_entre_recargas = list(map(lambda x: np.mean(x.tiempo_entre_recargas), self.camionetas))
+
+        return np.mean(tiempo_promedio_entre_recargas)

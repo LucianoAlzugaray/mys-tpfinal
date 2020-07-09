@@ -2,9 +2,11 @@ import math
 import numpy as np
 import random
 from models.TipoPizza import TipoPizza
-from datetime import timedelta
+from datetime import timedelta, datetime, date
+
 
 class Utils:
+
     ## Obtiene una velocidad probabilistica para cargar pizzas
     @staticmethod
     def velocidad_carga_pizza():
@@ -13,7 +15,8 @@ class Utils:
     ## Obtiene un tiempo de entrega probabilistico
     @staticmethod
     def tiempo_entrega():
-        return math.trunc(np.random.exponential(10))
+        return np.random.exponential(10)
+
 
     ## Obtiene si se convenció al cliente o no de cambiar el tipo de pizza
     @staticmethod
