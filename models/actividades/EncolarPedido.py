@@ -1,6 +1,7 @@
 from events.CamionetaRegresaARestauranteEvent import CamionetaRegresaARestauranteEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from .Actividad import Actividad
+from .CamionetaRegresa import CamionetaRegresa
 from ..TipoPizza import TipoPizza
 
 
@@ -29,7 +30,9 @@ class EncolarPedido(Actividad):
                 return True
 
             camioneta = simulacion.obtener_camioneta_a_volver_al_restaurante()
-            simulacion.add_event(CamionetaRegresaARestauranteEvent(camioneta, 10))
+            evento = CamionetaRegresaARestauranteEvent(camioneta, Simulacion().reloj.obtener_dt_futuro(10))
+            evento.attach(CamionetaRegresa(camioneta))
+            simulacion.add_event(evento)
             #TODO: WARNING - ¿La actividad deberia eliminar al evento de la fel?
 
     def asignar_pedido_a_camioneta(self, camioneta, evento):
