@@ -1,5 +1,6 @@
 from datetime import timedelta
 from events.SimulacionEvent import SimulacionEvent
+from datetime import timedelta
 
 
 class PizzaVenceEvent(SimulacionEvent):

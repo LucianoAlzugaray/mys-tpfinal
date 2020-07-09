@@ -1,7 +1,7 @@
 class Singleton(type):
-    _instances = {}
+    _instances = []
 
     def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
+        if len(cls._instances) == 0:
+            cls._instances.append(super(Singleton, cls).__call__(*args, **kwargs))
+        return cls._instances[0]

@@ -1,8 +1,8 @@
 from events.CamionetaRegresaARestauranteEvent import CamionetaRegresaARestauranteEvent
-from events.EntregarPizzaEvent import EntregarPizzaEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from .Actividad import Actividad
 from ..Pedido import Pedido
+from models.EventTypeEnum import EventTypeEnum
 
 
 class EncolarCliente(Actividad):
@@ -26,12 +26,12 @@ class EncolarCliente(Actividad):
                 return True
 
             camioneta = simulacion.obtener_camioneta_a_volver_al_restaurante()
-            simulacion.add_event(CamionetaRegresaARestauranteEvent(camioneta, 10))
+            simulacion.add_event(EventTypeEnum.CAMIONETA_REGRESA_A_RESTAURANTE, {'camioneta': camioneta})
 
     def asignar_pedido_a_camioneta(self, camioneta, evento):
         from Simulacion import Simulacion
+        simulacion = Simulacion()
         pedido = Pedido(evento.cliente, evento.hora, camioneta, evento.tipo_pizza)
-        Simulacion().add_pedido(pedido)
+        simulacion.add_pedido(pedido)
         camioneta.asignar_pedido(pedido)
-        evento.dia.encolar_cliente(evento)
 

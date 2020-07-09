@@ -7,7 +7,8 @@ class Reloj(object):
         from Simulacion import Simulacion
         self.dia = Simulacion.TIEMPO_INICIO
         self.cirre_at = time(Simulacion.HORA_DE_CIERRE, Simulacion.MINUTOS_DE_CIERRE)
-        self.finaliza_toma_pedidos_at = time(Simulacion.HORA_FIN_TOMA_DE_PEDIDOS, Simulacion.MINUTOS_FIN_TOMA_DE_PEDIDOS)
+        self.finaliza_toma_pedidos_at = time(Simulacion.HORA_FIN_TOMA_DE_PEDIDOS,
+                                             Simulacion.MINUTOS_FIN_TOMA_DE_PEDIDOS)
 
     def avanzar(self, minutos):
         self.dia = self.dia + timedelta(minutes=minutos)

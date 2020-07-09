@@ -10,5 +10,6 @@ class EntregarPizza(Actividad):
     def _ejecutar(self, evento: EntregarPizzaEvent):
         evento.pedido.camioneta.entregar_pedido(evento.pedido)
         from Simulacion import Simulacion
-        Simulacion().remover_evento_vencimiento_pizza(evento.pedido.pizza)
+        simulacion = Simulacion()
+        simulacion.remover_evento_vencimiento_pizza(evento.pedido.pizza)
 
