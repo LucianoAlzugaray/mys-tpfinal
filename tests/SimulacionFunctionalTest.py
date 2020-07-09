@@ -1,12 +1,10 @@
 import unittest
 from datetime import timedelta
-
 from Simulacion import Simulacion
 from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Camioneta import Camioneta
 from models.Cliente import Cliente
-from models.Dia import Dia
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.actividades.EncolarCliente import EncolarCliente
@@ -28,11 +26,11 @@ class TestableUtils(Utils):
 
 class TestableSimulacion(Simulacion):
 
+    CANTIDAD_DE_EXPERIMENTOS = 1
+
     def __init__(self):
         super().__init__()
         self.utils = TestableUtils()
-
-    CANTIDAD_DE_EXPERIMENTOS = 1
 
     def iniciar_dia(self):
         pass
@@ -51,7 +49,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
 
         cliente = self.generar_cliente_fuera_de_rango()
         evento = self.generar_evento(cliente, TipoPizza.ANANA)
-        simulacion.add_event(evento)
+        simulacion.fel.append(evento)
 
         simulacion.run()
 
@@ -63,12 +61,12 @@ class SimulacionFunctionalTest(unittest.TestCase):
 
         simulacion = self.get_simulacion()
         camioneta = simulacion.camionetas[0]
-        camioneta.pizzas.append(Pizza(TipoPizza.ANANA))
+        pizza = simulacion.generar_pizza(TipoPizza.ANANA)
+        camioneta.pizzas.append(pizza)
 
         cliente = self.generar_cliente_en_rango()
         evento = self.generar_evento(cliente, TipoPizza.ANANA)
-        simulacion.add_event(evento)
-        dia = simulacion.dia
+        simulacion.fel.append(evento)
 
         pizza_vence_event = list(filter(lambda x: isinstance(x, PizzaVenceEvent), simulacion.fel))[0]
         self.assertIsInstance(pizza_vence_event, PizzaVenceEvent)
@@ -89,14 +87,14 @@ class SimulacionFunctionalTest(unittest.TestCase):
         simulacion = self.get_simulacion()
         simulacion.camionetas.append(Camioneta())
 
-        simulacion.camionetas[0].pizzas.append(Pizza(TipoPizza.ANANA))
-        simulacion.camionetas[1].pizzas.append(Pizza(TipoPizza.ANANA))
+        simulacion.camionetas[0].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.dia))
+        simulacion.camionetas[1].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.dia))
 
         cliente = self.generar_cliente_en_rango()
         simulacion.camionetas[1].ubicacion = cliente.ubicacion
 
         evento = self.generar_evento(cliente, TipoPizza.ANANA)
-        simulacion.add_event(evento)
+        simulacion.fel.append(evento)
 
         simulacion.run()
 
@@ -129,17 +127,18 @@ class SimulacionFunctionalTest(unittest.TestCase):
 
     def get_simulacion(self):
         simulacion = TestableSimulacion()
-        self.clean_up(simulacion)
+        simulacion.reloj.dia = Simulacion.TIEMPO_INICIO
+        simulacion.fel = []
+        simulacion.camionetas = []
+        simulacion.pedidos = []
+        simulacion.clientes_rechazados = []
+        simulacion.dias_corridos = []
         simulacion.dias_a_simular = 1
         simulacion.experimentos = 1
         simulacion.camionetas = [Camioneta()]
         return simulacion
 
-    @staticmethod
-    def clean_up(simulacion):
-        simulacion.pedidos = []
-        simulacion.clientes_rechazados = []
-        simulacion.dias_corridos = []
+
 
 
 if __name__ == '__main__':

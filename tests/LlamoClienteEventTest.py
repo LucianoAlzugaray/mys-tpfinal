@@ -1,6 +1,4 @@
 import unittest
-
-from Simulacion import Simulacion
 from events.LlamoClienteEvent import LlamoClienteEvent
 from models.Cliente import Cliente
 from models.Camioneta import Camioneta

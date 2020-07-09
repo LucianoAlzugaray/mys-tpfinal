@@ -17,18 +17,18 @@ from models.Camioneta import Camioneta
 class SimulacionTest(unittest.TestCase):
 
     def test_debe_rechazar_pedido_cuando_cliente_no_esta_en_rango(self):
-        pedidos_rechazados = len(Simulacion().pedidos_rechazados_en_llamada)
+        pedidos_rechazados = len(Simulacion().clientes_rechazados)
         self.assertEqual(0, pedidos_rechazados)
 
         cliente = self.generar_cliente_fuera_de_rango()
         evento = self.generar_evento(cliente, None)
         evento.notify()
 
-        self.assertEqual(pedidos_rechazados + 1, len(Simulacion().pedidos_rechazados_en_llamada))
+        self.assertEqual(pedidos_rechazados + 1, len(Simulacion().clientes_rechazados))
 
     def test_debe_asignar_pedido_a_camioneta_cuando_cliente_esta_en_rango(self):
         simulacion = Simulacion()
-        simulacion.dia_actual.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA))
+        simulacion.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.time))
 
         cliente = self.generar_cliente_en_rango()
         evento = self.generar_evento(cliente, TipoPizza.ANANA)
@@ -43,8 +43,8 @@ class SimulacionTest(unittest.TestCase):
 
     def test_debe_asignar_el_pedido_a_la_camioneta_mas_cercana(self):
         simulacion = Simulacion()
-        simulacion.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA))
-        simulacion.camionetas[3].pizzas.append(Pizza(TipoPizza.ANANA))
+        simulacion.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.time))
+        simulacion.camionetas[3].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.time))
 
         cliente = self.generar_cliente_en_rango()
         evento = self.generar_evento(cliente, TipoPizza.ANANA)
@@ -66,10 +66,11 @@ class SimulacionTest(unittest.TestCase):
                 return True
 
         simulacion = self.get_simulacion()
+        simulacion.camionetas = [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
         simulacion.utils = TestableUtils()
-        simulacion.camionetas[2].pizzas.append(Pizza(TipoPizza.MOZZARELLA))
-        simulacion.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA))
-        simulacion.camionetas[3].pizzas.append(Pizza(TipoPizza.ANANA))
+        simulacion.camionetas[2].pizzas.append(Pizza(TipoPizza.MOZZARELLA, simulacion.time))
+        simulacion.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.time))
+        simulacion.camionetas[3].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.time))
         tipos_disponibles_en_camionetas = simulacion.get_tipos_disponibles_en_camionetas()
 
         cliente = self.generar_cliente_en_rango()
@@ -91,6 +92,7 @@ class SimulacionTest(unittest.TestCase):
                 return False
 
         simulacion = self.get_simulacion()
+        simulacion.camionetas += [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
         self.assertFalse(simulacion.volver_al_terminar_todos_los_pedidos)
 
         simulacion.utils = TestableUtils()
@@ -267,7 +269,8 @@ class SimulacionTest(unittest.TestCase):
         self.assertEqual(distancia, 1999.6979771955564)
 
     def asignar_pedido_a_camioneta(self, tipo_de_pizza, camioneta):
-        Simulacion().camionetas[camioneta].pizzas.append(Pizza(tipo_de_pizza))
+        simulacion = Simulacion()
+        simulacion.camionetas[camioneta].pizzas.append(Pizza(tipo_de_pizza, simulacion.time))
         cliente0 = self.generar_cliente_en_rango()
         pedido0 = Pedido(cliente0, 10, Simulacion().camionetas[camioneta], tipo_de_pizza)
         Simulacion().camionetas[camioneta].asignar_pedido(pedido0)
