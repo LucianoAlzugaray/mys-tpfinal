@@ -1,7 +1,7 @@
 from events.SimulacionEvent import SimulacionEvent
 
 
-class EntregarPizzaEvent(SimulacionEvent):
+class EntregarPedidoEvent(SimulacionEvent):
 
     def __init__(self, hora, pedido):
         super().__init__(hora)

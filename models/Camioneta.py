@@ -30,6 +30,10 @@ class Camioneta:
             self.tiempo_entre_recargas.append(Simulacion().get_diferencia_hora_actual(self.tiempo_ultima_recarga))
         self.tiempo_ultima_recarga = Simulacion().time
 
+    def remover_pizzas_vencidas(self):
+        self.pizzas = list(filter(lambda x: not x.vencida, self.pizzas))
+
+
     def quitar_pizza(self, pizza):
         self.pizzas.remove(pizza)
 
@@ -41,8 +45,15 @@ class Camioneta:
         self.pedido_en_curso = None
         pedido.entregado = True
         pedido.hora_entrega = simulacion.time
+        if len(self.pizzas) == 0:
+            self.generar_evento_volver_a_restaurante()
         if len(self.pedidos) > 0:
             self.generar_evento_enviar_pedido(self.pedidos[0])
+
+    def generar_evento_volver_a_restaurante(self):
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        simulacion.add_event(EventTypeEnum.CAMIONETA_REGRESA_VACIA, {'camioneta': self})
 
     def obtener_distancia(self, punto1, punto2):
         cateto1 = punto2[0] - punto1[0]

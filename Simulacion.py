@@ -5,6 +5,7 @@ from functools import reduce
 import numpy as np
 from events.PizzaVenceEvent import PizzaVenceEvent
 from events.SimulacionEventFactory import SimulacionEventFactory
+from models.Camioneta import Camioneta
 from models.Cliente import Cliente
 from models.Pedido import Pedido
 from models.Pizza import Pizza
@@ -13,12 +14,6 @@ from models.meta.Singleton import Singleton
 from utils.utils import Utils
 from models.Reloj import Reloj
 from models.EventTypeEnum import EventTypeEnum
-
-
-def generar_camionetas():
-    from models.Camioneta import Camioneta
-    return [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
-
 
 
 class Simulacion(metaclass=Singleton):
@@ -42,6 +37,7 @@ class Simulacion(metaclass=Singleton):
         MINUTOS_INICIO
     )
 
+    CANTIDAD_DE_CAMIONETAS = 4
     DIA_FIN = 10
     MES_FIN = 7
     ANIO_FIN = 2020
@@ -56,38 +52,29 @@ class Simulacion(metaclass=Singleton):
     )
 
     def __init__(self):
-        self.event_factory = SimulacionEventFactory()
-        self.reloj = Reloj()
         self.experimentos = 10
         self.dias_a_simular = 365
-        self.minutos_maximo = 60 * self.horas_por_dia
-        self.dias_corridos = []
-        self.camionetas = generar_camionetas()
-        self.events = []
-        self.utils = Utils()
-        self.volver_al_terminar_todos_los_pedidos = False
-        self.pedidos = []
-        self.clientes_rechazados = []
         self.rango_de_atencion = 2000
+        self.volver_al_terminar_todos_los_pedidos = False
+        self.utils = Utils()
+        self.reloj = Reloj()
+        self.event_factory = SimulacionEventFactory()
         self.fel = []
-        self.porcentaje_desperdicio_diario = []
+        self.pedidos = []
+        self.camionetas = [Camioneta() for i in range(self.CANTIDAD_DE_CAMIONETAS)]
         self.desperdicios = []
+        self.events = []
+        self.clientes_rechazados = []
+        self.porcentaje_desperdicio_diario = []
 
     def run(self):
         for experimento in range(self.experimentos):
             for dia in range(self.dias_a_simular):
                 self.iniciar_dia()
                 while not self.termino_dia():
-                    for evento in self.obtener_eventos_de_ahora():
+                    evento = self.next_event()
+                    if evento is not None:
                         evento.notify()
-                        self.events.append(evento)
-                        self.fel.remove(evento)
-                    if len(self.fel) == 0:
-                        dt_evento = datetime(year=self.dia.year, month=self.dia.month, day=self.dia.day, hour=self.HORA_DE_CIERRE, minute=self.MINUTOS_DE_CIERRE, second=1)
-                    else:
-                        evento = self.fel[0]
-                        dt_evento = evento.hora
-                    self.avanzar_reloj_time(dt_evento)
 
                 for camioneta in self.camionetas:
                     camioneta.volver_a_pizzeria()
@@ -134,10 +121,7 @@ class Simulacion(metaclass=Singleton):
             distancia = self.obtener_distancia(ubicacion, ubicacion_camioneta)
             distancias[camioneta] = distancia
 
-            variableParaDebug = 0
-
-            aux = sorted(distancias.items(), key=lambda x: x[1])
-
+        aux = sorted(distancias.items(), key=lambda x: x[1])
         camionetas = []
         for i in aux:
             camionetas.append(i[0])
@@ -348,3 +332,13 @@ class Simulacion(metaclass=Singleton):
     @property
     def pedidos_del_dia(self):
         return len(list(filter(lambda x: x.hora.day == self.time.day, self.pedidos)))
+
+    def next_event(self):
+        if len(self.fel) == 0:
+            self.reloj.terminar_el_dia()
+            return None
+
+        evento = self.fel[0]
+        self.events.append(evento)
+        self.fel.remove(evento)
+        return evento

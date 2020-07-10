@@ -1,5 +1,6 @@
-from events.CamionetaRegresaARestauranteEvent import CamionetaRegresaARestauranteEvent
-from events.EntregarPizzaEvent import EntregarPizzaEvent
+from events.CamionetaRegresaABuscarPedidoEvent import CamionetaRegresaABuscarPedidoEvent
+from events.CamionetaRegresaAVacia import CamionetaRegresaVaciaEvent
+from events.EntregarPedidoEvent import EntregarPedidoEvent
 from events.EnviarPedidoEvent import EnviarPedidoEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
@@ -9,7 +10,7 @@ from models.actividades.EntregarPizza import EntregarPizza
 from models.actividades.EnviarPedido import EnviarPedido
 from models.actividades.RecargarCamioneta import RecargarCamioneta
 from models.actividades.RechazarCliente import RechazarCliente
-from models.actividades.RechazarPizza import RechazarPizza
+from models.actividades.RechazarPedido import RechazarPedido
 from models.actividades.VencerPizza import VencerPizza
 
 
@@ -28,16 +29,23 @@ class SimulacionEventFactory(object):
             evento.attach(EnviarPedido())
             return evento
 
-        elif event_key == EventTypeEnum.ENTREGAR_PIZZA:
-            evento = EntregarPizzaEvent(kwargs['hora'], kwargs['pedido'])
+        elif event_key == EventTypeEnum.ENTREGAR_PEDIDO:
+            evento = EntregarPedidoEvent(kwargs['hora'], kwargs['pedido'])
             evento.attach(EntregarPizza())
-            evento.attach(RechazarPizza())
+            evento.attach(RechazarPedido())
             return evento
 
-        elif event_key == EventTypeEnum.CAMIONETA_REGRESA_A_RESTAURANTE:
+        elif event_key == EventTypeEnum.CAMIONETA_REGRESA_A_BUSCAR_PEDIDO:
+            pedido = kwargs['pedido']
+            hora = pedido.camioneta.obtener_tiempo_demora_en_volver()
+            evento = CamionetaRegresaABuscarPedidoEvent(pedido, hora)
+            evento.attach(RecargarCamioneta())
+            return evento
+
+        elif event_key == EventTypeEnum.CAMIONETA_REGRESA_VACIA:
             camioneta = kwargs['camioneta']
             hora = camioneta.obtener_tiempo_demora_en_volver()
-            evento = CamionetaRegresaARestauranteEvent(camioneta, hora)
+            evento = CamionetaRegresaVaciaEvent(camioneta, hora)
             evento.attach(RecargarCamioneta())
             return evento
 

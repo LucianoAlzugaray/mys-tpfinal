@@ -7,14 +7,14 @@ class Reloj(object):
         from Simulacion import Simulacion
         self.dia = Simulacion.TIEMPO_INICIO
         self.cirre_at = time(Simulacion.HORA_DE_CIERRE, Simulacion.MINUTOS_DE_CIERRE)
-        self.finaliza_toma_pedidos_at = time(Simulacion.HORA_FIN_TOMA_DE_PEDIDOS,
-                                             Simulacion.MINUTOS_FIN_TOMA_DE_PEDIDOS)
+        self.finaliza_toma_pedidos_at = time(Simulacion.HORA_FIN_TOMA_DE_PEDIDOS, Simulacion.MINUTOS_FIN_TOMA_DE_PEDIDOS)
+
 
     def avanzar(self, minutos):
         self.dia = self.dia + timedelta(minutes=minutos)
 
     def termino_dia(self):
-        return self.dia.time() >= self.cirre_at
+            return self.dia.time() >= self.cirre_at
 
     def termino_horario_de_toma_de_pedido(self):
         return self.dia.time() >= self.finaliza_toma_pedidos_at
@@ -35,3 +35,8 @@ class Reloj(object):
     def avanzar_time(self, time: datetime):
         diferencia_en_minutos = self.get_diferencia_hora_actual(time)
         self.avanzar(diferencia_en_minutos)
+
+    def terminar_el_dia(self):
+        self.avanzar_time(
+            datetime(year=self.dia.year, month=self.dia.month, day=self.dia.day, hour=self.cirre_at.hour,
+                     minute=self.cirre_at.minute, second=1))

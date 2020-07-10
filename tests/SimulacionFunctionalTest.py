@@ -73,7 +73,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
 
         eventos = list(filter(lambda x: isinstance(x, PizzaVenceEvent), simulacion.fel))
         self.assertEqual(len(eventos), 0)
-        self.assertTrue(len(camioneta.pizzas) == 0)
+        self.assertTrue(len(camioneta.pizzas) == 40)
         self.assertTrue(len(simulacion.pedidos) == 1)
         self.assertTrue(simulacion.pedidos[0].entregado)
         self.assertTrue(camioneta.pedido_en_curso is None)
@@ -124,7 +124,6 @@ class SimulacionFunctionalTest(unittest.TestCase):
         simulacion.camionetas = []
         simulacion.pedidos = []
         simulacion.clientes_rechazados = []
-        simulacion.dias_corridos = []
         simulacion.dias_a_simular = 1
         simulacion.experimentos = 1
         simulacion.camionetas = [Camioneta()]
