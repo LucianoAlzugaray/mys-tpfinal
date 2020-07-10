@@ -332,7 +332,7 @@ class Simulacion(metaclass=Singleton):
 
     @property
     def pedidos_del_dia(self):
-        return len(list(filter(lambda x: x.hora.day == self.time.day, self.pedidos)))
+        return len(list(filter(lambda x: x.hora_toma.day == self.time.day, self.pedidos)))
 
     def next_event(self):
         if len(self.fel) == 0:
