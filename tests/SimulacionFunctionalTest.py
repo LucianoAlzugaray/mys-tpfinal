@@ -5,6 +5,7 @@ from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Camioneta import Camioneta
 from models.Cliente import Cliente
+from models.EventTypeEnum import EventTypeEnum
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.actividades.EncolarCliente import EncolarCliente
@@ -48,8 +49,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
         simulacion = self.get_simulacion()
 
         cliente = self.generar_cliente_fuera_de_rango()
-        evento = self.generar_evento(cliente, TipoPizza.ANANA)
-        simulacion.fel.append(evento)
+        self.generar_evento(cliente, TipoPizza.ANANA)
 
         simulacion.run()
 
@@ -65,8 +65,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
         camioneta.pizzas.append(pizza)
 
         cliente = self.generar_cliente_en_rango()
-        evento = self.generar_evento(cliente, TipoPizza.ANANA)
-        simulacion.fel.append(evento)
+        self.generar_evento(cliente, TipoPizza.ANANA)
 
         pizza_vence_event = list(filter(lambda x: isinstance(x, PizzaVenceEvent), simulacion.fel))[0]
         self.assertIsInstance(pizza_vence_event, PizzaVenceEvent)
@@ -93,8 +92,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
         cliente = self.generar_cliente_en_rango()
         simulacion.camionetas[1].ubicacion = cliente.ubicacion
 
-        evento = self.generar_evento(cliente, TipoPizza.ANANA)
-        simulacion.fel.append(evento)
+        self.generar_evento(cliente, TipoPizza.ANANA)
 
         simulacion.run()
 
@@ -117,13 +115,10 @@ class SimulacionFunctionalTest(unittest.TestCase):
 
     @staticmethod
     def generar_evento(cliente, tipo_pizza):
-        hora = Simulacion.TIEMPO_INICIO + timedelta(minutes=5)
-        evento = LlamoClienteEvent(hora, cliente, Simulacion().dia)
-        if tipo_pizza is not None:
-            evento.tipo_pizza = tipo_pizza
-        evento.attach(RechazarPedido())
-        evento.attach(EncolarCliente())
-        return evento
+        simulacion = Simulacion()
+        hora = simulacion.TIEMPO_INICIO + timedelta(minutes=5)
+        kwargs = {'hora': hora, 'cliente': cliente, 'tipo_pizza': tipo_pizza}
+        simulacion.add_event(EventTypeEnum.LLAMO_CLIENTE, kwargs)
 
     def get_simulacion(self):
         simulacion = TestableSimulacion()
@@ -137,8 +132,6 @@ class SimulacionFunctionalTest(unittest.TestCase):
         simulacion.experimentos = 1
         simulacion.camionetas = [Camioneta()]
         return simulacion
-
-
 
 
 if __name__ == '__main__':

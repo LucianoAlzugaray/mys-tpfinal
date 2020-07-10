@@ -80,12 +80,7 @@ class Simulacion(metaclass=Singleton):
                         self.events.append(evento)
                         self.fel.remove(evento)
                     if len(self.fel) == 0:
-                        dt_evento = datetime(year=self.dia.year,
-                                                  month=self.dia.month,
-                                                  day=self.dia.day,
-                                                  hour=self.HORA_DE_CIERRE,
-                                                  minute=self.MINUTOS_DE_CIERRE,
-                                                  second=1)
+                        dt_evento = datetime(year=self.dia.year, month=self.dia.month, day=self.dia.day, hour=self.HORA_DE_CIERRE, minute=self.MINUTOS_DE_CIERRE, second=1)
                     else:
                         evento = self.fel[0]
                         dt_evento = evento.hora
@@ -100,6 +95,8 @@ class Simulacion(metaclass=Singleton):
     def add_event(self, event, kwargs=None):
         event = self.event_factory.get_event(event, kwargs)
         self.fel.append(event)
+        self.fel = sorted(self.fel, key=lambda evento: evento.hora)
+
 
     def get_camioneta_by_pizza(self, pizza):
         camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.camionetas))
