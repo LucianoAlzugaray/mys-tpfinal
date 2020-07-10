@@ -55,7 +55,3 @@ class Utils:
     @staticmethod
     def generar_ubicacion_cliente():
         return np.random.normal(0, 10, 2) * 100  ##Para que quede como maximo 2000 como en el gráfico de bruno
-
-    @staticmethod
-    def sumar_minutos_a_hora(hora, minutos):
-        return (datetime.combine(date.today(), hora) + timedelta(minutes=minutos)).time()
