@@ -71,14 +71,15 @@ class Simulacion(metaclass=Singleton):
         for experimento in range(self.experimentos):
             for dia in range(self.dias_a_simular):
                 self.iniciar_dia()
+
                 while not self.termino_dia():
                     evento = self.next_event()
                     if evento is not None:
                         evento.notify()
 
-                for camioneta in self.camionetas:
-                    camioneta.volver_a_pizzeria()
+                self.finalizar_dia()
 
+    # TODO: armar los csv de pedidos y desperdicios
     def obtener_datos(self):
         pass
 
@@ -318,8 +319,8 @@ class Simulacion(metaclass=Singleton):
         self.reloj.avanzar_time(time)
 
     '''Obtiene el porcentaje de desperdicios en el dia'''
-    def add_desperdicio(self, evento):
-        self.desperdicios.append(evento)
+    def add_desperdicio(self, pizza, hora):
+        self.desperdicios.append(pizza)
         if self.pedidos_del_dia > 0:
             self.porcentaje_desperdicio_diario = (self.desperdicios_del_dia/self.pedidos_del_dia) * 100
         else:
@@ -342,3 +343,10 @@ class Simulacion(metaclass=Singleton):
         self.events.append(evento)
         self.fel.remove(evento)
         return evento
+
+    def finalizar_dia(self):
+        desperdicios = list(itertools.chain(*map(lambda x: x.pizzas, self.camionetas)))
+        list(map(lambda x: self.add_desperdicio(x, self.dia), desperdicios))
+        list(map(lambda x: x.finalizar_dia(), self.camionetas))
+
+

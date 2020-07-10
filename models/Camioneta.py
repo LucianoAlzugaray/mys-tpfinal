@@ -148,17 +148,10 @@ class Camioneta:
 
         return simulacion.dia + timedelta(minutes=tiempo)
 
+    def finalizar_dia(self):
+        self.volver_a_pizzeria()
+        self.pizzas = []
 
-
-
-
-        # setear el pedio en curso
-        # calcular variable aleatoria de tiempo de entrega
-        # generar un evento de pizza entregada
-        #
-        #     cuando se produce un evento de pizza entregada
-        #         hay que decirle a la camioneta enviar_siguiente_pedido
-        #             si no tiene pedidos que entregar debe se queda donde está
 
 
 
