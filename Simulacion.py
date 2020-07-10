@@ -245,7 +245,8 @@ class Simulacion(metaclass=Singleton):
 
         for dia in range(self.dias_a_simular):
             desperdicio_diario = dia.desperdicios + dia.desperdicio_por_fin_de_dia
-            desperdicio_total.append(desperdicio_diario)
+            porcentaje_diario = (desperdicio_diario / self.horas_por_dia) * 100
+            desperdicio_total.append(porcentaje_diario)
 
         return np.mean(desperdicio_total)
 
