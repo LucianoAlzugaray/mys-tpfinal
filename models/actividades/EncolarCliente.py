@@ -19,6 +19,7 @@ class EncolarCliente(Actividad):
                 return True
 
             if simulacion.utils.convencer_al_cliente():
+                # TODO : BUG - aveces no hay elementos en la lista.
                 tipo_pizza = simulacion.get_tipos_disponibles_en_camionetas()[0]
                 evento.tipo_pizza = tipo_pizza
                 camioneta = simulacion.seleccionar_camioneta(evento.cliente, evento.tipo_pizza)

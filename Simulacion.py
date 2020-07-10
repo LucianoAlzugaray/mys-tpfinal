@@ -41,7 +41,7 @@ class Simulacion(metaclass=Singleton):
         MINUTOS_INICIO
     )
 
-    DIA_FIN = 9
+    DIA_FIN = 10
     MES_FIN = 7
     ANIO_FIN = 2020
     HORA_FIN = 23
@@ -77,7 +77,14 @@ class Simulacion(metaclass=Singleton):
                 while not self.termino_dia():
                     for evento in self.obtener_eventos_de_ahora():
                         evento.notify()
-                    self.avanzar_reloj(1)
+                        self.events.append(evento)
+                        self.fel.remove(evento)
+                    if len(self.fel) == 0:
+                        dt_evento = datetime(year=self.dia.year, month=self.dia.month, day=self.dia.day, hour=self.HORA_DE_CIERRE, minute=self.MINUTOS_DE_CIERRE, second=1)
+                    else:
+                        evento = self.fel[0]
+                        dt_evento = evento.hora
+                    self.avanzar_reloj_time(dt_evento)
 
                 for camioneta in self.camionetas:
                     camioneta.volver_a_pizzeria()
@@ -88,6 +95,8 @@ class Simulacion(metaclass=Singleton):
     def add_event(self, event, kwargs=None):
         event = self.event_factory.get_event(event, kwargs)
         self.fel.append(event)
+        self.fel = sorted(self.fel, key=lambda evento: evento.hora)
+
 
     def get_camioneta_by_pizza(self, pizza):
         camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.camionetas))
@@ -119,7 +128,9 @@ class Simulacion(metaclass=Singleton):
             distancia = self.obtener_distancia(ubicacion, ubicacion_camioneta)
             distancias[camioneta] = distancia
 
-        aux = sorted(distancias.items(), key=lambda x: x[1])
+            variableParaDebug = 0
+
+            aux = sorted(distancias.items(), key=lambda x: x[1])
 
         camionetas = []
         for i in aux:
@@ -223,7 +234,7 @@ class Simulacion(metaclass=Singleton):
         return self.TIEMPO_INICIO
 
     @property
-    def tiempo_fin(self):
+    def tiempo_fin(self): # TODO : WARNING - Sin uso.
         return self.TIEMPO_FIN
 
     # @property
@@ -326,3 +337,8 @@ class Simulacion(metaclass=Singleton):
         pizza = Pizza(tipo_pizza, self.time)
         self.add_event(EventTypeEnum.PIZZA_VENCE, {'pizza': pizza})
         return pizza
+
+    ''' Metodo para avanzar el tiempo dado un datetime.'''
+
+    def avanzar_reloj_time(self, time: datetime):
+        self.reloj.avanzar_time(time)
