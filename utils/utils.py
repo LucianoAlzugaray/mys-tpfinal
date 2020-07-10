@@ -26,9 +26,9 @@ class Utils:
     @staticmethod
     def get_horas_de_pedidos(horas):
         eventos_en_hora = []
-
+        from Simulacion import Simulacion
         for hora in range(horas):
-            for pedido in range(np.random.poisson(20)):
+            for pedido in range(np.random.poisson(Simulacion().pedidos_por_hora)):
                 tiempo_exacto = math.trunc(random.uniform(0, 60)) + 60 * hora
                 from Simulacion import Simulacion
                 timestamp = Simulacion().tiempo_inicio + timedelta(minutes=tiempo_exacto)
@@ -38,17 +38,12 @@ class Utils:
     ## Genera tipo de pizza aleatorio
     @staticmethod
     def generar_tipo_de_pizza():
-        opcion = random.random()
-        if opcion < 0.05:
-            return TipoPizza.ANANA
-        elif opcion < 0.20:
-            return TipoPizza.CALABRESA
-        elif opcion < 0.55:
-            return TipoPizza.MOZZARELLA
-        elif opcion < 0.75:
-            return TipoPizza.FUGAZZETA
-        else:
-            return TipoPizza.NAPOLITANA
+        opcion = random.random()*100
+        from Simulacion import Simulacion
+        #[(PIZZA, PROB), (PIZZA,PROB)]
+        pizzas_disponibles = Simulacion().pizzas_disponibles_con_probabilidades()
+        selected = np.random.choice(len(pizzas_disponibles), 1, p=[pd[1] for pd in pizzas_disponibles])[0]
+        return pizzas_disponibles[selected][0]
 
 
     ## Obtiene una ubicación del cliente aleatoria

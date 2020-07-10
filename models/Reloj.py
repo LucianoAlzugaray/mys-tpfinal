@@ -5,7 +5,7 @@ class Reloj(object):
 
     def __init__(self):
         from Simulacion import Simulacion
-        self.dia = Simulacion.TIEMPO_INICIO
+        self.dia = Simulacion().tiempo_inicio
         self.cirre_at = time(Simulacion.HORA_DE_CIERRE, Simulacion.MINUTOS_DE_CIERRE)
         self.finaliza_toma_pedidos_at = time(Simulacion.HORA_FIN_TOMA_DE_PEDIDOS,
                                              Simulacion.MINUTOS_FIN_TOMA_DE_PEDIDOS)

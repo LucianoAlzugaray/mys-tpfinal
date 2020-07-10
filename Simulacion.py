@@ -16,11 +16,9 @@ import paho.mqtt.client as paho
 from random import random
 import json
 
-def generar_camionetas():
+def generar_camionetas(configuracion):
     from models.Camioneta import Camioneta
-    return [Camioneta(), Camioneta(), Camioneta(), Camioneta()]
-
-
+    return [Camioneta(configuracion.hornosPorCamioneta, configuracion.pizzasPorHorno) for i in range(configuracion.cantidadCamionetas)]
 
 class Simulacion(metaclass=Singleton):
     CANTIDAD_HORAS_LABORALES = 12
@@ -30,40 +28,17 @@ class Simulacion(metaclass=Singleton):
     HORA_FIN_TOMA_DE_PEDIDOS = 22
     MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
 
-    DIA_INICIO = 9
-    MES_INICIO = 7
-    ANIO_INICIO = 2020
-    HORA_INICIO = 11
-    MINUTOS_INICIO = 0
-    TIEMPO_INICIO = datetime(
-        ANIO_INICIO,
-        MES_INICIO,
-        DIA_INICIO,
-        HORA_INICIO,
-        MINUTOS_INICIO
-    )
-
-    DIA_FIN = 10
-    MES_FIN = 7
-    ANIO_FIN = 2020
-    HORA_FIN = 23
-    MINUTOS_FIN = 0
-    TIEMPO_FIN = datetime(
-        ANIO_FIN,
-        MES_FIN,
-        DIA_FIN,
-        HORA_FIN,
-        MINUTOS_FIN
-    )
-
-    def __init__(self):
+    def __init__(self, valores):
         self.event_factory = SimulacionEventFactory()
         self.reloj = Reloj()
         self.experimentos = 10
-        self.dias_a_simular = 365
+        self.dias_a_simular = (valores.fin - valores.inicio).days
+        self.tiempo_inicio = valores.inicio
+        self.tiempo_fin = valores.fin
+        self.pedidos_por_hora = valores.pedidosPorHora
         self.minutos_maximo = 60 * self.horas_por_dia
         self.dias_corridos = []
-        self.camionetas = generar_camionetas()
+        self.camionetas = generar_camionetas(valores)
         self.events = []
         self.utils = Utils()
         self.volver_al_terminar_todos_los_pedidos = False
@@ -251,14 +226,6 @@ class Simulacion(metaclass=Singleton):
     def iniciar_dia(self):
         self.generar_pedidos()
         self.inicializar_camionetas()
-
-    @property
-    def tiempo_inicio(self):
-        return self.TIEMPO_INICIO
-
-    @property
-    def tiempo_fin(self): # TODO : WARNING - Sin uso.
-        return self.TIEMPO_FIN
 
     # @property
     # def dias_a_simular(self):

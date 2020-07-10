@@ -10,10 +10,8 @@ from models.Pizza import Pizza
 
 
 class Camioneta:
-    cantidad_hornos = 1
-    tamanio_hornos = 40
 
-    def __init__(self):
+    def __init__(self, cantidad_hornos=1, tamanio_hornos=40):
         self.ubicacion = [0, 0]
         self.pizzas = []
         self.disponible = True
@@ -22,6 +20,8 @@ class Camioneta:
         self.distancia_recorrida = 0
         self.tiempo_entre_recargas = []
         self.tiempo_ultima_recarga = None
+        self.cantidad_hornos = cantidad_hornos
+        self.tamanio_hornos = tamanio_hornos
 
     def cargar_pizzas(self):
         from Simulacion import Simulacion
