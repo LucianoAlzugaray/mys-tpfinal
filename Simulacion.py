@@ -6,6 +6,7 @@ import numpy as np
 from events.PizzaVenceEvent import PizzaVenceEvent
 from events.SimulacionEventFactory import SimulacionEventFactory
 from models.Cliente import Cliente
+from models.Pedido import Pedido
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.meta.Singleton import Singleton
@@ -102,7 +103,10 @@ class Simulacion(metaclass=Singleton):
         camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.camionetas))
         return None if len(camionetas) == 0 else camionetas[0]
 
-    def rechazar_pedido(self, cliente: Cliente) -> None:
+    def rechazar_pedido(self, pedido: Pedido) -> None:
+        self.clientes_rechazados.append(pedido)
+
+    def rechazar_cliente(self, cliente: Cliente) -> None:
         self.clientes_rechazados.append(cliente)
 
     def get_camioneta_by_cliente(self, cliente: Cliente):

@@ -8,7 +8,7 @@ from models.actividades.EncolarCliente import EncolarCliente
 from models.actividades.EntregarPizza import EntregarPizza
 from models.actividades.EnviarPedido import EnviarPedido
 from models.actividades.RecargarCamioneta import RecargarCamioneta
-from models.actividades.RechazarPedido import RechazarPedido
+from models.actividades.RechazarCliente import RechazarCliente
 from models.actividades.RechazarPizza import RechazarPizza
 from models.actividades.VencerPizza import VencerPizza
 
@@ -20,7 +20,7 @@ class SimulacionEventFactory(object):
         if event_key == EventTypeEnum.LLAMO_CLIENTE:
             evento = LlamoClienteEvent(kwargs['hora'], kwargs['cliente'], kwargs['tipo_pizza'])
             evento.attach(EncolarCliente())
-            evento.attach(RechazarPedido())
+            evento.attach(RechazarCliente())
             return evento
 
         elif event_key == EventTypeEnum.ENVIAR_PEDIDO:

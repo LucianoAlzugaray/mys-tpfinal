@@ -1,15 +1,12 @@
 import unittest
 from datetime import timedelta
 from Simulacion import Simulacion
-from events.LlamoClienteEvent import LlamoClienteEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Camioneta import Camioneta
 from models.Cliente import Cliente
 from models.EventTypeEnum import EventTypeEnum
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
-from models.actividades.EncolarCliente import EncolarCliente
-from models.actividades.RechazarPedido import RechazarPedido
 from utils.utils import Utils
 
 

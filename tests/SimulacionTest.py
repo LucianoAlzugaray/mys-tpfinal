@@ -9,7 +9,7 @@ from models.Pedido import Pedido
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.actividades.EncolarCliente import EncolarCliente
-from models.actividades.RechazarPedido import RechazarPedido
+from models.actividades.RechazarCliente import RechazarCliente
 from utils.utils import Utils
 from models.Camioneta import Camioneta
 
@@ -294,7 +294,7 @@ class SimulacionTest(unittest.TestCase):
         evento = LlamoClienteEvent(0, cliente, Simulacion())
         if tipo_pizza is not None:
             evento.tipo_pizza = tipo_pizza
-        evento.attach(RechazarPedido())
+        evento.attach(RechazarCliente())
         evento.attach(EncolarCliente())
         return evento
 
