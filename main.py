@@ -6,7 +6,7 @@ from Simulacion import Simulacion
 
 
 def iniciar_simulacion(configuraciones):
-
+    # TODO: falta cantidad de corridas o experimentos
     tipos_de_pizza = {
         "anana": configuraciones.anana if configuraciones.anana is not None else True,
         "napolitana": configuraciones.napolitana if configuraciones.napolitana is not None else True,

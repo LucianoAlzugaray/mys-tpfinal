@@ -31,24 +31,26 @@ class Simulacion(metaclass=Singleton):
     MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
 
     def __init__(self):
-        self.event_factory = SimulacionEventFactory()
-        self.reloj = Reloj()
-        self.experimentos = 10
         self.dias_a_simular = None
         self.tiempo_inicio = None
         self.tiempo_fin = None
         self.pedidos_por_hora = None
-        self.minutos_maximo = 60 * self.horas_por_dia
-        self.dias_corridos = []
-        self.camionetas = None
-        self.events = []
-        self.utils = Utils()
-        self.volver_al_terminar_todos_los_pedidos = False
-        self.pedidos = []
-        self.clientes_rechazados = []
+        self.experimentos = 10
         self.rango_de_atencion = 2000
+        self.volver_al_terminar_todos_los_pedidos = False
+
         self.fel = []
+        self.events = []
+        self.pedidos = []
+        self.camionetas = []
+        self.desperdicios = []
+        self.clientes_rechazados = []
         self.tipos_de_pizza_disponibles = []
+        self.porcentaje_desperdicio_diario = []
+
+        self.utils = Utils()
+        self.reloj = Reloj()
+        self.event_factory = SimulacionEventFactory()
 
     def configurate(self, configuracion):
         self.dias_a_simular = (configuracion.fin - configuracion.inicio).days
@@ -90,7 +92,7 @@ class Simulacion(metaclass=Singleton):
 
     def publicar_resultados(self):
         tiempo_espera = self.tiempo_espera()
-        #porcentaje_desperdicio = self.porcentaje_desperdicio()
+        porcentaje_desperdicio = self.porcentaje_desperdicio()
         pedidos_entregados = self.pedidos_entregados()
         pedidos_perdidos = self.pedidos_perdidos()
         distacia_recorrida = self.distacia_recorrida()
@@ -100,7 +102,7 @@ class Simulacion(metaclass=Singleton):
         client = paho.Client()
         client.connect("172.16.240.10", 1883)
         client.publish("espera-de-cliente", tiempo_espera)
-        client.publish("porcentaje-de-desperdicios", math.trunc(random() * 10))
+        client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
         client.publish("pedidos-entregados", len(pedidos_entregados))
         client.publish("pedidos-rechazados", len(pedidos_perdidos))
         client.publish("distancias-recorridas", distacia_recorrida)
