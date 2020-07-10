@@ -20,7 +20,9 @@ class CamionetaTest(unittest.TestCase):
 
         self.assertFalse(self.camioneta.tiene_tipo(TipoPizza.ANANA))
 
-        pizza = Pizza(TipoPizza.ANANA)
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        pizza = simulacion.generar_pizza(TipoPizza.ANANA)
         self.camioneta.pizzas.append(pizza)
         self.assertTrue(self.camioneta.tiene_tipo(TipoPizza.ANANA))
 
@@ -37,22 +39,25 @@ class CamionetaTest(unittest.TestCase):
         self.assertTrue(len(self.camioneta.pizzas) == 40)
         self.camioneta.pizzas = []
         self.assertTrue(len(self.camioneta.pizzas) == 0)
-        self.camioneta.pizzas = [Pizza(TipoPizza.ANANA),
-                                 Pizza(TipoPizza.ANANA),
-                                 Pizza(TipoPizza.ANANA)]
+        self.camioneta.pizzas = [Pizza(TipoPizza.ANANA, None),
+                                 Pizza(TipoPizza.ANANA, None),
+                                 Pizza(TipoPizza.ANANA, None)]
         self.assertTrue(len(self.camioneta.pizzas) == 3)
         self.camioneta.cargar_pizzas()
         self.assertTrue(len(self.camioneta.pizzas) == 40)
 
     def test_sabe_reservar_una_pizza(self):
-        cantidad_de_eventos = len(Simulacion().dia_actual.fel)
+        simulacion = Simulacion()
+        cantidad_de_eventos = len(simulacion.fel)
+
         self.camioneta = Camioneta()
-        self.camioneta.pizzas.append(Pizza(TipoPizza.ANANA))
-        self.assertEqual(cantidad_de_eventos + 1, len(Simulacion().dia_actual.fel))
+        self.camioneta.pizzas.append(simulacion.generar_pizza(TipoPizza.ANANA))
+
+        self.assertEqual(cantidad_de_eventos + 1, len(simulacion.fel))
 
         cliente = Cliente()
         cliente.ubicacion = [1414, 1414]
-        pedido = Pedido(cliente, Simulacion().get_hora(), self.camioneta, TipoPizza.ANANA)
+        pedido = Pedido(cliente, simulacion.time, self.camioneta, TipoPizza.ANANA)
         self.camioneta.reservar_pizza(pedido)
         self.assertEqual(len(self.camioneta.pizzas_reservadas), 1)
 
@@ -81,9 +86,6 @@ class CamionetaTest(unittest.TestCase):
         #     cuando se produce un evento de pizza entregada
         #         hay que decirle a la camioneta enviar_siguiente_pedido
         #             si no tiene pedidos que entregar debe se queda donde está
-
-
-
 
 if __name__ == '__main__':
     unittest.main()

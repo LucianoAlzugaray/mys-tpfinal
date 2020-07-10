@@ -1,14 +1,20 @@
+from datetime import timedelta
+
 from events.EntregarPizzaEvent import EntregarPizzaEvent
+from models.EventTypeEnum import EventTypeEnum
 from models.actividades.Actividad import Actividad
 from events.EnviarPedidoEvent import EnviarPedidoEvent
-from models.actividades.EntregarPizza import EntregarPizza
 
 
 class EnviarPedido(Actividad):
 
+    def __init__(self):
+        from Simulacion import Simulacion
+        self.demora = Simulacion().utils.tiempo_entrega()
+
     def _ejecutar(self, evento: EnviarPedidoEvent):
         evento.pedido.camioneta.enviar_pedido()
         from Simulacion import Simulacion
-        entregar_pizza_event = EntregarPizzaEvent(Simulacion().get_hora() + evento.pedido.tiempo_de_demora, evento.pedido)
-        entregar_pizza_event.attach(EntregarPizza(evento.pedido))
-        Simulacion().add_event(entregar_pizza_event)
+        simulacion = Simulacion()
+        simulacion.add_event(EventTypeEnum.ENTREGAR_PIZZA, {'hora': Simulacion().time + timedelta(minutes=self.demora), 'pedido': evento.pedido})
+

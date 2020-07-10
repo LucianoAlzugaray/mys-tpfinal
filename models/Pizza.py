@@ -1,14 +1,10 @@
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.actividades.VencerPizza import VencerPizza
-
+from models.EventTypeEnum import EventTypeEnum
 
 class Pizza:
-    def __init__(self, tipo):
-        from Simulacion import Simulacion
+    def __init__(self, tipo, hora):
         self.tipo = tipo
         self.vencida = False
         self.reservada = False
-        self.hora = Simulacion().get_hora()
-        evento = PizzaVenceEvent(self)
-        evento.attach(VencerPizza())
-        Simulacion().add_event(evento)
+        self.hora = hora

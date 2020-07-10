@@ -1,10 +1,11 @@
+from datetime import timedelta
+
+
 class Pedido:
 
     def __init__(self, cliente, hora_toma, camioneta, tipo_pizza):
-        from Simulacion import Simulacion
         self.cliente = cliente
         self.hora_toma = hora_toma
-        self.tiempo_de_demora = Simulacion().utils.tiempo_entrega()
         self.hora_entrega = None
         self.ubicacion_origen = None
         self.tipo_pizza = tipo_pizza
@@ -15,3 +16,7 @@ class Pedido:
     @property
     def ubicacion(self):
         return self.cliente.ubicacion
+
+    def esta_fuera_de_hora_de_entrega(self):
+        from Simulacion import Simulacion
+        return (Simulacion().time - self.hora_toma) > timedelta(minutes=30)
