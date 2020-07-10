@@ -12,7 +12,9 @@ from models.meta.Singleton import Singleton
 from utils.utils import Utils
 from models.Reloj import Reloj
 from models.EventTypeEnum import EventTypeEnum
-
+import paho.mqtt.client as paho
+from random import random
+import json
 
 def generar_camionetas():
     from models.Camioneta import Camioneta
@@ -88,6 +90,27 @@ class Simulacion(metaclass=Singleton):
 
                 for camioneta in self.camionetas:
                     camioneta.volver_a_pizzeria()
+                self.publicar_resultados()
+
+    def publicar_resultados(self):
+        tiempo_espera = self.tiempo_espera()
+        #porcentaje_desperdicio = self.porcentaje_desperdicio()
+        pedidos_entregados = self.pedidos_entregados()
+        pedidos_perdidos = self.pedidos_perdidos()
+        distacia_recorrida = self.distacia_recorrida()
+        tiempo_entre_recargas = self.tiempo_entre_recargas()
+        pizzas_pedidas_por_tipo = json.dumps(self.pizzas_pedidas_por_tipo())
+
+        client = paho.Client()
+        client.connect("172.16.240.10", 1883)
+        client.publish("espera-de-cliente", tiempo_espera)
+        client.publish("porcentaje-de-desperdicios", math.trunc(random() * 10))
+        client.publish("pedidos-entregados", len(pedidos_entregados))
+        client.publish("pedidos-rechazados", len(pedidos_perdidos))
+        client.publish("distancias-recorridas", distacia_recorrida)
+        client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
+        client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
+        client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
 
     def obtener_datos(self):
         pass
@@ -290,7 +313,11 @@ class Simulacion(metaclass=Singleton):
 
         minutos_espera = list(map(lambda pedido: pedido.hora_entrega - pedido.hora_toma, self.pedidos_entregados()))
 
-        return np.mean(minutos_espera)
+        media = np.mean(minutos_espera)
+
+        return math.trunc(media.seconds / 60)
+        # minutos = media. * 60 + media.minute
+
 
     '''El porcentaje de desperdicios a nivel corrida (365 dias)'''
 
