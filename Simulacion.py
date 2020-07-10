@@ -1,7 +1,7 @@
 import itertools
 import json
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from functools import reduce
 import numpy as np
 from events.PizzaVenceEvent import PizzaVenceEvent
@@ -35,7 +35,7 @@ class Simulacion(metaclass=Singleton):
         self.tiempo_inicio = None
         self.tiempo_fin = None
         self.pedidos_por_hora = None
-        self.experimentos = 10
+        self.experimentos = None
         self.rango_de_atencion = 2000
         self.volver_al_terminar_todos_los_pedidos = False
 
@@ -53,29 +53,20 @@ class Simulacion(metaclass=Singleton):
         self.event_factory = SimulacionEventFactory()
 
     def configurate(self, configuracion):
-        self.dias_a_simular = (configuracion.fin - configuracion.inicio).days
-        self.tiempo_inicio = configuracion.inicio
-        self.tiempo_fin = configuracion.fin
-        self.pedidos_por_hora = configuracion.pedidosPorHora
-        self.minutos_maximo = 60 * self.horas_por_dia
+        self.dias_a_simular = (configuracion['fin'] - configuracion['inicio']).days
+        self.tiempo_inicio = configuracion['inicio']
+        self.tiempo_fin = configuracion['fin']
+        self.experimentos = configuracion['cantidadExperimentos']
+        self.pedidos_por_hora = configuracion['pedidosPorHora']
         self.dias_corridos = []
         from models.Camioneta import Camioneta
-        self.camionetas = [
-            Camioneta(configuracion.hornosPorCamioneta, configuracion.pizzasPorHorno) for i in range(configuracion.cantidadCamionetas)
-        ]
+        self.camionetas += [Camioneta(configuracion['hornosPorCamioneta'], configuracion['pizzasPorHorno']) for i in range(configuracion['cantidadCamionetas'])]
+        self.tipos_de_pizza_disponibles = configuracion['tipos_de_pizza']
 
-        if configuracion.tipos_de_pizza.anana:
-           self.tipos_de_pizza_disponibles.append(TipoPizza.ANANA)
-        elif configuracion.tipos_de_pizza.calabresa:
-            self.tipos_de_pizza_disponibles.append(TipoPizza.CALABRESA)
-        elif configuracion.tipos_de_pizza.napolitana:
-            self.tipos_de_pizza_disponibles.append(TipoPizza.NAPOLITANA)
-        elif configuracion.tipos_de_pizza.fugazzeta:
-            self.tipos_de_pizza_disponibles.append(TipoPizza.FUGAZZETA)
-        elif configuracion.tipos_de_pizza.mozzarella:
-            self.tipos_de_pizza_disponibles.append(TipoPizza.MOZZARELLA)
-
-
+        self.reloj.configurate({
+            'dia': self.tiempo_inicio,
+            'hora_cierre': time(self.HORA_DE_CIERRE, self.MINUTOS_DE_CIERRE),
+        })
 
     def run(self):
         for experimento in range(self.experimentos):
@@ -211,7 +202,7 @@ class Simulacion(metaclass=Singleton):
 
     def generar_eventos_de_llamada(self):
         list(map(lambda hora_de_pedido: self.generar_llamo_cliente_event(hora_de_pedido),
-                 self.utils.get_horas_de_pedidos(self.horas_por_dia)))
+                 self.utils.get_horas_de_pedidos(self.horas_por_dia - 1)))
 
     def generar_llamo_cliente_event(self, hora_de_pedido):
         kwargs = {
@@ -254,7 +245,6 @@ class Simulacion(metaclass=Singleton):
     @property
     def horas_por_dia(self):
         return self.CANTIDAD_HORAS_LABORALES
-
 
     def get_diferencia_hora_actual(self, dt_hora):
         return self.reloj.get_diferencia_hora_actual(dt_hora)

@@ -1,5 +1,7 @@
 import unittest
 from datetime import timedelta
+
+from Configuracion import Configuracion
 from Simulacion import Simulacion
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Camioneta import Camioneta
@@ -37,6 +39,9 @@ class TestableSimulacion(Simulacion):
         pass
 
     def ubicar_camionetas(self):
+        pass
+
+    def publicar_resultados(self):
         pass
 
 
@@ -113,13 +118,13 @@ class SimulacionFunctionalTest(unittest.TestCase):
     @staticmethod
     def generar_evento(cliente, tipo_pizza):
         simulacion = Simulacion()
-        hora = simulacion.TIEMPO_INICIO + timedelta(minutes=5)
+        hora = simulacion.tiempo_inicio + timedelta(minutes=5)
         kwargs = {'hora': hora, 'cliente': cliente, 'tipo_pizza': tipo_pizza}
         simulacion.add_event(EventTypeEnum.LLAMO_CLIENTE, kwargs)
 
     def get_simulacion(self):
         simulacion = TestableSimulacion()
-        simulacion.reloj.dia = Simulacion.TIEMPO_INICIO
+        simulacion.configurate(Configuracion.get_default_configuration())
         simulacion.fel = []
         simulacion.camionetas = []
         simulacion.pedidos = []

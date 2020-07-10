@@ -1,28 +1,44 @@
 import paho.mqtt.client as mqtt
-import datetime
+from datetime import datetime
 import time
 
 from Simulacion import Simulacion
+from models.TipoPizza import TipoPizza
+
+PIZZAS_POR_HORNO = 40
+PEDIDOS_POR_HORA = 20
+HORNOS_POR_CAMIONETA = 1
+CANTIDAD_DE_CAMIONETAS = 4
+VOLVER_AL_RESTAURANTE = False
+CANTIDAD_DE_EXPERIMENTOS = 10
+FIN = datetime.strptime('31/12/20 23:00:00', '%d/%m/%y %H:%M:%S')
+INICIO = datetime.strptime('1/1/20 09:00:00', '%d/%m/%y %H:%M:%S')
+TIPOS_PIZZA_DISPONIBLES = [TipoPizza.ANANA, TipoPizza.CALABRESA, TipoPizza.FUGAZZETA, TipoPizza.MOZZARELLA, TipoPizza.NAPOLITANA]
 
 
 def iniciar_simulacion(configuraciones):
-    # TODO: falta cantidad de corridas o experimentos
-    tipos_de_pizza = {
-        "anana": configuraciones.anana if configuraciones.anana is not None else True,
-        "napolitana": configuraciones.napolitana if configuraciones.napolitana is not None else True,
-        "fugazzeta": configuraciones.fugazzeta if configuraciones.fugazzeta is not None else True,
-        "mozzarella": configuraciones.mozzarella if configuraciones.mozzarella is not None else True,
-        "calabresa": configuraciones.calabresa if configuraciones.calabresa is not None else True
-    }
+
+    tipos_de_pizza = []
+    if configuraciones.anana:
+        tipos_de_pizza.append(TipoPizza.ANANA)
+    elif configuraciones.napolitana:
+        tipos_de_pizza.append(TipoPizza.CALABRESA)
+    elif configuraciones.fugazzeta:
+        tipos_de_pizza.append(TipoPizza.NAPOLITANA)
+    elif configuraciones.mozzarella:
+        tipos_de_pizza.append(TipoPizza.FUGAZZETA)
+    elif configuraciones.calabresa:
+        tipos_de_pizza.append(TipoPizza.MOZZARELLA)
 
     configuracion = {
-        "inicio": time.ctime(configuraciones.inicio) if configuraciones.inicio is not None else datetime.strptime('1/1/20 09:00:00', '%d/%m/%y %H:%M:%S'),
-        "fin": time.ctime(configuraciones.fin) if configuraciones.fin is not None else datetime.strptime('31/12/20 23:00:00', '%d/%m/%y %H:%M:%S'),
-        "volverAlRestaurante": configuraciones.volverAlRestaurante if configuraciones.volverAlRestaurante is not None else 1,
-        "pedidosPorHora": configuraciones.pedidosPorHora if configuraciones.pedidosPorHora is not None else 20,
-        "hornosPorCamioneta": configuraciones.hornosPorCamioneta if configuraciones.hornosPorCamioneta is not None else 1,
-        "pizzasPorHorno": configuraciones.pizzasPorHorno if configuraciones.pizzasPorHorno is not None else 40,
-        "cantidadCamionetas": configuraciones.cantidadCamionetas if configuraciones.cantidadCamionetas is not None else 4,
+        "inicio": time.ctime(configuraciones.inicio) if configuraciones.inicio is not None else INICIO,
+        "fin": time.ctime(configuraciones.fin) if configuraciones.fin is not None else FIN,
+        "volverAlRestaurante": True if configuraciones.volverAlRestaurante is not None and configuraciones.volverAlRestaurante == 2 else VOLVER_AL_RESTAURANTE,
+        "pedidosPorHora": configuraciones.pedidosPorHora if configuraciones.pedidosPorHora is not None else PEDIDOS_POR_HORA,
+        "hornosPorCamioneta": configuraciones.hornosPorCamioneta if configuraciones.hornosPorCamioneta is not None else HORNOS_POR_CAMIONETA,
+        "pizzasPorHorno": configuraciones.pizzasPorHorno if configuraciones.pizzasPorHorno is not None else PIZZAS_POR_HORNO,
+        "cantidadCamionetas": configuraciones.cantidadCamionetas if configuraciones.cantidadCamionetas is not None else CANTIDAD_DE_CAMIONETAS,
+        "cantidadExperimentos": configuraciones.cantidadExperimentos if configuraciones.cantidadExperimentos is not None else CANTIDAD_DE_EXPERIMENTOS,
         "tipos_de_pizza": tipos_de_pizza
     }
 

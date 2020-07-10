@@ -27,11 +27,11 @@ class Utils:
     def get_horas_de_pedidos(horas):
         eventos_en_hora = []
         from Simulacion import Simulacion
+        simulacion = Simulacion()
         for hora in range(horas):
-            for pedido in range(np.random.poisson(Simulacion().pedidos_por_hora)):
+            for pedido in range(np.random.poisson(simulacion.pedidos_por_hora)):
                 tiempo_exacto = math.trunc(random.uniform(0, 60)) + 60 * hora
-                from Simulacion import Simulacion
-                timestamp = Simulacion().tiempo_inicio + timedelta(minutes=tiempo_exacto)
+                timestamp = simulacion.tiempo_inicio + timedelta(minutes=tiempo_exacto)
                 eventos_en_hora.append(timestamp)
         return eventos_en_hora
 

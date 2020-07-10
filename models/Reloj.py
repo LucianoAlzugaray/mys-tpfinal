@@ -3,11 +3,9 @@ from datetime import timedelta, time, datetime
 
 class Reloj(object):
 
-    def __init__(self):
-        from Simulacion import Simulacion
-        self.dia = Simulacion().tiempo_inicio
-        self.cirre_at = time(Simulacion.HORA_DE_CIERRE, Simulacion.MINUTOS_DE_CIERRE)
-        self.finaliza_toma_pedidos_at = time(Simulacion.HORA_FIN_TOMA_DE_PEDIDOS, Simulacion.MINUTOS_FIN_TOMA_DE_PEDIDOS)
+    def configurate(self, kwargs):
+        self.dia = kwargs['dia']
+        self.cirre_at = kwargs['hora_cierre']
 
 
     def avanzar(self, minutos):
@@ -16,8 +14,6 @@ class Reloj(object):
     def termino_dia(self):
             return self.dia.time() >= self.cirre_at
 
-    def termino_horario_de_toma_de_pedido(self):
-        return self.dia.time() >= self.finaliza_toma_pedidos_at
 
     ''' Recibe una fecha y hora (datetime) y devuevle la diferencia en minutos con la hora actual.'''
     def get_diferencia_hora_actual(self, dt_hora):

@@ -1,6 +1,5 @@
 import unittest
 
-from Simulacion import Simulacion
 from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
 from models.Camioneta import Camioneta
 from models.Cliente import Cliente
@@ -15,24 +14,26 @@ class CamionetaTest(unittest.TestCase):
         self.camioneta = Camioneta()
 
     def test_tiene_tipo(self):
+        simulacion = self.get_simulacion()
         self.camioneta.pizzas = []
         self.assertTrue(len(self.camioneta.pizzas) == 0)
 
         self.assertFalse(self.camioneta.tiene_tipo(TipoPizza.ANANA))
 
-        from Simulacion import Simulacion
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
         pizza = simulacion.generar_pizza(TipoPizza.ANANA)
         self.camioneta.pizzas.append(pizza)
         self.assertTrue(self.camioneta.tiene_tipo(TipoPizza.ANANA))
 
     def test_quitar_pizza(self):
+        self.get_simulacion()
         self.camioneta.cargar_pizzas()
         pizza = self.camioneta.pizzas[0]
         self.camioneta.quitar_pizza(pizza)
         self.assertTrue(len(self.camioneta.pizzas) == 39)
 
     def test_cargar_pizzas(self):
+        self.get_simulacion()
         self.assertIsInstance(self.camioneta, Camioneta)
         self.assertTrue(len(self.camioneta.pizzas) == 0)
         self.camioneta.cargar_pizzas()
@@ -44,10 +45,10 @@ class CamionetaTest(unittest.TestCase):
                                  Pizza(TipoPizza.ANANA, None)]
         self.assertTrue(len(self.camioneta.pizzas) == 3)
         self.camioneta.cargar_pizzas()
-        self.assertTrue(len(self.camioneta.pizzas) == 40)
+        self.assertEqual(40, len(self.camioneta.pizzas))
 
     def test_sabe_reservar_una_pizza(self):
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
         cantidad_de_eventos = len(simulacion.fel)
 
         self.camioneta = Camioneta()
@@ -63,29 +64,14 @@ class CamionetaTest(unittest.TestCase):
 
         self.assertRaises(NoHayTipoPizzaEnCamionetaException, self.camioneta.reservar_pizza, pedido)
 
-    # TODO: implementar
-    def test_debe_enviar_pedido_asignado_cuando_no_tiene_pedido_en_curso_y_cambiar_pedido_en_curso_al_enviar(self):
+    def get_simulacion(self):
+        from Simulacion import Simulacion
+        from Configuracion import Configuracion
+        configuracion = Configuracion.get_default_configuration()
+        simulacion = Simulacion()
+        simulacion.configurate(configuracion)
+        return simulacion
 
-        pass
-
-
-
-        # self.camioneta.pizzas.append(Pizza(TipoPizza.NAPOLITANA))
-        # pedido2 = Pedido(cliente, 10, self.camioneta, TipoPizza.NAPOLITANA)
-        # self.camioneta.asignar_pedido(pedido2)
-        # self.assertEqual(pedido, self.camioneta.pedido_en_curso)
-        #
-        # self.camioneta.enviar_pedido()
-        # self.assertEqual(pedido2, self.camioneta.pedido_en_curso)
-
-
-
-        # calcular variable aleatoria de tiempo de entrega
-        # generar un evento de pizza entregada
-        #
-        #     cuando se produce un evento de pizza entregada
-        #         hay que decirle a la camioneta enviar_siguiente_pedido
-        #             si no tiene pedidos que entregar debe se queda donde está
 
 if __name__ == '__main__':
     unittest.main()
