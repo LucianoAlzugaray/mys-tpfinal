@@ -1,11 +1,11 @@
 import itertools
+import json
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from functools import reduce
 import numpy as np
 from events.PizzaVenceEvent import PizzaVenceEvent
 from events.SimulacionEventFactory import SimulacionEventFactory
-from models.Camioneta import Camioneta
 from models.Cliente import Cliente
 from models.Pedido import Pedido
 from models.Pizza import Pizza
@@ -14,7 +14,13 @@ from models.meta.Singleton import Singleton
 from utils.utils import Utils
 from models.Reloj import Reloj
 from models.EventTypeEnum import EventTypeEnum
+import paho.mqtt.client as paho
+from random import random
+import json
 
+def generar_camionetas(configuracion):
+    from models.Camioneta import Camioneta
+    return [Camioneta(configuracion.hornosPorCamioneta, configuracion.pizzasPorHorno) for i in range(configuracion.cantidadCamionetas)]
 
 class Simulacion(metaclass=Singleton):
     CANTIDAD_HORAS_LABORALES = 12
@@ -24,48 +30,43 @@ class Simulacion(metaclass=Singleton):
     HORA_FIN_TOMA_DE_PEDIDOS = 22
     MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
 
-    DIA_INICIO = 9
-    MES_INICIO = 7
-    ANIO_INICIO = 2020
-    HORA_INICIO = 11
-    MINUTOS_INICIO = 0
-    TIEMPO_INICIO = datetime(
-        ANIO_INICIO,
-        MES_INICIO,
-        DIA_INICIO,
-        HORA_INICIO,
-        MINUTOS_INICIO
-    )
-
-    CANTIDAD_DE_CAMIONETAS = 4
-    DIA_FIN = 10
-    MES_FIN = 7
-    ANIO_FIN = 2020
-    HORA_FIN = 23
-    MINUTOS_FIN = 0
-    TIEMPO_FIN = datetime(
-        ANIO_FIN,
-        MES_FIN,
-        DIA_FIN,
-        HORA_FIN,
-        MINUTOS_FIN
-    )
-
     def __init__(self):
-        self.experimentos = 10
-        self.dias_a_simular = 365
+        self.dias_a_simular = None
+        self.tiempo_inicio = None
+        self.tiempo_fin = None
+        self.pedidos_por_hora = None
+        self.experimentos = None
         self.rango_de_atencion = 2000
         self.volver_al_terminar_todos_los_pedidos = False
+
+        self.fel = []
+        self.events = []
+        self.pedidos = []
+        self.camionetas = []
+        self.desperdicios = []
+        self.clientes_rechazados = []
+        self.tipos_de_pizza_disponibles = []
+        self.porcentaje_desperdicio_diario = []
+
         self.utils = Utils()
         self.reloj = Reloj()
         self.event_factory = SimulacionEventFactory()
-        self.fel = []
-        self.pedidos = []
-        self.camionetas = [Camioneta() for i in range(self.CANTIDAD_DE_CAMIONETAS)]
-        self.desperdicios = []
-        self.events = []
-        self.clientes_rechazados = []
-        self.porcentaje_desperdicio_diario = []
+
+    def configurate(self, configuracion):
+        self.dias_a_simular = (configuracion['fin'] - configuracion['inicio']).days
+        self.tiempo_inicio = configuracion['inicio']
+        self.tiempo_fin = configuracion['fin']
+        self.experimentos = configuracion['cantidadExperimentos']
+        self.pedidos_por_hora = configuracion['pedidosPorHora']
+        self.dias_corridos = []
+        from models.Camioneta import Camioneta
+        self.camionetas += [Camioneta(configuracion['hornosPorCamioneta'], configuracion['pizzasPorHorno']) for i in range(configuracion['cantidadCamionetas'])]
+        self.tipos_de_pizza_disponibles = configuracion['tipos_de_pizza']
+
+        self.reloj.configurate({
+            'dia': self.tiempo_inicio,
+            'hora_cierre': time(self.HORA_DE_CIERRE, self.MINUTOS_DE_CIERRE),
+        })
 
     def run(self):
         for experimento in range(self.experimentos):
@@ -78,6 +79,27 @@ class Simulacion(metaclass=Singleton):
                         evento.notify()
 
                 self.finalizar_dia()
+                self.publicar_resultados()
+
+    def publicar_resultados(self):
+        tiempo_espera = self.tiempo_espera()
+        porcentaje_desperdicio = self.porcentaje_desperdicio()
+        pedidos_entregados = self.pedidos_entregados()
+        pedidos_perdidos = self.pedidos_perdidos()
+        distacia_recorrida = self.distacia_recorrida()
+        tiempo_entre_recargas = self.tiempo_entre_recargas()
+        pizzas_pedidas_por_tipo = json.dumps(self.pizzas_pedidas_por_tipo())
+
+        client = paho.Client()
+        client.connect("172.16.240.10", 1883)
+        client.publish("espera-de-cliente", tiempo_espera)
+        client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
+        client.publish("pedidos-entregados", len(pedidos_entregados))
+        client.publish("pedidos-rechazados", len(pedidos_perdidos))
+        client.publish("distancias-recorridas", distacia_recorrida)
+        client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
+        client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
+        client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
 
     # TODO: armar los csv de pedidos y desperdicios
     def obtener_datos(self):
@@ -180,7 +202,7 @@ class Simulacion(metaclass=Singleton):
 
     def generar_eventos_de_llamada(self):
         list(map(lambda hora_de_pedido: self.generar_llamo_cliente_event(hora_de_pedido),
-                 self.utils.get_horas_de_pedidos(self.horas_por_dia)))
+                 self.utils.get_horas_de_pedidos(self.horas_por_dia - 1)))
 
     def generar_llamo_cliente_event(self, hora_de_pedido):
         kwargs = {
@@ -221,21 +243,8 @@ class Simulacion(metaclass=Singleton):
         self.inicializar_camionetas()
 
     @property
-    def tiempo_inicio(self):
-        return self.TIEMPO_INICIO
-
-    @property
-    def tiempo_fin(self): # TODO : WARNING - Sin uso.
-        return self.TIEMPO_FIN
-
-    # @property
-    # def dias_a_simular(self):
-    #     return self.tiempo_fin.date().day - self.tiempo_inicio.date().day
-
-    @property
     def horas_por_dia(self):
         return self.CANTIDAD_HORAS_LABORALES
-
 
     def get_diferencia_hora_actual(self, dt_hora):
         return self.reloj.get_diferencia_hora_actual(dt_hora)
@@ -276,8 +285,10 @@ class Simulacion(metaclass=Singleton):
     def tiempo_espera(self):
 
         minutos_espera = list(map(lambda pedido: pedido.hora_entrega - pedido.hora_toma, self.pedidos_entregados()))
+        media = np.mean(minutos_espera)
+        return math.trunc(media.seconds / 60)
+        # minutos = media. * 60 + media.minute
 
-        return np.mean(minutos_espera)
 
     '''El porcentaje de desperdicios a nivel corrida (365 dias)'''
     def porcentaje_desperdicio(self):

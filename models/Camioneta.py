@@ -7,10 +7,8 @@ from models.Pizza import Pizza
 
 
 class Camioneta:
-    cantidad_hornos = 1
-    tamanio_hornos = 40
 
-    def __init__(self):
+    def __init__(self, cantidad_hornos=1, tamanio_hornos=40):
         self.ubicacion = [0, 0]
         self.pizzas = []
         self.disponible = True
@@ -19,12 +17,24 @@ class Camioneta:
         self.distancia_recorrida = 0
         self.tiempo_entre_recargas = []
         self.tiempo_ultima_recarga = None
+        self.cantidad_hornos = cantidad_hornos
+        self.tamanio_hornos = tamanio_hornos
 
     def cargar_pizzas(self):
         from Simulacion import Simulacion
         simulacion = Simulacion()
-        for i in range(self.tamanio_hornos - len(self.pizzas)):
-            self.pizzas.append(Pizza(simulacion.utils.generar_tipo_de_pizza(), simulacion.dia))
+        cantidad_de_pizzas_a_cargar = self.tamanio_hornos - len(self.pizzas)
+        pizzas_por_tipo = divmod(cantidad_de_pizzas_a_cargar, len(simulacion.tipos_de_pizza_disponibles))
+
+        for tipo_de_pizza in simulacion.tipos_de_pizza_disponibles:
+            self.pizzas += [Pizza(tipo_de_pizza, simulacion.dia) for i in range(pizzas_por_tipo[0])]
+
+        k = 0
+        for i in range(pizzas_por_tipo[1]):
+            self.pizzas.append(Pizza(simulacion.tipos_de_pizza_disponibles[k], simulacion.dia))
+            k += 1
+            if i > len(simulacion.tipos_de_pizza_disponibles):
+                k = 0
 
         if self.tiempo_ultima_recarga is not None:
             self.tiempo_entre_recargas.append(Simulacion().get_diferencia_hora_actual(self.tiempo_ultima_recarga))
@@ -32,7 +42,6 @@ class Camioneta:
 
     def remover_pizzas_vencidas(self):
         self.pizzas = list(filter(lambda x: not x.vencida, self.pizzas))
-
 
     def quitar_pizza(self, pizza):
         self.pizzas.remove(pizza)

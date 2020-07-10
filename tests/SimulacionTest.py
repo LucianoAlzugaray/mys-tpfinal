@@ -1,5 +1,7 @@
 import unittest
+from datetime import timedelta
 
+from Configuracion import Configuracion
 from events.CamionetaRegresaABuscarPedidoEvent import CamionetaRegresaABuscarPedidoEvent
 from events.EnviarPedidoEvent import EnviarPedidoEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
@@ -27,14 +29,17 @@ class SimulacionTest(unittest.TestCase):
         self.assertEqual(pedidos_rechazados + 1, len(Simulacion().clientes_rechazados))
 
     def test_debe_asignar_pedido_a_camioneta_cuando_cliente_esta_en_rango(self):
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
+        configuracion = Configuracion.get_default_configuration()
+        simulacion.camionetas += [Camioneta(configuracion['hornosPorCamioneta'], configuracion['pizzasPorHorno']) for i in range(configuracion['cantidadCamionetas'])]
+
         simulacion.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.time))
 
         cliente = self.generar_cliente_en_rango()
         evento = self.generar_evento(cliente, TipoPizza.ANANA)
         evento.notify()
 
-        camioneta = Simulacion().get_camioneta_by_cliente(cliente)
+        camioneta = simulacion.get_camioneta_by_cliente(cliente)
         pedido = camioneta.get_pedido_by_cliente(cliente)
 
         self.assertEqual(camioneta, simulacion.camionetas[2])
@@ -42,7 +47,10 @@ class SimulacionTest(unittest.TestCase):
         self.assertEqual(pedido.hora_toma, evento.hora)
 
     def test_debe_asignar_el_pedido_a_la_camioneta_mas_cercana(self):
-        simulacion = Simulacion()
+        simulacion = self.get_simulacion()
+        configuracion = Configuracion.get_default_configuration()
+        simulacion.camionetas += [Camioneta(configuracion['hornosPorCamioneta'], configuracion['pizzasPorHorno']) for i in range(configuracion['cantidadCamionetas'])]
+
         simulacion.camionetas[2].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.time))
         simulacion.camionetas[3].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.time))
 
@@ -51,7 +59,7 @@ class SimulacionTest(unittest.TestCase):
         simulacion.camionetas[3].ubicacion = evento.cliente.ubicacion
         evento.notify()
 
-        camioneta = Simulacion().get_camioneta_by_cliente(cliente)
+        camioneta = simulacion.get_camioneta_by_cliente(cliente)
         pedido = camioneta.get_pedido_by_cliente(cliente)
 
         self.assertEqual(camioneta, simulacion.camionetas[3])
@@ -178,36 +186,36 @@ class SimulacionTest(unittest.TestCase):
         camioneta12 = Camioneta()
         camioneta12.cargar_pizzas()
 
-        pedido12 = Pedido(cliente12, 10, camioneta12, camioneta12.pizzas[0].tipo)
-        pedido12.hora_entrega = 15
+        pedido12 = Pedido(cliente12, simulacion.time, camioneta12, camioneta12.pizzas[0].tipo)
+        pedido12.hora_entrega = simulacion.time + timedelta(minutes=15)
         pedido12.pizza = camioneta12.pizzas[0]
         pedido12.entregado = True
         simulacion.pedidos.append(pedido12)
 
-        pedido22 = Pedido(cliente12, 10, camioneta12, camioneta12.pizzas[1].tipo)
-        pedido22.hora_entrega = 15
+        pedido22 = Pedido(cliente12, simulacion.time, camioneta12, camioneta12.pizzas[1].tipo)
+        pedido22.hora_entrega = simulacion.time + timedelta(minutes=15)
         pedido22.pizza = camioneta12.pizzas[1]
         pedido22.entregado = True
         simulacion.pedidos.append(pedido22)
 
-        pedido32 = Pedido(cliente12, 10, camioneta12, camioneta12.pizzas[2].tipo)
-        pedido32.hora_entrega = 15
+        pedido32 = Pedido(cliente12, simulacion.time, camioneta12, camioneta12.pizzas[2].tipo)
+        pedido32.hora_entrega = simulacion.time + timedelta(minutes=15)
         pedido32.pizza = camioneta12.pizzas[2]
         simulacion.pedidos.append(pedido32)
 
-        pedido42 = Pedido(cliente12, 10, camioneta12, camioneta12.pizzas[3].tipo)
-        pedido42.hora_entrega = 15
+        pedido42 = Pedido(cliente12, simulacion.time, camioneta12, camioneta12.pizzas[3].tipo)
+        pedido42.hora_entrega = simulacion.time + timedelta(minutes=15)
         pedido42.pizza = camioneta12.pizzas[3]
         simulacion.pedidos.append(pedido42)
 
-        pedido52 = Pedido(cliente12, 10, camioneta12, camioneta12.pizzas[4].tipo)
-        pedido52.hora_entrega = 15
+        pedido52 = Pedido(cliente12, simulacion.time, camioneta12, camioneta12.pizzas[4].tipo)
+        pedido52.hora_entrega = simulacion.time + timedelta(minutes=15)
         pedido52.pizza = camioneta12.pizzas[4]
         simulacion.pedidos.append(pedido52)
 
         tiempo_espera = simulacion.tiempo_espera()
 
-        self.assertEqual(tiempo_espera, 5)
+        self.assertEqual(tiempo_espera, 15)
 
     def test_debe_retornar_pedidos_perdidos(self):
         simulacion = self.get_simulacion()
@@ -300,13 +308,13 @@ class SimulacionTest(unittest.TestCase):
 
     def get_simulacion(self):
         simulacion = Simulacion()
+        simulacion.configurate(Configuracion.get_default_configuration())
         simulacion.pedidos = []
         simulacion.clientes_rechazados = []
         simulacion.dias_a_simular = 1
         simulacion.experimentos = 1
         simulacion.camionetas = []
         return simulacion
-
 
 
 if __name__ == '__main__':
