@@ -1,11 +1,8 @@
 import math
 from datetime import timedelta
-
 from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
-from events.EnviarPedidoEvent import EnviarPedidoEvent
 from models.EventTypeEnum import EventTypeEnum
 from models.Pedido import Pedido
-from models.actividades.EnviarPedido import EnviarPedido
 from models.Pizza import Pizza
 
 
@@ -37,6 +34,9 @@ class Camioneta:
             self.tiempo_entre_recargas.append(Simulacion().get_diferencia_hora_actual(self.tiempo_ultima_recarga))
         self.tiempo_ultima_recarga = Simulacion().time
 
+    def remover_pizzas_vencidas(self):
+        self.pizzas = list(filter(lambda x: not x.vencida, self.pizzas))
+
 
     def quitar_pizza(self, pizza):
         self.pizzas.remove(pizza)
@@ -49,8 +49,15 @@ class Camioneta:
         self.pedido_en_curso = None
         pedido.entregado = True
         pedido.hora_entrega = simulacion.time
+        if len(self.pizzas) == 0:
+            self.generar_evento_volver_a_restaurante()
         if len(self.pedidos) > 0:
             self.generar_evento_enviar_pedido(self.pedidos[0])
+
+    def generar_evento_volver_a_restaurante(self):
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        simulacion.add_event(EventTypeEnum.CAMIONETA_REGRESA_VACIA, {'camioneta': self})
 
     def obtener_distancia(self, punto1, punto2):
         cateto1 = punto2[0] - punto1[0]
@@ -130,6 +137,7 @@ class Camioneta:
     def enviar_pedido(self):
         pedido = self.get_siguiente_pedido()
         pedido.ubicacion_origen = self.ubicacion
+        # TODO : ver si no nos quita el pedido de los pedidos de la simulacion
         self.pedidos.remove(pedido)
         self.pedido_en_curso = pedido
 
@@ -144,17 +152,10 @@ class Camioneta:
 
         return simulacion.dia + timedelta(minutes=tiempo)
 
+    def finalizar_dia(self):
+        self.volver_a_pizzeria()
+        self.pizzas = []
 
-
-
-
-        # setear el pedio en curso
-        # calcular variable aleatoria de tiempo de entrega
-        # generar un evento de pizza entregada
-        #
-        #     cuando se produce un evento de pizza entregada
-        #         hay que decirle a la camioneta enviar_siguiente_pedido
-        #             si no tiene pedidos que entregar debe se queda donde está
 
 
 

@@ -1,4 +1,5 @@
 import itertools
+import json
 import math
 from datetime import datetime, timedelta
 from functools import reduce
@@ -6,6 +7,7 @@ import numpy as np
 from events.PizzaVenceEvent import PizzaVenceEvent
 from events.SimulacionEventFactory import SimulacionEventFactory
 from models.Cliente import Cliente
+from models.Pedido import Pedido
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.meta.Singleton import Singleton
@@ -77,20 +79,13 @@ class Simulacion(metaclass=Singleton):
         for experimento in range(self.experimentos):
             for dia in range(self.dias_a_simular):
                 self.iniciar_dia()
-                while not self.termino_dia():
-                    for evento in self.obtener_eventos_de_ahora():
-                        evento.notify()
-                        self.events.append(evento)
-                        self.fel.remove(evento)
-                    if len(self.fel) == 0:
-                        dt_evento = datetime(year=self.dia.year, month=self.dia.month, day=self.dia.day, hour=self.HORA_DE_CIERRE, minute=self.MINUTOS_DE_CIERRE, second=1)
-                    else:
-                        evento = self.fel[0]
-                        dt_evento = evento.hora
-                    self.avanzar_reloj_time(dt_evento)
 
-                for camioneta in self.camionetas:
-                    camioneta.volver_a_pizzeria()
+                while not self.termino_dia():
+                    evento = self.next_event()
+                    if evento is not None:
+                        evento.notify()
+
+                self.finalizar_dia()
                 self.publicar_resultados()
 
     def publicar_resultados(self):
@@ -113,6 +108,7 @@ class Simulacion(metaclass=Singleton):
         client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
         client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
 
+    # TODO: armar los csv de pedidos y desperdicios
     def obtener_datos(self):
         pass
 
@@ -126,7 +122,10 @@ class Simulacion(metaclass=Singleton):
         camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.camionetas))
         return None if len(camionetas) == 0 else camionetas[0]
 
-    def rechazar_pedido(self, cliente: Cliente) -> None:
+    def rechazar_pedido(self, pedido: Pedido) -> None:
+        self.clientes_rechazados.append(pedido)
+
+    def rechazar_cliente(self, cliente: Cliente) -> None:
         self.clientes_rechazados.append(cliente)
 
     def get_camioneta_by_cliente(self, cliente: Cliente):
@@ -152,10 +151,7 @@ class Simulacion(metaclass=Singleton):
             distancia = self.obtener_distancia(ubicacion, ubicacion_camioneta)
             distancias[camioneta] = distancia
 
-            variableParaDebug = 0
-
-            aux = sorted(distancias.items(), key=lambda x: x[1])
-
+        aux = sorted(distancias.items(), key=lambda x: x[1])
         camionetas = []
         for i in aux:
             camionetas.append(i[0])
@@ -208,10 +204,10 @@ class Simulacion(metaclass=Singleton):
         self.reloj.avanzar(minutos)
 
     def iniciar_dia(self):
-        self.generar_pedidos()
+        self.generar_eventos_de_llamada()
         self.inicializar_camionetas()
 
-    def generar_pedidos(self):
+    def generar_eventos_de_llamada(self):
         list(map(lambda hora_de_pedido: self.generar_llamo_cliente_event(hora_de_pedido),
                  self.utils.get_horas_de_pedidos(self.horas_por_dia)))
 
@@ -250,12 +246,8 @@ class Simulacion(metaclass=Singleton):
         return self.reloj.dia
 
     def iniciar_dia(self):
-        self.generar_pedidos()
+        self.generar_eventos_de_llamada()
         self.inicializar_camionetas()
-
-    # @property
-    # def dias_a_simular(self):
-    #     return self.tiempo_fin.date().day - self.tiempo_inicio.date().day
 
     @property
     def horas_por_dia(self):
@@ -266,18 +258,15 @@ class Simulacion(metaclass=Singleton):
         return self.reloj.get_diferencia_hora_actual(dt_hora)
 
     '''Pedidos que fueron entregados realmente'''
-
     def pedidos_entregados(self):
         return list(filter(lambda pedido: pedido.entregado == True, self.pedidos))
 
     '''Pedidos que fueron rechazados'''
-
     # TODO el nombre rechazado en el dashboard no me parece correcto deberia ser perdido
     def pedidos_perdidos(self):
         return list(filter(lambda pedido: pedido.entregado == False, self.pedidos))
 
     '''Devuelve un diccionario tipo_pizza: cantidad'''
-
     def pizzas_pedidas_por_tipo(self):
         cont_anana = 0
         cont_mozzarela = 0
@@ -301,31 +290,19 @@ class Simulacion(metaclass=Singleton):
                 'Calabresa': cont_calabresa, 'Fugazzeta': cont_fugazzeta}
 
     '''Tiempo promedio de espera de los clientes a nivel simulacion'''
-
     def tiempo_espera(self):
 
         minutos_espera = list(map(lambda pedido: pedido.hora_entrega - pedido.hora_toma, self.pedidos_entregados()))
-
         media = np.mean(minutos_espera)
-
         return math.trunc(media.seconds / 60)
         # minutos = media. * 60 + media.minute
 
 
     '''El porcentaje de desperdicios a nivel corrida (365 dias)'''
-
     def porcentaje_desperdicio(self):
-        desperdicio_total = []
-
-        for dia in range(self.dias_a_simular):
-            desperdicio_diario = dia.desperdicios + dia.desperdicio_por_fin_de_dia
-            porcentaje_diario = (desperdicio_diario / self.horas_por_dia) * 100
-            desperdicio_total.append(porcentaje_diario)
-
-        return np.mean(desperdicio_total)
+        return np.mean(self.porcentaje_desperdicio_diario)
 
     '''devuelve la cantidad de clientes atendidos (que recibieron una pizza) por hora'''
-
     def clientes_atendidos_por_hora(self):
 
         clientes_atendidos_por_hora = []
@@ -338,7 +315,6 @@ class Simulacion(metaclass=Singleton):
         return clientes_atendidos_por_hora
 
     '''las camionetas deberian llevar su distancia recorrida'''
-
     def distacia_recorrida(self):
 
         distancias_camionetas = list(map(lambda x: x.distancia_recorrida, self.camionetas))
@@ -346,7 +322,6 @@ class Simulacion(metaclass=Singleton):
         return reduce(lambda acumulador, distancia_camioneta: acumulador + distancia_camioneta, distancias_camionetas)
 
     ''' tiempo promedio entre recargas a nivel simulación'''
-
     def tiempo_entre_recargas(self):
 
         tiempo_promedio_entre_recargas = list(map(lambda x: np.mean(x.tiempo_entre_recargas), self.camionetas))
@@ -359,6 +334,38 @@ class Simulacion(metaclass=Singleton):
         return pizza
 
     ''' Metodo para avanzar el tiempo dado un datetime.'''
-
     def avanzar_reloj_time(self, time: datetime):
         self.reloj.avanzar_time(time)
+
+    '''Obtiene el porcentaje de desperdicios en el dia'''
+    def add_desperdicio(self, pizza, hora):
+        self.desperdicios.append(pizza)
+        if self.pedidos_del_dia > 0:
+            self.porcentaje_desperdicio_diario = (self.desperdicios_del_dia/self.pedidos_del_dia) * 100
+        else:
+            self.porcentaje_desperdicio_diario = 0
+
+    @property
+    def desperdicios_del_dia(self):
+        return len(list(filter(lambda x: x.hora.day == self.time.day, self.desperdicios)))
+
+    @property
+    def pedidos_del_dia(self):
+        return len(list(filter(lambda x: x.hora_toma.day == self.time.day, self.pedidos)))
+
+    def next_event(self):
+        if len(self.fel) == 0:
+            self.reloj.terminar_el_dia()
+            return None
+
+        evento = self.fel[0]
+        self.events.append(evento)
+        self.fel.remove(evento)
+        return evento
+
+    def finalizar_dia(self):
+        desperdicios = list(itertools.chain(*map(lambda x: x.pizzas, self.camionetas)))
+        list(map(lambda x: self.add_desperdicio(x, self.dia), desperdicios))
+        list(map(lambda x: x.finalizar_dia(), self.camionetas))
+
+

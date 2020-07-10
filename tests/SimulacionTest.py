@@ -1,6 +1,6 @@
 import unittest
 
-from events.CamionetaRegresaARestauranteEvent import CamionetaRegresaARestauranteEvent
+from events.CamionetaRegresaABuscarPedidoEvent import CamionetaRegresaABuscarPedidoEvent
 from events.EnviarPedidoEvent import EnviarPedidoEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from Simulacion import Simulacion
@@ -9,7 +9,7 @@ from models.Pedido import Pedido
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.actividades.EncolarCliente import EncolarCliente
-from models.actividades.RechazarPedido import RechazarPedido
+from models.actividades.RechazarCliente import RechazarCliente
 from utils.utils import Utils
 from models.Camioneta import Camioneta
 
@@ -109,9 +109,9 @@ class SimulacionTest(unittest.TestCase):
         evento = self.generar_evento(cliente, TipoPizza.NAPOLITANA)
         evento.notify()
 
-        eventos = list(filter(lambda x: isinstance(x, CamionetaRegresaARestauranteEvent), simulacion.fel))
+        eventos = list(filter(lambda x: isinstance(x, CamionetaRegresaABuscarPedidoEvent), simulacion.fel))
         self.assertFalse(len(eventos) == 0)
-        self.assertIsInstance(eventos[0], CamionetaRegresaARestauranteEvent)
+        self.assertIsInstance(eventos[0], CamionetaRegresaABuscarPedidoEvent)
 
         expected = simulacion.camionetas[3]
         actual = eventos[0].camioneta
@@ -294,7 +294,7 @@ class SimulacionTest(unittest.TestCase):
         evento = LlamoClienteEvent(0, cliente, Simulacion())
         if tipo_pizza is not None:
             evento.tipo_pizza = tipo_pizza
-        evento.attach(RechazarPedido())
+        evento.attach(RechazarCliente())
         evento.attach(EncolarCliente())
         return evento
 
@@ -302,7 +302,6 @@ class SimulacionTest(unittest.TestCase):
         simulacion = Simulacion()
         simulacion.pedidos = []
         simulacion.clientes_rechazados = []
-        simulacion.dias_corridos = []
         simulacion.dias_a_simular = 1
         simulacion.experimentos = 1
         simulacion.camionetas = []
