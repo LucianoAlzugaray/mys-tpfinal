@@ -8,3 +8,6 @@ class VencerPizza(Actividad):
         # saber si la pizza no fue entregada
 
         evento.pizza.vencida = True
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        simulacion.add_desperdicio(evento)

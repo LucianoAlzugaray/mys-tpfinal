@@ -1,11 +1,8 @@
 import math
 from datetime import timedelta
-
 from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
-from events.EnviarPedidoEvent import EnviarPedidoEvent
 from models.EventTypeEnum import EventTypeEnum
 from models.Pedido import Pedido
-from models.actividades.EnviarPedido import EnviarPedido
 from models.Pizza import Pizza
 
 
@@ -32,7 +29,6 @@ class Camioneta:
         if self.tiempo_ultima_recarga is not None:
             self.tiempo_entre_recargas.append(Simulacion().get_diferencia_hora_actual(self.tiempo_ultima_recarga))
         self.tiempo_ultima_recarga = Simulacion().time
-
 
     def quitar_pizza(self, pizza):
         self.pizzas.remove(pizza)
@@ -126,6 +122,7 @@ class Camioneta:
     def enviar_pedido(self):
         pedido = self.get_siguiente_pedido()
         pedido.ubicacion_origen = self.ubicacion
+        # TODO : ver si no nos quita el pedido de los pedidos de la simulacion
         self.pedidos.remove(pedido)
         self.pedido_en_curso = pedido
 

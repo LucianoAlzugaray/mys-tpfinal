@@ -70,6 +70,8 @@ class Simulacion(metaclass=Singleton):
         self.clientes_rechazados = []
         self.rango_de_atencion = 2000
         self.fel = []
+        self.porcentaje_desperdicio_diario = []
+        self.desperdicios = []
 
     def run(self):
         for experimento in range(self.experimentos):
@@ -188,10 +190,10 @@ class Simulacion(metaclass=Singleton):
         self.reloj.avanzar(minutos)
 
     def iniciar_dia(self):
-        self.generar_pedidos()
+        self.generar_eventos_de_llamada()
         self.inicializar_camionetas()
 
-    def generar_pedidos(self):
+    def generar_eventos_de_llamada(self):
         list(map(lambda hora_de_pedido: self.generar_llamo_cliente_event(hora_de_pedido),
                  self.utils.get_horas_de_pedidos(self.horas_por_dia)))
 
@@ -230,7 +232,7 @@ class Simulacion(metaclass=Singleton):
         return self.reloj.dia
 
     def iniciar_dia(self):
-        self.generar_pedidos()
+        self.generar_eventos_de_llamada()
         self.inicializar_camionetas()
 
     @property
@@ -254,18 +256,15 @@ class Simulacion(metaclass=Singleton):
         return self.reloj.get_diferencia_hora_actual(dt_hora)
 
     '''Pedidos que fueron entregados realmente'''
-
     def pedidos_entregados(self):
         return list(filter(lambda pedido: pedido.entregado == True, self.pedidos))
 
     '''Pedidos que fueron rechazados'''
-
     # TODO el nombre rechazado en el dashboard no me parece correcto deberia ser perdido
     def pedidos_perdidos(self):
         return list(filter(lambda pedido: pedido.entregado == False, self.pedidos))
 
     '''Devuelve un diccionario tipo_pizza: cantidad'''
-
     def pizzas_pedidas_por_tipo(self):
         cont_anana = 0
         cont_mozzarela = 0
@@ -289,7 +288,6 @@ class Simulacion(metaclass=Singleton):
                 'Calabresa': cont_calabresa, 'Fugazzeta': cont_fugazzeta}
 
     '''Tiempo promedio de espera de los clientes a nivel simulacion'''
-
     def tiempo_espera(self):
 
         minutos_espera = list(map(lambda pedido: pedido.hora_entrega - pedido.hora_toma, self.pedidos_entregados()))
@@ -297,19 +295,10 @@ class Simulacion(metaclass=Singleton):
         return np.mean(minutos_espera)
 
     '''El porcentaje de desperdicios a nivel corrida (365 dias)'''
-
     def porcentaje_desperdicio(self):
-        desperdicio_total = []
-
-        for dia in range(self.dias_a_simular):
-            desperdicio_diario = dia.desperdicios + dia.desperdicio_por_fin_de_dia
-            porcentaje_diario = (desperdicio_diario / self.horas_por_dia) * 100
-            desperdicio_total.append(porcentaje_diario)
-
-        return np.mean(desperdicio_total)
+        return np.mean(self.porcentaje_desperdicio_diario)
 
     '''devuelve la cantidad de clientes atendidos (que recibieron una pizza) por hora'''
-
     def clientes_atendidos_por_hora(self):
 
         clientes_atendidos_por_hora = []
@@ -322,7 +311,6 @@ class Simulacion(metaclass=Singleton):
         return clientes_atendidos_por_hora
 
     '''las camionetas deberian llevar su distancia recorrida'''
-
     def distacia_recorrida(self):
 
         distancias_camionetas = list(map(lambda x: x.distancia_recorrida, self.camionetas))
@@ -330,7 +318,6 @@ class Simulacion(metaclass=Singleton):
         return reduce(lambda acumulador, distancia_camioneta: acumulador + distancia_camioneta, distancias_camionetas)
 
     ''' tiempo promedio entre recargas a nivel simulación'''
-
     def tiempo_entre_recargas(self):
 
         tiempo_promedio_entre_recargas = list(map(lambda x: np.mean(x.tiempo_entre_recargas), self.camionetas))
@@ -343,6 +330,21 @@ class Simulacion(metaclass=Singleton):
         return pizza
 
     ''' Metodo para avanzar el tiempo dado un datetime.'''
-
     def avanzar_reloj_time(self, time: datetime):
         self.reloj.avanzar_time(time)
+
+    '''Obtiene el porcentaje de desperdicios en el dia'''
+    def add_desperdicio(self, evento):
+        self.desperdicios.append(evento)
+        if self.pedidos_del_dia > 0:
+            self.porcentaje_desperdicio_diario = (self.desperdicios_del_dia/self.pedidos_del_dia) * 100
+        else:
+            self.porcentaje_desperdicio_diario = 0
+
+    @property
+    def desperdicios_del_dia(self):
+        return len(list(filter(lambda x: x.hora.day == self.time.day, self.desperdicios)))
+
+    @property
+    def pedidos_del_dia(self):
+        return len(list(filter(lambda x: x.hora.day == self.time.day, self.pedidos)))
