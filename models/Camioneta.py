@@ -26,8 +26,12 @@ class Camioneta:
     def cargar_pizzas(self):
         from Simulacion import Simulacion
         simulacion = Simulacion()
-        for i in range(self.tamanio_hornos - len(self.pizzas)):
-            self.pizzas.append(Pizza(simulacion.utils.generar_tipo_de_pizza(), simulacion.dia))
+
+        cantidad_de_pizzas_a_cargar = self.tamanio_hornos - len(self.pizzas)
+        pizzas_por_tipo = math.trunc(cantidad_de_pizzas_a_cargar / len(simulacion.tipos_de_pizza_disponibles))
+
+        for tipo_de_pizza in simulacion.tipos_de_pizza_disponibles:
+            self.pizzas += [Pizza(tipo_de_pizza, simulacion.dia) for i in range(pizzas_por_tipo)]
 
         if self.tiempo_ultima_recarga is not None:
             self.tiempo_entre_recargas.append(Simulacion().get_diferencia_hora_actual(self.tiempo_ultima_recarga))

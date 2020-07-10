@@ -38,12 +38,20 @@ class Utils:
     ## Genera tipo de pizza aleatorio
     @staticmethod
     def generar_tipo_de_pizza():
-        opcion = random.random()*100
-        from Simulacion import Simulacion
-        #[(PIZZA, PROB), (PIZZA,PROB)]
-        pizzas_disponibles = Simulacion().pizzas_disponibles_con_probabilidades()
-        selected = np.random.choice(len(pizzas_disponibles), 1, p=[pd[1] for pd in pizzas_disponibles])[0]
-        return pizzas_disponibles[selected][0]
+
+        opcion = random.random()
+        if opcion < 0.05:
+            return TipoPizza.ANANA
+        elif opcion < 0.20:
+            return TipoPizza.CALABRESA
+        elif opcion < 0.55:
+            return TipoPizza.MOZZARELLA
+        elif opcion < 0.75:
+            return TipoPizza.FUGAZZETA
+        else:
+            return TipoPizza.NAPOLITANA
+
+
 
 
     ## Obtiene una ubicación del cliente aleatoria

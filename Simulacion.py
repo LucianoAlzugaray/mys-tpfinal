@@ -28,17 +28,17 @@ class Simulacion(metaclass=Singleton):
     HORA_FIN_TOMA_DE_PEDIDOS = 22
     MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
 
-    def __init__(self, valores):
+    def __init__(self):
         self.event_factory = SimulacionEventFactory()
         self.reloj = Reloj()
         self.experimentos = 10
-        self.dias_a_simular = (valores.fin - valores.inicio).days
-        self.tiempo_inicio = valores.inicio
-        self.tiempo_fin = valores.fin
-        self.pedidos_por_hora = valores.pedidosPorHora
+        self.dias_a_simular = None
+        self.tiempo_inicio = None
+        self.tiempo_fin = None
+        self.pedidos_por_hora = None
         self.minutos_maximo = 60 * self.horas_por_dia
         self.dias_corridos = []
-        self.camionetas = generar_camionetas(valores)
+        self.camionetas = None
         self.events = []
         self.utils = Utils()
         self.volver_al_terminar_todos_los_pedidos = False
@@ -46,6 +46,32 @@ class Simulacion(metaclass=Singleton):
         self.clientes_rechazados = []
         self.rango_de_atencion = 2000
         self.fel = []
+        self.tipos_de_pizza_disponibles = []
+
+    def configurate(self, configuracion):
+        self.dias_a_simular = (configuracion.fin - configuracion.inicio).days
+        self.tiempo_inicio = configuracion.inicio
+        self.tiempo_fin = configuracion.fin
+        self.pedidos_por_hora = configuracion.pedidosPorHora
+        self.minutos_maximo = 60 * self.horas_por_dia
+        self.dias_corridos = []
+        from models.Camioneta import Camioneta
+        self.camionetas = [
+            Camioneta(configuracion.hornosPorCamioneta, configuracion.pizzasPorHorno) for i in range(configuracion.cantidadCamionetas)
+        ]
+
+        if configuracion.tipos_de_pizza.anana:
+           self.tipos_de_pizza_disponibles.append(TipoPizza.ANANA)
+        elif configuracion.tipos_de_pizza.calabresa:
+            self.tipos_de_pizza_disponibles.append(TipoPizza.CALABRESA)
+        elif configuracion.tipos_de_pizza.napolitana:
+            self.tipos_de_pizza_disponibles.append(TipoPizza.NAPOLITANA)
+        elif configuracion.tipos_de_pizza.fugazzeta:
+            self.tipos_de_pizza_disponibles.append(TipoPizza.FUGAZZETA)
+        elif configuracion.tipos_de_pizza.mozzarella:
+            self.tipos_de_pizza_disponibles.append(TipoPizza.MOZZARELLA)
+
+
 
     def run(self):
         for experimento in range(self.experimentos):

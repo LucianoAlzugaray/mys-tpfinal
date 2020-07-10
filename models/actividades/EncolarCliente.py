@@ -11,7 +11,7 @@ class EncolarCliente(Actividad):
         from Simulacion import Simulacion
         simulacion = Simulacion()
 
-        if simulacion.cliente_esta_en_rango(evento.cliente):
+        if simulacion.cliente_esta_en_rango(evento.cliente) and evento.tipo_pizza in simulacion.tipos_de_pizza_disponibles:
             camioneta = simulacion.seleccionar_camioneta(evento.cliente, evento.tipo_pizza)
 
             if camioneta is not None:
