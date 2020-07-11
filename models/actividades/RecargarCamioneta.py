@@ -7,8 +7,5 @@ class RecargarCamioneta(Actividad):
 
         camioneta = evento.camioneta
         camioneta.remover_pizzas_vencidas()
+        camioneta.asignar_pedidos_pendientes()
         camioneta.cargar_pizzas()
-        if hasattr(evento, 'pedido'):
-            pedido = getattr(evento, 'pedido')
-            camioneta.reservar_pizza(pedido.tipo_pizza)
-            camioneta.disponible = True

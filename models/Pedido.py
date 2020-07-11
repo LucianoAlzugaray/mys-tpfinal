@@ -19,4 +19,5 @@ class Pedido:
 
     def esta_fuera_de_hora_de_entrega(self):
         from Simulacion import Simulacion
-        return (Simulacion().time - self.hora_toma) > timedelta(minutes=30)
+        simulacion = Simulacion()
+        return (simulacion.time - self.hora_toma) > timedelta(minutes=30)

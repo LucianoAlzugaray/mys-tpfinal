@@ -6,7 +6,7 @@ from Simulacion import Simulacion
 from events.PizzaVenceEvent import PizzaVenceEvent
 from models.Camioneta import Camioneta
 from models.Cliente import Cliente
-from models.EventTypeEnum import EventTypeEnum
+from events.EventType import EventType
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from utils.utils import Utils
@@ -33,7 +33,7 @@ class TestableSimulacion(Simulacion):
         self.utils = TestableUtils()
 
     def iniciar_dia(self):
-        pass
+        self.reloj.iniciar_dia()
 
     def cargar_camionetas(self):
         pass
@@ -62,6 +62,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
     def test_debe_entregarse_una_pizza_cuando_cliente_esta_en_rango(self):
 
         simulacion = self.get_simulacion()
+        simulacion.camionetas += [Camioneta()]
         camioneta = simulacion.camionetas[0]
         pizza = simulacion.generar_pizza(TipoPizza.ANANA)
         camioneta.pizzas.append(pizza)
@@ -86,7 +87,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
     def test_debe_asignar_el_pedido_a_la_camioneta_mas_cercana(self):
 
         simulacion = self.get_simulacion()
-        simulacion.camionetas.append(Camioneta())
+        simulacion.camionetas += [Camioneta(), Camioneta()]
 
         simulacion.camionetas[0].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.dia))
         simulacion.camionetas[1].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.dia))
@@ -100,6 +101,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
 
         self.assertEqual(simulacion.camionetas[1], simulacion.pedidos[0].camioneta)
         self.assertTrue(simulacion.pedidos[0].entregado)
+
 
     @staticmethod
     def generar_cliente_en_rango():
@@ -120,18 +122,21 @@ class SimulacionFunctionalTest(unittest.TestCase):
         simulacion = Simulacion()
         hora = simulacion.tiempo_inicio + timedelta(minutes=5)
         kwargs = {'hora': hora, 'cliente': cliente, 'tipo_pizza': tipo_pizza}
-        simulacion.add_event(EventTypeEnum.LLAMO_CLIENTE, kwargs)
+        simulacion.dispatch(EventType.LLAMO_CLIENTE, kwargs)
 
     def get_simulacion(self):
         simulacion = TestableSimulacion()
         simulacion.configurate(Configuracion.get_default_configuration())
         simulacion.fel = []
-        simulacion.camionetas = []
+        simulacion.events = []
         simulacion.pedidos = []
+        simulacion.camionetas = []
+        simulacion.desperdicios = []
+        simulacion.pedidos_en_espera = []
         simulacion.clientes_rechazados = []
+        simulacion.porcentaje_desperdicio_diario = []
         simulacion.dias_a_simular = 1
         simulacion.experimentos = 1
-        simulacion.camionetas = [Camioneta()]
         return simulacion
 
 

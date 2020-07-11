@@ -39,10 +39,10 @@ def iniciar_simulacion(configuraciones):
         "cantidadExperimentos": configuraciones["cantidadExperimentos"] if configuraciones["cantidadExperimentos"] is not None else CANTIDAD_DE_EXPERIMENTOS,
         "tipos_de_pizza": tipos_de_pizza
     }
+
     simulacion = Simulacion()
     simulacion.configurate(configuracion)
-    print('simulando')
-    simulacion.run()
+
 
 def on_message(client, user_data, msg):
     print("Llegó una petición de simulación")

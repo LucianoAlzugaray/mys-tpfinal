@@ -19,14 +19,16 @@ from models.Camioneta import Camioneta
 class SimulacionTest(unittest.TestCase):
 
     def test_debe_rechazar_pedido_cuando_cliente_no_esta_en_rango(self):
-        pedidos_rechazados = len(Simulacion().clientes_rechazados)
+
+        simulacion = Simulacion()
+        pedidos_rechazados = len(simulacion.clientes_rechazados)
         self.assertEqual(0, pedidos_rechazados)
 
         cliente = self.generar_cliente_fuera_de_rango()
         evento = self.generar_evento(cliente, None)
         evento.notify()
 
-        self.assertEqual(pedidos_rechazados + 1, len(Simulacion().clientes_rechazados))
+        self.assertEqual(pedidos_rechazados + 1, len(simulacion.clientes_rechazados))
 
     def test_debe_asignar_pedido_a_camioneta_cuando_cliente_esta_en_rango(self):
         simulacion = self.get_simulacion()
@@ -85,7 +87,8 @@ class SimulacionTest(unittest.TestCase):
         evento = self.generar_evento(cliente, TipoPizza.NAPOLITANA)
         evento.notify()
 
-        camioneta = Simulacion().get_camioneta_by_cliente(cliente)
+        simulacion = Simulacion()
+        camioneta = simulacion.get_camioneta_by_cliente(cliente)
         pedido = camioneta.get_pedido_by_cliente(cliente)
 
         self.assertEqual(2, len(tipos_disponibles_en_camionetas))
@@ -280,8 +283,8 @@ class SimulacionTest(unittest.TestCase):
         simulacion = Simulacion()
         simulacion.camionetas[camioneta].pizzas.append(Pizza(tipo_de_pizza, simulacion.time))
         cliente0 = self.generar_cliente_en_rango()
-        pedido0 = Pedido(cliente0, 10, Simulacion().camionetas[camioneta], tipo_de_pizza)
-        Simulacion().camionetas[camioneta].asignar_pedido(pedido0)
+        pedido0 = Pedido(cliente0, 10, simulacion.camionetas[camioneta], tipo_de_pizza)
+        simulacion.camionetas[camioneta].asignar_pedido(pedido0)
 
     @staticmethod
     def generar_cliente_fuera_de_rango():
