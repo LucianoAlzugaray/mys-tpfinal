@@ -1,6 +1,7 @@
-import paho.mqtt.client as mqtt
 import datetime
 import time
+import paho.mqtt.client as mqtt
+import json
 
 def iniciar_simulacion(configuraciones):
     valores = {
@@ -18,19 +19,20 @@ def iniciar_simulacion(configuraciones):
         "calabresa": configuraciones.calabresa if configuraciones.calabresa is not None else True
     }
 
+    from Simulacion import Simulacion
     simulacion = Simulacion(valores)
 
-
 def on_message(client, user_data, msg):
-    print(msg.topic + " " + str(msg.payload))
+    configuracion = json.loads(msg.payload.decode('utf-8'))
+    iniciar_simulacion(configuracion)
 
 def on_connect(client, user_data, flags, rc):
-    client.subscribe("topic_control")
+    print("conectado con el servidor")
+    client.subscribe("control")
 
 if __name__ == "__main__":
     client = mqtt.Client()
     client.on_message = on_message
     client.on_connect = on_connect
     client.connect("172.16.240.10", 1883, 60)
-    print("conectado con el servidor")
     client.loop_forever()
