@@ -2,10 +2,10 @@ from datetime import timedelta, time, datetime
 
 
 class Reloj(object):
-    
+
     def __init__(self):
         self.termino_dia = False
-    
+
     def configurate(self, kwargs):
         self.dia = kwargs['dia']
         self.cirre_at = kwargs['hora_cierre']
@@ -28,8 +28,6 @@ class Reloj(object):
 
     '''Avanza el reloj hasta un datetime recibido por parametro'''
     def avanzar_time(self, time: datetime):
-        # if time > self.dia:
-        #     self.dia = time
         diferencia_en_minutos = self.get_diferencia_hora_actual(time)
         self.avanzar(diferencia_en_minutos)
 
@@ -47,3 +45,9 @@ class Reloj(object):
 
     def iniciar_dia(self):
         self.termino_dia = False
+
+    @property
+    def dias_transcurridos(self):
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        return (self.dia - simulacion.tiempo_inicio).days + 1
