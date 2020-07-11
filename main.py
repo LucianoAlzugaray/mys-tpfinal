@@ -16,7 +16,8 @@ def iniciar_simulacion(configuraciones):
         "napolitana": configuraciones.napolitana if configuraciones.napolitana is not None else True,
         "fugazzeta": configuraciones.fugazzeta if configuraciones.fugazzeta is not None else True,
         "mozzarella": configuraciones.mozzarella if configuraciones.mozzarella is not None else True,
-        "calabresa": configuraciones.calabresa if configuraciones.calabresa is not None else True
+        "calabresa": configuraciones.calabresa if configuraciones.calabresa is not None else True,
+        "experimentos": configuraciones.experimentos if configuraciones.experimentos is not None else 10,
     }
 
     from Simulacion import Simulacion
