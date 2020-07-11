@@ -44,6 +44,8 @@ class TestableSimulacion(Simulacion):
     def publicar_resultados(self):
         pass
 
+    def clean_experimento(self):
+        pass
 
 class SimulacionFunctionalTest(unittest.TestCase):
 
@@ -90,6 +92,7 @@ class SimulacionFunctionalTest(unittest.TestCase):
         simulacion.camionetas += [Camioneta(), Camioneta()]
 
         simulacion.camionetas[0].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.dia))
+        simulacion.camionetas[1].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.dia))
         simulacion.camionetas[1].pizzas.append(Pizza(TipoPizza.ANANA, simulacion.dia))
 
         cliente = self.generar_cliente_en_rango()

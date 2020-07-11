@@ -42,6 +42,7 @@ def iniciar_simulacion(configuraciones):
 
     simulacion = Simulacion()
     simulacion.configurate(configuracion)
+    simulacion.run()
 
 
 def on_message(client, user_data, msg):

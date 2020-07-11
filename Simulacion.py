@@ -3,7 +3,7 @@ import math
 from datetime import datetime, time
 from functools import reduce
 import numpy as np
-
+import pandas as pd
 from events.EntregarPedidoEvent import EntregarPedidoEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
 from events.SimulacionEventFactory import SimulacionEventFactory
@@ -75,8 +75,6 @@ class Simulacion(metaclass=Singleton):
 
     def run(self):
         for experimento in range(self.experimentos):
-            # TODO limpiar events, pedidos,pedidos_perdidos, porcentaje_de_desperdicio_diario, etc.
-            self.clean_experimento()
             for dia in range(self.dias_a_simular):
                 self.iniciar_dia()
 
@@ -88,6 +86,7 @@ class Simulacion(metaclass=Singleton):
                 self.finalizar_dia()
                 self.publicar_resultados_dia()
             self.publicar_resultados_experimento(experimento)
+            self.clean_experimento()
 
     def clean_experimento(self):
         self.fel = []
@@ -98,6 +97,8 @@ class Simulacion(metaclass=Singleton):
         self.porcentaje_desperdicio_diario = []
 
     def publicar_resultados_experimento(self, experimento):
+        if len(self.resultados_experimentos) == 0:
+            return
         row = {
             "corrida": experimento.__str__(),
             "esperaClientes": self.tiempo_espera(),
@@ -114,6 +115,8 @@ class Simulacion(metaclass=Singleton):
         self.client.publish('resumen', data)
 
     def publicar_resultados_dia(self):
+        if len(self.pedidos) == 0:
+            return
         tiempo_espera = self.tiempo_espera()
         porcentaje_desperdicio = self.porcentaje_desperdicio()
         pedidos_entregados = self.pedidos_entregados()
@@ -242,7 +245,7 @@ class Simulacion(metaclass=Singleton):
         self.reloj.avanzar(minutos)
 
     def iniciar_dia(self):
-        self.reloj
+        self.reloj.iniciar_dia()
         self.generar_eventos_de_llamada()
         self.inicializar_camionetas()
 
@@ -292,11 +295,6 @@ class Simulacion(metaclass=Singleton):
         raise Exception("get_pedido_by_pizza: Se pinchó para la mierda")
 
 
-    def iniciar_dia(self):
-        self.reloj.iniciar_dia()
-        self.generar_eventos_de_llamada()
-        self.inicializar_camionetas()
-
     @property
     def horas_por_dia(self):
         return self.CANTIDAD_HORAS_LABORALES
@@ -341,7 +339,6 @@ class Simulacion(metaclass=Singleton):
         minutos_espera = list(map(lambda pedido: pedido.hora_entrega - pedido.hora_toma, self.pedidos_entregados()))
         media = np.mean(minutos_espera)
         return math.trunc(media.seconds / 60)
-        # minutos = media. * 60 + media.minute
 
 
     '''El porcentaje de desperdicios a nivel corrida (365 dias)'''
