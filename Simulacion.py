@@ -39,7 +39,7 @@ class Simulacion(metaclass=Singleton):
         self.experimentos = None
         self.rango_de_atencion = 2000
         self.volver_al_terminar_todos_los_pedidos = False
-
+        self.pedido_sin_tipo_en_camioneta = 0
         self.fel = []
         self.events = []
         self.pedidos = []
@@ -95,6 +95,7 @@ class Simulacion(metaclass=Singleton):
         self.desperdicios = []
         self.clientes_rechazados = []
         self.porcentaje_desperdicio_diario = []
+        self.pedido_sin_tipo_en_camioneta = 0
 
     def publicar_resultados_experimento(self, experimento):
         if len(self.resultados_experimentos) == 0:
@@ -131,7 +132,7 @@ class Simulacion(metaclass=Singleton):
         self.client.publish("pedidos-rechazados", len(pedidos_perdidos))
         self.client.publish("distancias-recorridas", distacia_recorrida)
         self.client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
-        self.client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
+        self.client.publish("pedido-sin-tipo-de-camioneta", self.pedido_sin_tipo_en_camioneta)
         self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
 
     # TODO: armar los csv de pedidos y desperdicios

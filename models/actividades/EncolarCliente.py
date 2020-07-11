@@ -17,7 +17,7 @@ class EncolarCliente(Actividad):
             if camioneta is not None:
                 self.asignar_pedido_a_camioneta(camioneta, evento)
                 return True
-
+            simulacion.pedido_sin_tipo_en_camioneta += 1
             if simulacion.utils.convencer_al_cliente():
                 tipos_disponibles = simulacion.get_tipos_disponibles_en_camionetas()
                 tipo_pizza = tipos_disponibles[0] if len(tipos_disponibles) > 0 else TipoPizza.MOZZARELLA
