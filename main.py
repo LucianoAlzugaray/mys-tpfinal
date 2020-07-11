@@ -40,8 +40,9 @@ def iniciar_simulacion(configuraciones):
         "tipos_de_pizza": tipos_de_pizza
     }
 
+    from Configuracion import Configuracion
     simulacion = Simulacion()
-    simulacion.configurate(configuracion)
+    simulacion.configurate(Configuracion.get_default_configuration())
     simulacion.run()
 
 

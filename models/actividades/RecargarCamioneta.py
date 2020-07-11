@@ -1,3 +1,4 @@
+from events.EventType import EventType
 from models.actividades.Actividad import Actividad
 
 
@@ -9,3 +10,6 @@ class RecargarCamioneta(Actividad):
         camioneta.remover_pizzas_vencidas()
         camioneta.asignar_pedidos_pendientes()
         camioneta.cargar_pizzas()
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        simulacion.dispatch(EventType.ENVIAR_PEDIDO, {'pedido': camioneta.pedido_en_curso, 'hora': simulacion.time})

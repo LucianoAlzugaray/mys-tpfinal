@@ -97,8 +97,7 @@ class Simulacion(metaclass=Singleton):
         self.porcentaje_desperdicio_diario = []
 
     def publicar_resultados_experimento(self, experimento):
-        if len(self.resultados_experimentos) == 0:
-            return
+        return 0
         row = {
             "corrida": experimento.__str__(),
             "esperaClientes": self.tiempo_espera(),
@@ -125,14 +124,22 @@ class Simulacion(metaclass=Singleton):
         tiempo_entre_recargas = self.tiempo_entre_recargas()
         pizzas_pedidas_por_tipo = json.dumps(self.pizzas_pedidas_por_tipo())
 
-        self.client.publish("espera-de-cliente", tiempo_espera)
-        self.client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
-        self.client.publish("pedidos-entregados", len(pedidos_entregados))
-        self.client.publish("pedidos-rechazados", len(pedidos_perdidos))
-        self.client.publish("distancias-recorridas", distacia_recorrida)
-        self.client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
-        self.client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
-        self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
+        print(tiempo_espera)
+        print(porcentaje_desperdicio)
+        print(pedidos_entregados)
+        print(pedidos_perdidos)
+        print(distacia_recorrida)
+        print(tiempo_entre_recargas)
+        print(pizzas_pedidas_por_tipo)
+
+        # self.client.publish("espera-de-cliente", tiempo_espera)
+        # self.client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
+        # self.client.publish("pedidos-entregados", len(pedidos_entregados))
+        # self.client.publish("pedidos-rechazados", len(pedidos_perdidos))
+        # self.client.publish("distancias-recorridas", distacia_recorrida)
+        # self.client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
+        # self.client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
+        # self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
 
     # TODO: armar los csv de pedidos y desperdicios
     def obtener_datos(self):

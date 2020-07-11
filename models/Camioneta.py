@@ -31,6 +31,7 @@ class Camioneta:
         if self.tiempo_ultima_recarga is not None:
             self.tiempo_entre_recargas.append(simulacion.get_diferencia_hora_actual(self.tiempo_ultima_recarga))
         self.tiempo_ultima_recarga = simulacion.time
+        self.disponible = True
 
     def carga_por_defecto(self, cantidad_de_pizzas_a_cargar):
         from Simulacion import Simulacion
@@ -67,7 +68,7 @@ class Camioneta:
             self.pizzas.append(simulacion.generar_pizza(pedido.tipo_pizza))
             self.reservar_pizza(pedido)
 
-        self.disponible = True
+        self.pedido_en_curso = self.pedidos[0]
 
     def quitar_pizza(self, pizza):
         if pizza in self.pizzas:
