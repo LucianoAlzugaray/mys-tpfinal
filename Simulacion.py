@@ -17,6 +17,8 @@ from models.EventTypeEnum import EventTypeEnum
 import paho.mqtt.client as paho
 from random import random
 import json
+import pandas as pd
+import os
 
 def generar_camionetas(configuracion):
     from models.Camioneta import Camioneta
@@ -53,6 +55,12 @@ class Simulacion(metaclass=Singleton):
         self.reloj = Reloj()
         self.event_factory = SimulacionEventFactory()
 
+        self.data = {
+            "desperdicios": None,
+            "clientes_rechazados": None,
+            "pedidos": None
+        }
+
         self.client = paho.Client()
         self.client.connect("172.16.240.10", 1883)
 
@@ -73,7 +81,6 @@ class Simulacion(metaclass=Singleton):
 
     def run(self):
         for experimento in range(self.experimentos):
-            # TODO limpiar events, pedidos,pedidos_perdidos, porcentaje_de_desperdicio_diario, etc.
             self.clean_experimento()
             for dia in range(self.dias_a_simular):
                 self.iniciar_dia()
@@ -86,6 +93,8 @@ class Simulacion(metaclass=Singleton):
                 self.finalizar_dia()
                 self.publicar_resultados_dia()
             self.publicar_resultados_experimento(experimento)
+            self.guardar_datos(experimento)
+        self.exportar_datos()
 
     def clean_experimento(self):
         self.fel = []
@@ -105,7 +114,6 @@ class Simulacion(metaclass=Singleton):
             "distanciasRecorridas": self.distacia_recorrida(),
             "recargaCamionetas": self.tiempo_entre_recargas()
         }
-        # TODO recargaCamioneta siempre me da nan. Puede ser por qu eno recarga, al menos que me de 0.
 
         self.resultados_experimentos.append(row)
         data = json.dumps(self.resultados_experimentos)
@@ -130,8 +138,43 @@ class Simulacion(metaclass=Singleton):
         self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
 
     # TODO: armar los csv de pedidos y desperdicios
-    def obtener_datos(self):
-        pass
+    def guardar_datos(self, experimento):
+        pedidos_data = [pedido.to_dict() for pedido in self.pedidos]
+        desperdicios_data = [pizza.to_dict() for pizza in self.desperdicios]
+        clientes_rechazados_data = [cliente.dict() for cliente in self.clientes_rechazados]
+
+        pedidos_df = pd.DataFrame(pedidos_data)
+        desperdicios_df = pd.DataFrame(desperdicios_data)
+        clientes_rechazados_df = pd.DataFrame(clientes_rechazados_data)
+
+        pedidos_df["experimento"] = experimento + 1
+        desperdicios_df["experimento"] = experimento + 1
+        clientes_rechazados_df["experimento"] = experimento + 1
+        
+
+        if self.data["pedidos"] is None:
+            self.data["pedidos"] = pedidos_df
+        else:
+            self.data["pedidos"].append(pedidos_df)
+
+        if self.data["desperdicios"] is None:
+            self.data["desperdicios"] = desperdicios_df
+        else:
+            self.data["desperdicios"].append(desperdicios_df)
+
+        if self.data["clientes_rechazados"] is None:
+            self.data["clientes_rechazados"] = clientes_rechazados_df
+        else:
+            self.data["clientes_rechazados"].append(clientes_rechazados_df)
+
+    def exportar_datos(self):
+        outdir = './store'
+        if not os.path.exists(outdir):
+            os.mkdir(outdir)
+
+        self.data["pedidos"].to_csv(f"{outdir}/pedidos.csv", index=False)
+        self.data["desperdicios"].to_csv(f"{outdir}/desperdicios.csv", index=False)
+        self.data["clientes_rechazados"].to_csv(f"{outdir}/clientes_rechazados.csv", index=False)
 
     def add_event(self, event, kwargs=None):
         event = self.event_factory.get_event(event, kwargs)
@@ -313,8 +356,11 @@ class Simulacion(metaclass=Singleton):
     def tiempo_espera(self):
 
         minutos_espera = list(map(lambda pedido: pedido.hora_entrega - pedido.hora_toma, self.pedidos_entregados()))
-        media = np.mean(minutos_espera)
-        return math.trunc(media.seconds / 60)
+        if(len(minutos_espera) > 0):
+            media = np.mean(minutos_espera)
+            return math.trunc(media.seconds / 60)
+        else:
+            return 0
         # minutos = media. * 60 + media.minute
 
 
