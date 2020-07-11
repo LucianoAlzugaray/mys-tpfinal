@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class EventTypeEnum(Enum):
+class EventType(Enum):
 
     CAMIONETA_REGRESA_A_BUSCAR_PEDIDO = 'CAMIONETA_REGRESA_A_BUSCAR_PEDIDO'
     ENTREGAR_PEDIDO = 'ENTREGAR_PEDIDO'

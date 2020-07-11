@@ -9,7 +9,7 @@ class LlamoClienteEventTest(unittest.TestCase):
     def setUp(self):
         from Simulacion import Simulacion
         self.simulacion = Simulacion()
-        self.evento = LlamoClienteEvent(10, Cliente(), Simulacion().generar_tipo_de_pizza())
+        self.evento = LlamoClienteEvent(10, Cliente(), self.simulacion.generar_tipo_de_pizza())
         self.camionetas = [Camioneta() for i in range(4)]
 
     def test_cliente_esta_en_rango(self):

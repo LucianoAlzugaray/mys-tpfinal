@@ -1,8 +1,8 @@
-from events.CamionetaRegresaABuscarPedidoEvent import CamionetaRegresaABuscarPedidoEvent
 from events.LlamoClienteEvent import LlamoClienteEvent
 from .Actividad import Actividad
 from ..Pedido import Pedido
-from models.EventTypeEnum import EventTypeEnum
+from events.EventType import EventType
+from ..TipoPizza import TipoPizza
 
 
 class EncolarCliente(Actividad):
@@ -19,20 +19,18 @@ class EncolarCliente(Actividad):
                 return True
 
             if simulacion.utils.convencer_al_cliente():
-                # TODO : BUG - aveces no hay elementos en la lista.
-                tipo_pizza = simulacion.get_tipos_disponibles_en_camionetas()[0]
+                tipos_disponibles = simulacion.get_tipos_disponibles_en_camionetas()
+                tipo_pizza = tipos_disponibles[0] if len(tipos_disponibles) > 0 else TipoPizza.MOZZARELLA
                 evento.tipo_pizza = tipo_pizza
+
                 camioneta = simulacion.seleccionar_camioneta(evento.cliente, evento.tipo_pizza)
-                self.asignar_pedido_a_camioneta(camioneta, evento)
+                if camioneta is None:
+                    self.regresar_a_restaurante(evento)
+                else:
+                    self.asignar_pedido_a_camioneta(camioneta, evento)
                 return True
 
-            camioneta = simulacion.obtener_camioneta_a_volver_al_restaurante()
-            pedido = Pedido(evento.cliente, evento.hora, camioneta, evento.tipo_pizza)
-            simulacion.add_pedido(pedido)
-
-            camioneta.disponible = False
-            camioneta.pedidos.append(pedido)
-            simulacion.add_event(EventTypeEnum.CAMIONETA_REGRESA_A_BUSCAR_PEDIDO, {'pedido': pedido})
+            self.regresar_a_restaurante(evento)
 
     def asignar_pedido_a_camioneta(self, camioneta, evento):
         from Simulacion import Simulacion
@@ -40,4 +38,17 @@ class EncolarCliente(Actividad):
         pedido = Pedido(evento.cliente, evento.hora, camioneta, evento.tipo_pizza)
         simulacion.add_pedido(pedido)
         camioneta.asignar_pedido(pedido)
+
+    def regresar_a_restaurante(self, evento):
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        camioneta = simulacion.obtener_camioneta_a_volver_al_restaurante()
+        pedido = Pedido(evento.cliente, evento.hora, camioneta, evento.tipo_pizza)
+        if camioneta is None:
+            simulacion.pedidos_en_espera.append(pedido)
+        else:
+            simulacion.add_pedido(pedido)
+            camioneta.disponible = False
+            camioneta.pedidos.append(pedido)
+            simulacion.dispatch(EventType.CAMIONETA_REGRESA_A_BUSCAR_PEDIDO, {'pedido': pedido})
 

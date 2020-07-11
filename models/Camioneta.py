@@ -1,9 +1,8 @@
 import math
 from datetime import timedelta
 from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
-from models.EventTypeEnum import EventTypeEnum
+from events.EventType import EventType
 from models.Pedido import Pedido
-from models.Pizza import Pizza
 
 
 class Camioneta:
@@ -24,27 +23,55 @@ class Camioneta:
         from Simulacion import Simulacion
         simulacion = Simulacion()
         cantidad_de_pizzas_a_cargar = self.tamanio_hornos - len(self.pizzas)
+        if simulacion.pedidos_en_espera:
+            self.atender_pedidos_en_espera(cantidad_de_pizzas_a_cargar)
+        else:
+            self.carga_por_defecto(cantidad_de_pizzas_a_cargar)
+
+        if self.tiempo_ultima_recarga is not None:
+            self.tiempo_entre_recargas.append(simulacion.get_diferencia_hora_actual(self.tiempo_ultima_recarga))
+        self.tiempo_ultima_recarga = simulacion.time
+
+    def carga_por_defecto(self, cantidad_de_pizzas_a_cargar):
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
         pizzas_por_tipo = divmod(cantidad_de_pizzas_a_cargar, len(simulacion.tipos_de_pizza_disponibles))
-
         for tipo_de_pizza in simulacion.tipos_de_pizza_disponibles:
-            self.pizzas += [Pizza(tipo_de_pizza, simulacion.dia) for i in range(pizzas_por_tipo[0])]
-
+            self.pizzas += [simulacion.generar_pizza(tipo_de_pizza) for i in range(pizzas_por_tipo[0])]
         k = 0
         for i in range(pizzas_por_tipo[1]):
-            self.pizzas.append(Pizza(simulacion.tipos_de_pizza_disponibles[k], simulacion.dia))
+            self.pizzas.append(simulacion.generar_pizza(simulacion.tipos_de_pizza_disponibles[k]))
             k += 1
             if i > len(simulacion.tipos_de_pizza_disponibles):
                 k = 0
 
-        if self.tiempo_ultima_recarga is not None:
-            self.tiempo_entre_recargas.append(Simulacion().get_diferencia_hora_actual(self.tiempo_ultima_recarga))
-        self.tiempo_ultima_recarga = Simulacion().time
-
     def remover_pizzas_vencidas(self):
         self.pizzas = list(filter(lambda x: not x.vencida, self.pizzas))
 
+    def asignar_pedidos_pendientes(self):
+        pedidos = self.pedidos
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        if self.pedido_en_curso is not None:
+            pedidos.append(self.pedido_en_curso)
+
+        pedidos_sin_pizza = list(filter(lambda x: x.pizza is None, pedidos))
+        for pedido in pedidos_sin_pizza:
+            self.pizzas.append(simulacion.generar_pizza(pedido.tipo_pizza))
+            self.reservar_pizza(pedido)
+
+        pedidos_con_pizza = list(filter(lambda x: x not in pedidos_sin_pizza, pedidos))
+        pedidos_con_pizza_vencida = list(filter(lambda x: x.pizza.vencida, pedidos_con_pizza))
+
+        for pedido in pedidos_con_pizza_vencida:
+            self.pizzas.append(simulacion.generar_pizza(pedido.tipo_pizza))
+            self.reservar_pizza(pedido)
+
+        self.disponible = True
+
     def quitar_pizza(self, pizza):
-        self.pizzas.remove(pizza)
+        if pizza in self.pizzas:
+            self.pizzas.remove(pizza)
 
     def entregar_pedido(self, pedido: Pedido):
         from Simulacion import Simulacion
@@ -54,15 +81,17 @@ class Camioneta:
         self.pedido_en_curso = None
         pedido.entregado = True
         pedido.hora_entrega = simulacion.time
-        if len(self.pizzas) == 0:
-            self.generar_evento_volver_a_restaurante()
-        if len(self.pedidos) > 0:
+
+        if len(self.pedidos) > 0 and self.disponible:
             self.generar_evento_enviar_pedido(self.pedidos[0])
+
+        if len(self.pizzas) == 0 or len(list(filter(lambda x: x.vencida, self.pizzas))) == len(self.pizzas) and self.disponible:
+            self.generar_evento_volver_a_restaurante()
 
     def generar_evento_volver_a_restaurante(self):
         from Simulacion import Simulacion
         simulacion = Simulacion()
-        simulacion.add_event(EventTypeEnum.CAMIONETA_REGRESA_VACIA, {'camioneta': self})
+        simulacion.dispatch(EventType.CAMIONETA_REGRESA_VACIA, {'camioneta': self})
 
     def obtener_distancia(self, punto1, punto2):
         cateto1 = punto2[0] - punto1[0]
@@ -73,7 +102,7 @@ class Camioneta:
         self.distancia_recorrida += self.obtener_distancia(self.ubicacion, pedido.cliente.ubicacion)
         from Simulacion import Simulacion
         simulacion = Simulacion()
-        simulacion.add_event(EventTypeEnum.ENVIAR_PEDIDO, {'hora': simulacion.time + timedelta(minutes=1), 'pedido': pedido})
+        simulacion.dispatch(EventType.ENVIAR_PEDIDO, {'hora': simulacion.time + timedelta(minutes=1), 'pedido': pedido})
 
     def tiene_tipo(self, tipo):
         return len(list(filter(lambda x: x.tipo == tipo, self.get_pizzas_disponibles()))) > 0
@@ -93,7 +122,7 @@ class Camioneta:
         return self.disponible
 
     def get_pizza(self, pizza):
-        pizzas = list(filter(lambda x: x.pizza == pizza, self.pizzas))
+        pizzas = list(filter(lambda x: x == pizza, self.pizzas))
         return None if len(pizzas) == 0 else pizzas[0]
 
     def reservar_pizza(self, pedido: Pedido) -> None:
@@ -101,7 +130,7 @@ class Camioneta:
         pizza_del_tipo = list(filter(lambda x: x.tipo == pedido.tipo_pizza, pizzas_disponibles))
 
         if len(pizza_del_tipo) == 0:
-            raise NoHayTipoPizzaEnCamionetaException(f"No hay pizza del tipo {pedido.tipo_pizza}")
+            raise NoHayTipoPizzaEnCamionetaException(f"reservar_pizza: No hay pizza del tipo {pedido.tipo_pizza}")
 
         pizza = pizza_del_tipo[0]
         pizza.reservada = True
@@ -121,17 +150,15 @@ class Camioneta:
 
         return None if len(pedidos) == 0 else pedidos[0]
 
-    def get_siguiente_pedido(self):
-        return self.pedidos[0]
-
     def asignar_pedido(self, pedido: Pedido):
+        pedido.camioneta = self
         self.reservar_pizza(pedido)
         self.pedidos.append(pedido)
         if self.pedido_en_curso is None:
             self.generar_evento_enviar_pedido(pedido)
 
     def get_ubicacion_pedido_en_curso(self):
-        return self.pedido_en_curso if self.pedido_en_curso is None else self.pedido_en_curso.ubicacion
+        return self.ubicacion if self.pedido_en_curso is None else self.pedido_en_curso.ubicacion
 
     def get_ubicacion_ultimo_pedido(self):
         return self.pedidos[len(self.pedidos) - 1].ubicacion
@@ -140,27 +167,37 @@ class Camioneta:
         return self.ubicacion
 
     def enviar_pedido(self):
-        pedido = self.get_siguiente_pedido()
-        pedido.ubicacion_origen = self.ubicacion
-        # TODO : ver si no nos quita el pedido de los pedidos de la simulacion
-        self.pedidos.remove(pedido)
-        self.pedido_en_curso = pedido
-
+        if len(self.pedidos) > 0:
+            self.pedido_en_curso = self.pedidos[0]
+            self.pedido_en_curso.ubicacion_origen = self.ubicacion
+            self.pedidos.remove(self.pedido_en_curso)
 
     def obtener_tiempo_demora_en_volver(self):
         from Simulacion import Simulacion
         simulacion = Simulacion()
-        distancia = simulacion.obtener_distancia([0, 0], self.ubicacion)
+        ubicacion = self.ubicacion if self.pedido_en_curso is None else self.pedido_en_curso.ubicacion
+        distancia = simulacion.obtener_distancia([0, 0], ubicacion)
         velocidad = 20
 
         tiempo = (distancia / velocidad) * 60
-
         return simulacion.dia + timedelta(minutes=tiempo)
 
     def finalizar_dia(self):
         self.volver_a_pizzeria()
         self.pizzas = []
 
+    def atender_pedidos_en_espera(self, cantidad_de_pizzas_a_cargar):
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        pedidos_en_espera = simulacion.pedidos_en_espera[0: cantidad_de_pizzas_a_cargar]
+
+        for pedido in pedidos_en_espera:
+            pedido.camioneta = self
+            self.pizzas.append(simulacion.generar_pizza(pedido.tipo_pizza))
+            self.reservar_pizza(pedido)
+            self.pedidos.append(pedido)
+            simulacion.add_pedido(pedido)
+            simulacion.pedidos_en_espera.remove(pedido)
 
 
 

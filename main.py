@@ -49,8 +49,10 @@ def iniciar_simulacion(configuraciones):
 def on_message(client, user_data, msg):
     print(msg.topic + " " + str(msg.payload))
 
+
 def on_connect(client, user_data, flags, rc):
     client.subscribe("topic_control")
+
 
 if __name__ == "__main__":
     client = mqtt.Client()
