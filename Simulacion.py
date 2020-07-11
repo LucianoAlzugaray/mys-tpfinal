@@ -80,7 +80,13 @@ class Simulacion(metaclass=Singleton):
 
                 while not self.termino_dia():
                     evento = self.next_event()
-                    if evento is not None:
+                    if isinstance(evento, PizzaVenceEvent):
+                        lista_EVP = list(filter(lambda x: isinstance(x, PizzaVenceEvent), self.fel))
+                        lista_EVP_ahora = list(filter(lambda x: x.hora == evento.hora, lista_EVP))
+                        for evp in lista_EVP_ahora:
+                            evp.notify()
+
+                    elif evento is not None:
                         evento.notify()
 
                 self.finalizar_dia()
