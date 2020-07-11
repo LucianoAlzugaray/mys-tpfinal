@@ -74,6 +74,7 @@ class Simulacion(metaclass=Singleton):
     def run(self):
         for experimento in range(self.experimentos):
             # TODO limpiar events, pedidos,pedidos_perdidos, porcentaje_de_desperdicio_diario, etc.
+            self.clean_experimento()
             for dia in range(self.dias_a_simular):
                 self.iniciar_dia()
 
@@ -85,6 +86,14 @@ class Simulacion(metaclass=Singleton):
                 self.finalizar_dia()
                 self.publicar_resultados_dia()
             self.publicar_resultados_experimento(experimento)
+
+    def clean_experimento(self):
+        self.fel = []
+        self.events = []
+        self.pedidos = []
+        self.desperdicios = []
+        self.clientes_rechazados = []
+        self.porcentaje_desperdicio_diario = []
 
     def publicar_resultados_experimento(self, experimento):
         row = {

@@ -1,6 +1,5 @@
 import paho.mqtt.client as mqtt
 from datetime import datetime
-import time
 import json
 
 from Simulacion import Simulacion
@@ -46,10 +45,7 @@ def iniciar_simulacion(configuraciones):
     simulacion.run()
 
 def on_message(client, user_data, msg):
-    print('Llegó una petición de simulacion')
-    import pdb;
-    pdb.set_trace()
-
+    print("Llegó una petición de simulación")
     configuracion = json.loads(msg.payload.decode('utf-8'))
     iniciar_simulacion(configuracion)
 
