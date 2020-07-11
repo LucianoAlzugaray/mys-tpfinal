@@ -2,7 +2,7 @@ class SimulacionEvent(object):
 
     def __init__(self, hora):
         self.actividades = []
-        self.hora = hora #TODO: Esta hora ahora es un time, arreglar impacto.
+        self.hora = hora
 
     def attach(self, actividad):
         self.actividades.append(actividad)

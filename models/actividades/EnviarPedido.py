@@ -1,7 +1,6 @@
 from datetime import timedelta
 
-from events.EntregarPedidoEvent import EntregarPedidoEvent
-from models.EventTypeEnum import EventTypeEnum
+from events.EventType import EventType
 from models.actividades.Actividad import Actividad
 from events.EnviarPedidoEvent import EnviarPedidoEvent
 
@@ -10,11 +9,12 @@ class EnviarPedido(Actividad):
 
     def __init__(self):
         from Simulacion import Simulacion
-        self.demora = Simulacion().utils.tiempo_entrega()
+        simulacion = Simulacion()
+        self.demora = simulacion.utils.tiempo_entrega()
 
     def _ejecutar(self, evento: EnviarPedidoEvent):
         evento.pedido.camioneta.enviar_pedido()
         from Simulacion import Simulacion
         simulacion = Simulacion()
-        simulacion.add_event(EventTypeEnum.ENTREGAR_PEDIDO, {'hora': Simulacion().time + timedelta(minutes=self.demora), 'pedido': evento.pedido})
+        simulacion.dispatch(EventType.ENTREGAR_PEDIDO, {'hora': simulacion.time + timedelta(minutes=self.demora), 'pedido': evento.pedido})
 
