@@ -47,10 +47,14 @@ class Simulacion(metaclass=Singleton):
         self.clientes_rechazados = []
         self.tipos_de_pizza_disponibles = []
         self.porcentaje_desperdicio_diario = []
+        self.resultados_experimentos = []
 
         self.utils = Utils()
         self.reloj = Reloj()
         self.event_factory = SimulacionEventFactory()
+
+        self.client = paho.Client()
+        self.client.connect("172.16.240.10", 1883)
 
     def configurate(self, configuracion):
         self.dias_a_simular = (configuracion['fin'] - configuracion['inicio']).days
@@ -58,7 +62,6 @@ class Simulacion(metaclass=Singleton):
         self.tiempo_fin = configuracion['fin']
         self.experimentos = configuracion['cantidadExperimentos']
         self.pedidos_por_hora = configuracion['pedidosPorHora']
-        self.dias_corridos = []
         from models.Camioneta import Camioneta
         self.camionetas += [Camioneta(configuracion['hornosPorCamioneta'], configuracion['pizzasPorHorno']) for i in range(configuracion['cantidadCamionetas'])]
         self.tipos_de_pizza_disponibles = configuracion['tipos_de_pizza']
@@ -70,6 +73,7 @@ class Simulacion(metaclass=Singleton):
 
     def run(self):
         for experimento in range(self.experimentos):
+            # TODO limpiar events, pedidos,pedidos_perdidos, porcentaje_de_desperdicio_diario, etc.
             for dia in range(self.dias_a_simular):
                 self.iniciar_dia()
 
@@ -79,9 +83,26 @@ class Simulacion(metaclass=Singleton):
                         evento.notify()
 
                 self.finalizar_dia()
-                self.publicar_resultados()
+                self.publicar_resultados_dia()
+            self.publicar_resultados_experimento(experimento)
 
-    def publicar_resultados(self):
+    def publicar_resultados_experimento(self, experimento):
+        row = {
+            "corrida": experimento.__str__(),
+            "esperaClientes": self.tiempo_espera(),
+            "clientesHora": np.mean(self.clientes_atendidos_por_hora()),
+            "pizzasDia": len(self.pedidos_entregados()) / self.reloj.dias_transcurridos,
+            "desperdicios": self.porcentaje_desperdicio(),
+            "distanciasRecorridas": self.distacia_recorrida(),
+            "recargaCamionetas": self.tiempo_entre_recargas()
+        }
+        # TODO recargaCamioneta siempre me da nan. Puede ser por qu eno recarga, al menos que me de 0.
+
+        self.resultados_experimentos.append(row)
+        data = json.dumps(self.resultados_experimentos)
+        self.client.publish('resumen', data)
+
+    def publicar_resultados_dia(self):
         tiempo_espera = self.tiempo_espera()
         porcentaje_desperdicio = self.porcentaje_desperdicio()
         pedidos_entregados = self.pedidos_entregados()
@@ -90,16 +111,14 @@ class Simulacion(metaclass=Singleton):
         tiempo_entre_recargas = self.tiempo_entre_recargas()
         pizzas_pedidas_por_tipo = json.dumps(self.pizzas_pedidas_por_tipo())
 
-        client = paho.Client()
-        client.connect("172.16.240.10", 1883)
-        client.publish("espera-de-cliente", tiempo_espera)
-        client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
-        client.publish("pedidos-entregados", len(pedidos_entregados))
-        client.publish("pedidos-rechazados", len(pedidos_perdidos))
-        client.publish("distancias-recorridas", distacia_recorrida)
-        client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
-        client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
-        client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
+        self.client.publish("espera-de-cliente", tiempo_espera)
+        self.client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
+        self.client.publish("pedidos-entregados", len(pedidos_entregados))
+        self.client.publish("pedidos-rechazados", len(pedidos_perdidos))
+        self.client.publish("distancias-recorridas", distacia_recorrida)
+        self.client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
+        self.client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
+        self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
 
     # TODO: armar los csv de pedidos y desperdicios
     def obtener_datos(self):
@@ -300,6 +319,7 @@ class Simulacion(metaclass=Singleton):
         clientes_atendidos_por_hora = []
         for hora in range(self.horas_por_dia):
             # TODO pedido.hora_entrega.hour por el timestamp, hacer diccionario?
+            # TODO 10 cambiar a hora de inicio
             clientes_atendidos = list(
                 filter(lambda pedido: pedido.hora_entrega.hour == (hora + 10), self.pedidos_entregados()))
             clientes_atendidos_por_hora.append(len(clientes_atendidos))
@@ -316,9 +336,11 @@ class Simulacion(metaclass=Singleton):
     ''' tiempo promedio entre recargas a nivel simulación'''
     def tiempo_entre_recargas(self):
 
-        tiempo_promedio_entre_recargas = list(map(lambda x: np.mean(x.tiempo_entre_recargas), self.camionetas))
-
-        return np.mean(tiempo_promedio_entre_recargas)
+        lista_de_tiempos_promedio_entre_recargas = list(map(lambda x: np.mean(x.tiempo_entre_recargas), self.camionetas))
+        tiempo_promedio_entre_recargas = np.mean(lista_de_tiempos_promedio_entre_recargas)
+        if(math.isnan(tiempo_promedio_entre_recargas)):
+            return 0
+        return tiempo_promedio_entre_recargas
 
     def generar_pizza(self, tipo_pizza):
         pizza = Pizza(tipo_pizza, self.time)

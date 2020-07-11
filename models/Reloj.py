@@ -4,6 +4,7 @@ from datetime import timedelta, time, datetime
 class Reloj(object):
 
     def configurate(self, kwargs):
+        self.dia_inicial = kwargs['dia']
         self.dia = kwargs['dia']
         self.cirre_at = kwargs['hora_cierre']
 
@@ -36,3 +37,7 @@ class Reloj(object):
         self.avanzar_time(
             datetime(year=self.dia.year, month=self.dia.month, day=self.dia.day, hour=self.cirre_at.hour,
                      minute=self.cirre_at.minute, second=1))
+
+    @property
+    def dias_transcurridos(self):
+        return (self.dia - self.dia_inicial).days + 1
