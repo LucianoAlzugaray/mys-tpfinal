@@ -20,8 +20,7 @@ class EncolarCliente(Actividad):
 
             if simulacion.utils.convencer_al_cliente():
                 tipos_disponibles = simulacion.get_tipos_disponibles_en_camionetas()
-                tipo_pizza = tipos_disponibles[0] if len(tipos_disponibles) > 0 else TipoPizza.MOZZARELLA
-                evento.tipo_pizza = tipo_pizza
+                evento.tipo_pizza = tipos_disponibles[0]
 
                 camioneta = simulacion.seleccionar_camioneta(evento.cliente, evento.tipo_pizza)
                 if camioneta is None:
@@ -32,6 +31,10 @@ class EncolarCliente(Actividad):
 
             self.regresar_a_restaurante(evento)
 
+        else:
+            simulacion.clientes_rechazados.append(evento)
+
+
     def asignar_pedido_a_camioneta(self, camioneta, evento):
         from Simulacion import Simulacion
         simulacion = Simulacion()
@@ -39,16 +42,18 @@ class EncolarCliente(Actividad):
         simulacion.add_pedido(pedido)
         camioneta.asignar_pedido(pedido)
 
+
     def regresar_a_restaurante(self, evento):
         from Simulacion import Simulacion
         simulacion = Simulacion()
         camioneta = simulacion.obtener_camioneta_a_volver_al_restaurante()
         pedido = Pedido(evento.cliente, evento.hora, camioneta, evento.tipo_pizza)
+
         if camioneta is None:
             simulacion.pedidos_en_espera.append(pedido)
         else:
             simulacion.add_pedido(pedido)
             camioneta.disponible = False
             camioneta.pedidos.append(pedido)
-            simulacion.dispatch(EventType.CAMIONETA_REGRESA_A_BUSCAR_PEDIDO, {'pedido': pedido})
+            simulacion.dispatch(EventType.CAMIONETA_REGRESA_A_BUSCAR_PEDIDO, {'pedido': pedido, 'camioneta': camioneta})
 

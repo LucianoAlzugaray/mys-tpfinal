@@ -47,7 +47,7 @@ class Simulacion(metaclass=Singleton):
         self.desperdicios = []
         self.pedidos_en_espera = []
         self.clientes_rechazados = []
-        self.tipos_de_pizza_disponibles = []
+        self._tipos_de_pizza_disponibles = []
         self.porcentaje_desperdicio_diario = []
         self.resultados_experimentos = []
 
@@ -66,7 +66,8 @@ class Simulacion(metaclass=Singleton):
         self.pedidos_por_hora = configuracion['pedidosPorHora']
         from models.Camioneta import Camioneta
         self.camionetas += [Camioneta(configuracion['hornosPorCamioneta'], configuracion['pizzasPorHorno']) for i in range(configuracion['cantidadCamionetas'])]
-        self.tipos_de_pizza_disponibles = configuracion['tipos_de_pizza']
+        self._tipos_de_pizza_disponibles = configuracion['tipos_de_pizza']
+
 
         self.reloj.configurate({
             'dia': self.tiempo_inicio,
@@ -80,19 +81,18 @@ class Simulacion(metaclass=Singleton):
 
                 while not self.termino_dia():
                     evento = self.next_event()
-                    if isinstance(evento, PizzaVenceEvent):
-                        lista_EVP = list(filter(lambda x: isinstance(x, PizzaVenceEvent), self.fel))
-                        lista_EVP_ahora = list(filter(lambda x: x.hora == evento.hora, lista_EVP))
-                        for evp in lista_EVP_ahora:
-                            evp.notify()
-
-                    elif evento is not None:
+                    if evento is not None:
                         evento.notify()
 
                 self.finalizar_dia()
+                print("PUBLICANDO RESULTADOS DEL DIA")
                 self.publicar_resultados_dia()
             self.publicar_resultados_experimento(experimento)
             self.clean_experimento()
+
+    @property
+    def tipos_de_pizza_disponibles(self):
+        return list(map(lambda x: x['tipo'], self._tipos_de_pizza_disponibles))
 
     def clean_experimento(self):
         self.fel = []
@@ -220,10 +220,10 @@ class Simulacion(metaclass=Singleton):
             return math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2))
 
     def get_tipos_disponibles_en_camionetas(self):
-
         pizzas_disponibles = list(
             itertools.chain(*map(lambda x: x.get_pizzas_disponibles(), self.camionetas)))
-        return list(set(map(lambda x: x.tipo, pizzas_disponibles)))
+        tipos_de_pizza_disponibles = list(set(map(lambda x: x.tipo, pizzas_disponibles)))
+        return tipos_de_pizza_disponibles if tipos_de_pizza_disponibles else self.utils.generar_tipo_de_pizza()
 
     def obtener_camioneta_a_volver_al_restaurante(self):
         if self.volver_al_terminar_todos_los_pedidos:
@@ -397,6 +397,7 @@ class Simulacion(metaclass=Singleton):
         self.reloj.avanzar_time(time)
 
     '''Obtiene el porcentaje de desperdicios en el dia'''
+    # TODO: checkear - si no tengo pedidos y estoy añadiendo desperdicios el porcentoje diario no puede ser 0!!
     def add_desperdicio(self, pizza, hora):
         self.desperdicios.append(pizza)
         if self.pedidos_del_dia > 0:
@@ -427,5 +428,16 @@ class Simulacion(metaclass=Singleton):
         desperdicios = list(itertools.chain(*map(lambda x: x.pizzas, self.camionetas)))
         list(map(lambda x: self.add_desperdicio(x, self.dia), desperdicios))
         list(map(lambda x: x.finalizar_dia(), self.camionetas))
+
+    def atender_pedidos_en_espera(self, camioneta):
+        pedidos_en_espera = self.pedidos_en_espera[0: camioneta.cantidad_de_pizzas_a_cargar]
+
+        for pedido in pedidos_en_espera:
+            camioneta.pizzas.append(self.generar_pizza(pedido.tipo_pizza))
+            camioneta.pedidos.append(pedido)
+            pedido.camioneta = camioneta
+            self.add_pedido(pedido)
+            self.pedidos_en_espera.remove(pedido)
+
 
 

@@ -18,15 +18,20 @@ TIPOS_PIZZA_DISPONIBLES = [TipoPizza.ANANA, TipoPizza.CALABRESA, TipoPizza.FUGAZ
 def iniciar_simulacion(configuraciones):
     tipos_de_pizza = []
     if configuraciones["anana"]:
-        tipos_de_pizza.append(TipoPizza.ANANA)
+        tipo_de_pizza = {'tipo': TipoPizza.ANANA, 'probabilidad': 0.05}
+        tipos_de_pizza.append(tipo_de_pizza)
     elif configuraciones["napolitana"]:
-        tipos_de_pizza.append(TipoPizza.CALABRESA)
+        tipo_de_pizza = {'tipo': TipoPizza.CALABRESA, 'probabilidad': 0.20}
+        tipos_de_pizza.append(tipo_de_pizza)
     elif configuraciones["fugazzeta"]:
-        tipos_de_pizza.append(TipoPizza.NAPOLITANA)
+        tipo_de_pizza = {'tipo': TipoPizza.NAPOLITANA, 'probabilidad': 0.20}
+        tipos_de_pizza.append(tipo_de_pizza)
     elif configuraciones["mozzarella"]:
-        tipos_de_pizza.append(TipoPizza.FUGAZZETA)
+        tipo_de_pizza = {'tipo': TipoPizza.FUGAZZETA, 'probabilidad': 0.20}
+        tipos_de_pizza.append(tipo_de_pizza)
     elif configuraciones["calabresa"]:
-        tipos_de_pizza.append(TipoPizza.MOZZARELLA)
+        tipo_de_pizza = {'tipo': TipoPizza.MOZZARELLA, 'probabilidad': 0.20}
+        tipos_de_pizza.append(tipo_de_pizza)
 
     configuracion = {
         "inicio": datetime.fromtimestamp(configuraciones["inicio"] / 1000.0) if configuraciones["inicio"] is not None else INICIO,

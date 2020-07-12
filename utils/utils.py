@@ -35,6 +35,15 @@ class Utils:
                 eventos_en_hora.append(timestamp)
         return eventos_en_hora
 
+    @staticmethod
+    def generar_pizza():
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        opcion = random.random()
+        for tipo_disponible in simulacion._tipos_de_pizza_disponibles:
+            if opcion < tipo_disponible['probabilidad']:
+                return tipo_disponible['tipo']
+
     ## Genera tipo de pizza aleatorio
     @staticmethod
     def generar_tipo_de_pizza():

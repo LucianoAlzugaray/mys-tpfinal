@@ -8,8 +8,7 @@ class RecargarCamioneta(Actividad):
 
         camioneta = evento.camioneta
         camioneta.remover_pizzas_vencidas()
-        camioneta.asignar_pedidos_pendientes()
         camioneta.cargar_pizzas()
         from Simulacion import Simulacion
         simulacion = Simulacion()
-        simulacion.dispatch(EventType.ENVIAR_PEDIDO, {'pedido': camioneta.pedido_en_curso, 'hora': simulacion.time})
+        simulacion.dispatch(EventType.ENVIAR_PEDIDO, {'pedido': camioneta.pedido_en_curso, 'hora': simulacion.time, 'camioneta': camioneta})

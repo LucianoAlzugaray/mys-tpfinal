@@ -10,9 +10,15 @@ class Configuracion:
     CANTIDAD_DE_CAMIONETAS = 4
     VOLVER_AL_RESTAURANTE = False
     CANTIDAD_DE_EXPERIMENTOS = 10
-    FIN = datetime.strptime('31/12/20 23:00:00', '%d/%m/%y %H:%M:%S')
+    FIN = datetime.strptime('3/1/20 23:00:00', '%d/%m/%y %H:%M:%S')
     INICIO = datetime.strptime('1/1/20 11:00:00', '%d/%m/%y %H:%M:%S')
-    TIPOS_PIZZA_DISPONIBLES = [TipoPizza.ANANA, TipoPizza.CALABRESA, TipoPizza.FUGAZZETA, TipoPizza.MOZZARELLA, TipoPizza.NAPOLITANA]
+    TIPOS_PIZZA_DISPONIBLES = [
+        {'tipo': TipoPizza.ANANA, 'probabilidad': 0.05},
+        {'tipo': TipoPizza.CALABRESA, 'probabilidad': 0.20},
+        {'tipo': TipoPizza.NAPOLITANA, 'probabilidad': 0.20},
+        {'tipo': TipoPizza.FUGAZZETA, 'probabilidad': 0.20},
+        {'tipo': TipoPizza.MOZZARELLA, 'probabilidad': 0.20}
+    ]
 
     @classmethod
     def get_default_configuration(cls):

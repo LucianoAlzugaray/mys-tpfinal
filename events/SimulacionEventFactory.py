@@ -25,7 +25,7 @@ class SimulacionEventFactory(object):
             return evento
 
         elif event_key == EventType.ENVIAR_PEDIDO:
-            evento = EnviarPedidoEvent(kwargs['hora'], kwargs['pedido'])
+            evento = EnviarPedidoEvent(kwargs['hora'], kwargs['pedido'], kwargs['camioneta'])
             evento.attach(EnviarPedido())
             return evento
 

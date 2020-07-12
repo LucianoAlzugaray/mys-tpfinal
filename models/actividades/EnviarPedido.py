@@ -13,7 +13,7 @@ class EnviarPedido(Actividad):
         self.demora = simulacion.utils.tiempo_entrega()
 
     def _ejecutar(self, evento: EnviarPedidoEvent):
-        evento.pedido.camioneta.enviar_pedido()
+        evento.camioneta.enviar_pedido()
         from Simulacion import Simulacion
         simulacion = Simulacion()
         simulacion.dispatch(EventType.ENTREGAR_PEDIDO, {'hora': simulacion.time + timedelta(minutes=self.demora), 'pedido': evento.pedido})
