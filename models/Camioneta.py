@@ -73,21 +73,36 @@ class Camioneta:
     def _enviar_siguiente_pedido(self):
 
         if self.tengo_pizzas_para_el_siguiente_pedido() and self.no_estoy_volviendo_a_restaurante():
-            self.generar_evento_enviar_pedido(self.pedidos[0])
+            from Simulacion import Simulacion
+            simulacion = Simulacion()
+            if len(self.pedidos) > 0:
+                self.generar_evento_enviar_pedido(self.pedidos[0])
 
-        if not self.tengo_pizzas() or (self.tengo_pedidos() and not self.tengo_pizzas_para_el_siguiente_pedido()):
+        if not self.tengo_pizzas():
             self.generar_evento_volver_a_restaurante()
+        elif self.tengo_pedidos() and not self.tengo_pizzas_para_el_siguiente_pedido():
+            self.pedido_en_curso = self.pedidos[0]
+            self.pedidos.remove(self.pedido_en_curso)
+            self._volver_a_restaurante()
 
     def tengo_pizzas_para_el_siguiente_pedido(self):
-        return self.tengo_pedidos() and list(filter(lambda x: x.tipo == self.pedidos[0].tipo_pizza, self.pizzas))
+        return self.tengo_pedidos() and len(list(filter(lambda x: x.tipo == self.pedidos[0].tipo_pizza, self.pizzas))) > 0
 
     def tengo_pedidos(self):
         return len(self.pedidos) > 0
 
-    def entregar_pedido(self):
-        self.ubicacion = self.pedido_en_curso.cliente.ubicacion
+    def enviar_pedido(self):
+        if self.pedido_en_curso is None:
+            pedido = self.pedidos[0]
+            self.pedido_en_curso = pedido
+            self.pedido_en_curso.ubicacion_origen = self.ubicacion
+            self.pedidos.remove(pedido)
 
-        if self._tengo_pizzas_para_entregar(self.pedido_en_curso.tipo_pizza):
+    def entregar_pedido(self):
+        from Simulacion import Simulacion
+        simulacion = Simulacion()
+        self.ubicacion = self.pedido_en_curso.cliente.ubicacion if self.pedido_en_curso is not None else self.ubicacion
+        if self._tengo_pizzas_para_entregar():
             self._entregar_pedido()
             self._enviar_siguiente_pedido()
         else:
@@ -96,10 +111,13 @@ class Camioneta:
     def _volver_a_restaurante(self):
         from Simulacion import Simulacion
         simulacion = Simulacion()
-        simulacion.dispatch(EventType.CAMIONETA_REGRESA_A_BUSCAR_PEDIDO, {'pedido': self.pedido_en_curso, 'camioneta': self})
+        if self.pedido_en_curso is not None:
+            simulacion.dispatch(EventType.CAMIONETA_REGRESA_A_BUSCAR_PEDIDO, {'pedido': self.pedido_en_curso, 'camioneta': self})
 
-    def _tengo_pizzas_para_entregar(self, tipo_pizza):
-        return len(list(filter(lambda x: not x.vencida and x.tipo == tipo_pizza, self.pizzas))) > 0
+    def _tengo_pizzas_para_entregar(self):
+        if self.pedido_en_curso is None:
+            return False
+        return len(list(filter(lambda x: not x.vencida and x.tipo == self.pedido_en_curso.tipo_pizza, self.pizzas))) > 0
 
     def tengo_pizzas(self):
         return len(self.pizzas) > 0 and not self.todas_mis_pizzas_estan_vencidas()
@@ -124,7 +142,7 @@ class Camioneta:
         self.distancia_recorrida += self.obtener_distancia(self.ubicacion, pedido.cliente.ubicacion)
         from Simulacion import Simulacion
         simulacion = Simulacion()
-        simulacion.dispatch(EventType.ENVIAR_PEDIDO, {'hora': simulacion.time + timedelta(minutes=1), 'pedido': pedido, 'camioneta': self})
+        simulacion.dispatch(EventType.ENVIAR_PEDIDO, {'hora': simulacion.time + timedelta(seconds=1), 'pedido': self.pedido_en_curso, 'camioneta': self})
 
     def tiene_tipo(self, tipo):
         return len(list(filter(lambda x: x.tipo == tipo, self.pizzas_no_vencidas))) > 0
@@ -182,7 +200,6 @@ class Camioneta:
 
         self.pedidos.append(pedido)
         if self.pedido_en_curso is None:
-
             self.generar_evento_enviar_pedido(pedido)
 
     def get_ubicacion_pedido_en_curso(self):
@@ -193,12 +210,6 @@ class Camioneta:
 
     def get_ubicacion(self):
         return self.ubicacion
-
-    def enviar_pedido(self):
-        if len(self.pedidos) > 0:
-            self.pedido_en_curso = self.pedidos[0]
-            self.pedido_en_curso.ubicacion_origen = self.ubicacion
-            self.pedidos.remove(self.pedido_en_curso)
 
     def obtener_tiempo_demora_en_volver(self):
         from Simulacion import Simulacion

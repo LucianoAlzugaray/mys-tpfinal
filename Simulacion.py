@@ -130,22 +130,22 @@ class Simulacion(metaclass=Singleton):
         tiempo_entre_recargas = self.tiempo_entre_recargas()
         pizzas_pedidas_por_tipo = json.dumps(self.pizzas_pedidas_por_tipo())
 
-        print(tiempo_espera)
-        print(porcentaje_desperdicio)
-        print(pedidos_entregados)
-        print(pedidos_perdidos)
-        print(distacia_recorrida)
-        print(tiempo_entre_recargas)
-        print(pizzas_pedidas_por_tipo)
+        # print(tiempo_espera)
+        # print(porcentaje_desperdicio)
+        # print(pedidos_entregados)
+        # print(pedidos_perdidos)
+        # print(distacia_recorrida)
+        # print(tiempo_entre_recargas)
+        # print(pizzas_pedidas_por_tipo)
 
-        # self.client.publish("espera-de-cliente", tiempo_espera)
-        # self.client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
-        # self.client.publish("pedidos-entregados", len(pedidos_entregados))
-        # self.client.publish("pedidos-rechazados", len(pedidos_perdidos))
-        # self.client.publish("distancias-recorridas", distacia_recorrida)
-        # self.client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
-        # self.client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
-        # self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
+        self.client.publish("espera-de-cliente", tiempo_espera)
+        self.client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
+        self.client.publish("pedidos-entregados", len(pedidos_entregados))
+        self.client.publish("pedidos-rechazados", len(pedidos_perdidos))
+        self.client.publish("distancias-recorridas", distacia_recorrida)
+        self.client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
+        self.client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
+        self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
 
     # TODO: armar los csv de pedidos y desperdicios
     def obtener_datos(self):
@@ -223,7 +223,7 @@ class Simulacion(metaclass=Singleton):
         pizzas_disponibles = list(
             itertools.chain(*map(lambda x: x.get_pizzas_disponibles(), self.camionetas)))
         tipos_de_pizza_disponibles = list(set(map(lambda x: x.tipo, pizzas_disponibles)))
-        return tipos_de_pizza_disponibles if tipos_de_pizza_disponibles else self.utils.generar_tipo_de_pizza()
+        return tipos_de_pizza_disponibles if tipos_de_pizza_disponibles else [self.utils.generar_pizza()]
 
     def obtener_camioneta_a_volver_al_restaurante(self):
         if self.volver_al_terminar_todos_los_pedidos:
