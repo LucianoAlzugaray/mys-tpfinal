@@ -13,6 +13,20 @@ class Pedido:
         self.camioneta = camioneta
         self.entregado = False
 
+    def to_dict(self):
+        return {
+            "id": id(self),
+            "cliente": id(self.cliente),
+            "hora_toma": self.hora_toma,
+            "hora_entrega": self.hora_entrega,
+            "ubicacion_origen": self.ubicacion_origen,
+            "tipo_pizza": self.tipo_pizza,
+            "pizza": id(self.pizza),
+            "camioneta": id(self.camioneta),
+            "entregado": self.entregado
+        }
+
+
     @property
     def ubicacion(self):
         return self.cliente.ubicacion

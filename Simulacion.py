@@ -1,5 +1,7 @@
 import itertools
+import json
 import math
+import os
 from datetime import datetime, time
 from functools import reduce
 import numpy as np
@@ -55,6 +57,12 @@ class Simulacion(metaclass=Singleton):
         self.reloj = Reloj()
         self.event_factory = SimulacionEventFactory()
 
+        self.data = {
+            "desperdicios": None,
+            "clientes_rechazados": None,
+            "pedidos": None
+        }
+
         self.client = paho.Client()
         self.client.connect("172.16.240.10", 1883)
 
@@ -88,7 +96,10 @@ class Simulacion(metaclass=Singleton):
                 print("PUBLICANDO RESULTADOS DEL DIA")
                 self.publicar_resultados_dia()
             self.publicar_resultados_experimento(experimento)
+            self.guardar_datos(experimento)
             self.clean_experimento()
+        self.exportar_datos()
+
 
     @property
     def tipos_de_pizza_disponibles(self):
@@ -103,7 +114,6 @@ class Simulacion(metaclass=Singleton):
         self.porcentaje_desperdicio_diario = []
 
     def publicar_resultados_experimento(self, experimento):
-        return 0
         row = {
             "corrida": experimento.__str__(),
             "esperaClientes": self.tiempo_espera(),
@@ -113,7 +123,6 @@ class Simulacion(metaclass=Singleton):
             "distanciasRecorridas": self.distacia_recorrida(),
             "recargaCamionetas": self.tiempo_entre_recargas()
         }
-        # TODO recargaCamioneta siempre me da nan. Puede ser por qu eno recarga, al menos que me de 0.
 
         self.resultados_experimentos.append(row)
         data = json.dumps(self.resultados_experimentos)
@@ -130,14 +139,6 @@ class Simulacion(metaclass=Singleton):
         tiempo_entre_recargas = self.tiempo_entre_recargas()
         pizzas_pedidas_por_tipo = json.dumps(self.pizzas_pedidas_por_tipo())
 
-        # print(tiempo_espera)
-        # print(porcentaje_desperdicio)
-        # print(pedidos_entregados)
-        # print(pedidos_perdidos)
-        # print(distacia_recorrida)
-        # print(tiempo_entre_recargas)
-        # print(pizzas_pedidas_por_tipo)
-
         self.client.publish("espera-de-cliente", tiempo_espera)
         self.client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
         self.client.publish("pedidos-entregados", len(pedidos_entregados))
@@ -148,8 +149,43 @@ class Simulacion(metaclass=Singleton):
         self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
 
     # TODO: armar los csv de pedidos y desperdicios
-    def obtener_datos(self):
-        pass
+    def guardar_datos(self, experimento):
+        pedidos_data = [pedido.to_dict() for pedido in self.pedidos]
+        desperdicios_data = [pizza.to_dict() for pizza in self.desperdicios]
+        clientes_rechazados_data = [cliente.dict() for cliente in self.clientes_rechazados]
+
+        pedidos_df = pd.DataFrame(pedidos_data)
+        desperdicios_df = pd.DataFrame(desperdicios_data)
+        clientes_rechazados_df = pd.DataFrame(clientes_rechazados_data)
+
+        pedidos_df["experimento"] = experimento + 1
+        desperdicios_df["experimento"] = experimento + 1
+        clientes_rechazados_df["experimento"] = experimento + 1
+
+
+        if self.data["pedidos"] is None:
+            self.data["pedidos"] = pedidos_df
+        else:
+            self.data["pedidos"].append(pedidos_df)
+
+        if self.data["desperdicios"] is None:
+            self.data["desperdicios"] = desperdicios_df
+        else:
+            self.data["desperdicios"].append(desperdicios_df)
+
+        if self.data["clientes_rechazados"] is None:
+            self.data["clientes_rechazados"] = clientes_rechazados_df
+        else:
+            self.data["clientes_rechazados"].append(clientes_rechazados_df)
+
+    def exportar_datos(self):
+        outdir = './store'
+        if not os.path.exists(outdir):
+            os.mkdir(outdir)
+
+        self.data["pedidos"].to_csv(f"{outdir}/pedidos.csv", index=False)
+        self.data["desperdicios"].to_csv(f"{outdir}/desperdicios.csv", index=False)
+        self.data["clientes_rechazados"].to_csv(f"{outdir}/clientes_rechazados.csv", index=False)
 
     def dispatch(self, event, kwargs=None):
         if event == EventType.ENTREGAR_PEDIDO:
@@ -397,7 +433,6 @@ class Simulacion(metaclass=Singleton):
         self.reloj.avanzar_time(time)
 
     '''Obtiene el porcentaje de desperdicios en el dia'''
-    # TODO: checkear - si no tengo pedidos y estoy añadiendo desperdicios el porcentoje diario no puede ser 0!!
     def add_desperdicio(self, pizza, hora):
         self.desperdicios.append(pizza)
         if self.pedidos_del_dia > 0:
