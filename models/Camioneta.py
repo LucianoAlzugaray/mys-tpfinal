@@ -73,8 +73,7 @@ class Camioneta:
     def _enviar_siguiente_pedido(self):
 
         if self.tengo_pizzas_para_el_siguiente_pedido() and self.no_estoy_volviendo_a_restaurante():
-            from Simulacion import Simulacion
-            simulacion = Simulacion()
+
             if len(self.pedidos) > 0:
                 self.generar_evento_enviar_pedido(self.pedidos[0])
 

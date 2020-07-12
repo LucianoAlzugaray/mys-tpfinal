@@ -152,7 +152,7 @@ class Simulacion(metaclass=Singleton):
     def guardar_datos(self, experimento):
         pedidos_data = [pedido.to_dict() for pedido in self.pedidos]
         desperdicios_data = [pizza.to_dict() for pizza in self.desperdicios]
-        clientes_rechazados_data = [cliente.dict() for cliente in self.clientes_rechazados]
+        clientes_rechazados_data = [cliente.to_dict() for cliente in self.clientes_rechazados]
 
         pedidos_df = pd.DataFrame(pedidos_data)
         desperdicios_df = pd.DataFrame(desperdicios_data)
@@ -209,7 +209,7 @@ class Simulacion(metaclass=Singleton):
         pedido.camioneta.pedido_en_curso = None
 
 
-    def rechazar_cliente(self, cliente: Cliente) -> None:
+    def rechazar_cliente(self, cliente):
         self.clientes_rechazados.append(cliente)
 
     def get_camioneta_by_cliente(self, cliente: Cliente):

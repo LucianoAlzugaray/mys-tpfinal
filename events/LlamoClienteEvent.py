@@ -7,3 +7,11 @@ class LlamoClienteEvent(SimulacionEvent):
         super().__init__(hora)
         self.cliente = cliente
         self.tipo_pizza = tipo_pizza
+
+    def to_dict(self):
+        return {
+            "id": id(self),
+            "cliente_id": id(self.cliente),
+            "ubicacion": self.cliente.ubicacion,
+            "tipo_de_pizza": self.tipo_pizza
+        }

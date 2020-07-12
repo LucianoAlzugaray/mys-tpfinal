@@ -4,7 +4,7 @@ from models.TipoPizza import TipoPizza
 
 
 class Configuracion:
-    PIZZAS_POR_HORNO = 12
+    PIZZAS_POR_HORNO = 20
     PEDIDOS_POR_HORA = 20
     HORNOS_POR_CAMIONETA = 1
     CANTIDAD_DE_CAMIONETAS = 4
@@ -15,9 +15,9 @@ class Configuracion:
     TIPOS_PIZZA_DISPONIBLES = [
         {'tipo': TipoPizza.ANANA, 'probabilidad': 0.05},
         {'tipo': TipoPizza.CALABRESA, 'probabilidad': 0.20},
-        {'tipo': TipoPizza.NAPOLITANA, 'probabilidad': 0.20},
-        {'tipo': TipoPizza.FUGAZZETA, 'probabilidad': 0.20},
-        {'tipo': TipoPizza.MOZZARELLA, 'probabilidad': 0.20}
+        {'tipo': TipoPizza.NAPOLITANA, 'probabilidad': 0.55},
+        {'tipo': TipoPizza.FUGAZZETA, 'probabilidad': 0.75},
+        {'tipo': TipoPizza.MOZZARELLA, 'probabilidad': 1}
     ]
 
     @classmethod

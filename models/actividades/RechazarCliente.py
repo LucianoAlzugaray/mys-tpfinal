@@ -8,4 +8,4 @@ class RechazarCliente(Actividad):
         from Simulacion import Simulacion
         simulacion = Simulacion()
         if not simulacion.cliente_esta_en_rango(evento.cliente):
-            simulacion.rechazar_cliente(evento.cliente)
+            simulacion.rechazar_cliente(evento)
