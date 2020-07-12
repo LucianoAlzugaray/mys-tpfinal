@@ -20,6 +20,7 @@ class Pedido:
             "hora_toma": self.hora_toma,
             "hora_entrega": self.hora_entrega,
             "ubicacion_origen": self.ubicacion_origen,
+            "ubicacion": self.cliente.ubicacion,
             "tipo_pizza": self.tipo_pizza,
             "pizza": id(self.pizza),
             "camioneta": id(self.camioneta),

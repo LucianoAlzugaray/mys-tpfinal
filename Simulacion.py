@@ -7,6 +7,7 @@ from functools import reduce
 import numpy as np
 import pandas as pd
 from events.EntregarPedidoEvent import EntregarPedidoEvent
+from events.EnviarPedidoEvent import EnviarPedidoEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
 from events.SimulacionEventFactory import SimulacionEventFactory
 from models.Cliente import Cliente
@@ -207,6 +208,7 @@ class Simulacion(metaclass=Singleton):
 
     def rechazar_pedido(self, pedido: Pedido) -> None:
         pedido.entregado = False
+        pedido.hora_entrega = self.time
         pedido.camioneta.pedido_en_curso = None
 
 
@@ -301,7 +303,7 @@ class Simulacion(metaclass=Singleton):
 
     def generar_eventos_de_llamada(self):
         list(map(lambda hora_de_pedido: self.generar_llamo_cliente_event(hora_de_pedido),
-                 self.utils.get_horas_de_pedidos(self.horas_por_dia - 1)))
+             self.utils.get_horas_de_pedidos(self.horas_por_dia - 1)))
 
     def generar_llamo_cliente_event(self, hora_de_pedido):
         kwargs = {
@@ -451,6 +453,10 @@ class Simulacion(metaclass=Singleton):
             return None
 
         evento = self.fel[0]
+        if evento.hora.time() > self.reloj.cirre_at:
+            self.reloj.terminar_el_dia()
+            return None
+
         self.reloj.avanzar_time(evento.hora)
         self.events.append(evento)
         self.fel.remove(evento)
@@ -460,6 +466,9 @@ class Simulacion(metaclass=Singleton):
         desperdicios = list(itertools.chain(*map(lambda x: x.pizzas, self.camionetas)))
         list(map(lambda x: self.add_desperdicio(x, self.dia), desperdicios))
         list(map(lambda x: x.finalizar_dia(), self.camionetas))
+        pedidos_perdidos = list(map(lambda x: x.pedido, list(filter(lambda x: isinstance(x, EnviarPedidoEvent) or isinstance(x, EntregarPedidoEvent), self.fel))))
+        for pedido in pedidos_perdidos:
+            pedido.hora_entrega = self.time
 
     def atender_pedidos_en_espera(self, camioneta):
         pedidos_en_espera = self.pedidos_en_espera[0: camioneta.cantidad_de_pizzas_a_cargar]

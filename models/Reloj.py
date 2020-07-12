@@ -29,8 +29,6 @@ class Reloj(object):
     '''Avanza el reloj hasta un datetime recibido por parametro'''
     def avanzar_time(self, time: datetime):
         self.dia = time
-        # diferencia_en_minutos = self.get_diferencia_hora_actual(time)
-        # self.avanzar(diferencia_en_minutos)
 
     def terminar_el_dia(self):
         from Simulacion import Simulacion
