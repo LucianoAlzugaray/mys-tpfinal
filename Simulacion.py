@@ -93,8 +93,9 @@ class Simulacion(metaclass=Singleton):
                         evento.notify()
 
                 self.finalizar_dia()
-                print("PUBLICANDO RESULTADOS DEL DIA")
+                print(f"PUBLICANDO RESULTADOS DEL DIA {self.time.date()}")
                 self.publicar_resultados_dia()
+            print(f"PUBLICANDO RESULTADOS DEL EXPERIMENTO {experimento+1}")
             self.publicar_resultados_experimento(experimento)
             self.guardar_datos(experimento)
             self.clean_experimento()
