@@ -31,7 +31,7 @@ class Utils:
         for hora in range(horas):
             for pedido in range(np.random.poisson(simulacion.pedidos_por_hora)):
                 tiempo_exacto = math.trunc(random.uniform(0, 60)) + 60 * hora
-                timestamp = simulacion.tiempo_inicio + timedelta(minutes=tiempo_exacto)
+                timestamp = simulacion.time + timedelta(minutes=tiempo_exacto)
                 eventos_en_hora.append(timestamp)
         return eventos_en_hora
 
@@ -66,4 +66,4 @@ class Utils:
     ## Obtiene una ubicación del cliente aleatoria
     @staticmethod
     def generar_ubicacion_cliente():
-        return np.random.normal(0, 10, 2) * 100  ##Para que quede como maximo 2000 como en el gráfico de bruno
+        return np.random.normal(0,7,2)*100

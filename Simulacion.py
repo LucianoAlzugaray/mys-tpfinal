@@ -384,7 +384,6 @@ class Simulacion(metaclass=Singleton):
 
     '''Tiempo promedio de espera de los clientes a nivel simulacion'''
     def tiempo_espera(self):
-
         minutos_espera = list(map(lambda pedido: pedido.hora_entrega - pedido.hora_toma, self.pedidos_entregados()))
         media = np.mean(minutos_espera)
         return math.trunc(media.seconds / 60)
@@ -428,9 +427,6 @@ class Simulacion(metaclass=Singleton):
         self.dispatch(EventType.PIZZA_VENCE, {'pizza': pizza})
         return pizza
 
-    ''' Metodo para avanzar el tiempo dado un datetime.'''
-    def avanzar_reloj_time(self, time: datetime):
-        self.reloj.avanzar_time(time)
 
     '''Obtiene el porcentaje de desperdicios en el dia'''
     def add_desperdicio(self, pizza, hora):
