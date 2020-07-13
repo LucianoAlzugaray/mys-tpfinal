@@ -7,7 +7,7 @@ services:
       - "1883:1883"
       - "9001:9001"
     networks:
-      tp4-net:
+      simulacion-net:
         ipv4_address: 172.16.240.10
 
   publisher:
@@ -16,11 +16,26 @@ services:
     ports:
       - "1880:1880"
     networks:
-      tp4-net:
-        ipv4_address: 172.16.240.20 
+      simulacion-net:
+        ipv4_address: 172.16.240.20
+
+  simulacion:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    container_name: "simulacion"
+    links:
+      - "broker"
+    volumes:
+      - .:/app
+    ports:
+      - "1881:1881"
+    networks:
+      simulacion-net:
+        ipv4_address: 172.16.240.30
 
 networks:
-  tp4-net:
+  simulacion-net:
     driver: bridge
     ipam:
       config:

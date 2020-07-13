@@ -2,7 +2,7 @@ import itertools
 import json
 import math
 import os
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from functools import reduce
 import numpy as np
 import pandas as pd
@@ -464,18 +464,14 @@ class Simulacion(metaclass=Singleton):
     '''Obtiene el porcentaje de desperdicios en el dia'''
     def add_desperdicio(self, pizza, hora):
         self.desperdicios.append(pizza)
-        if self.pedidos_del_dia > 0:
-            self.porcentaje_desperdicio_diario = (self.desperdicios_del_dia/self.pedidos_del_dia) * 100
-        else:
-            self.porcentaje_desperdicio_diario = 0
 
     @property
     def desperdicios_del_dia(self):
-        return len(list(filter(lambda x: x.hora.day == self.time.day, self.desperdicios)))
+        return len(list(filter(lambda x: x.hora.date() == (self.time - timedelta(days=1)).date(), self.desperdicios)))
 
     @property
     def pedidos_del_dia(self):
-        return len(list(filter(lambda x: x.hora_toma.day == self.time.day, self.pedidos)))
+        return len(list(filter(lambda x: x.hora_toma.date() == (self.time - timedelta(days=1)).date(), self.pedidos)))
 
     def next_event(self):
         if len(self.fel) == 0:
@@ -493,7 +489,11 @@ class Simulacion(metaclass=Singleton):
         return evento
 
     def finalizar_dia(self):
+
+        self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / self.pedidos_del_dia) * 100)
         self.pedidos_en_espera = []
+        self.fel = []
+
         desperdicios = list(itertools.chain(*map(lambda x: x.pizzas, self.camionetas)))
         list(map(lambda x: self.add_desperdicio(x, self.dia), desperdicios))
         pedidos_en_camioneta = list(itertools.chain(*map(lambda x: x.pedidos, self.camionetas)))

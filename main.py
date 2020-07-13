@@ -47,7 +47,7 @@ def iniciar_simulacion(configuraciones):
 
     from Configuracion import Configuracion
     simulacion = Simulacion()
-    simulacion.configurate(Configuracion.get_default_configuration())
+    simulacion.configurate(configuraciones)
     simulacion.run()
 
 

@@ -4,10 +4,10 @@ from models.TipoPizza import TipoPizza
 
 
 class Configuracion:
-    PIZZAS_POR_HORNO = 5
+    PIZZAS_POR_HORNO = 20
     PEDIDOS_POR_HORA = 20
     HORNOS_POR_CAMIONETA = 1
-    CANTIDAD_DE_CAMIONETAS = 40
+    CANTIDAD_DE_CAMIONETAS = 4
     VOLVER_AL_RESTAURANTE = False
     CANTIDAD_DE_EXPERIMENTOS = 1
     FIN = datetime.strptime('1/2/20 23:00:00', '%d/%m/%y %H:%M:%S')
