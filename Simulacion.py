@@ -83,6 +83,48 @@ class Simulacion(metaclass=Singleton):
             'hora_cierre': time(self.HORA_DE_CIERRE, self.MINUTOS_DE_CIERRE),
         })
 
+    @property
+    def pedidos_que_no_estan_en_camioneta(self):
+        pedidos_en_camioneta  = []
+        for camioneta in self.camionetas:
+            pedidos_en_camioneta += camioneta.pedidos
+        return list(filter(lambda pedido: pedido not in pedidos_en_camioneta, self.pedidos))
+
+    # @property
+    # def
+
+    @property
+    def pedidos_que_no_tienen_hora_de_entrega(self):
+        return list(filter(lambda pedido: pedido.hora_entrega is None, self.pedidos))
+
+    @property
+    def pedidos_entregados_por_camioneta(self):
+        asd = {
+            id(self.camionetas[0]): [],
+            id(self.camionetas[1]): [],
+            id(self.camionetas[2]): [],
+            id(self.camionetas[3]): []
+        }
+        for pedido in list(filter(lambda x: x.entregado, self.pedidos)):
+            asd[id(pedido.camioneta)].append(pedido)
+        return asd
+
+    @property
+    def pedidos_rechazados(self):
+        return list(filter(lambda x: not x.entregado and x.hora_entrega is not None, self.pedidos))
+
+    @property
+    def eventos_de_envio(self):
+        return list(filter(lambda x: isinstance(x, EnviarPedidoEvent), self.events))
+
+    @property
+    def eventos_de_entrega(self):
+        return list(filter(lambda x: isinstance(x, EntregarPedidoEvent), self.events))
+
+    @property
+    def pedidos_sin_evento_de_envio(self):
+        return list(filter(lambda x: x not in list(map(lambda x: x.pedido, self.eventos_de_entrega)), self.pedidos))
+
     def run(self):
         for experimento in range(self.experimentos):
             for dia in range(self.dias_a_simular):
@@ -190,12 +232,6 @@ class Simulacion(metaclass=Singleton):
         self.data["clientes_rechazados"].to_csv(f"{outdir}/clientes_rechazados.csv", index=False)
 
     def dispatch(self, event, kwargs=None):
-        if event == EventType.ENTREGAR_PEDIDO:
-            eventos_entregar_pedido = list(filter(lambda x: isinstance(x, EntregarPedidoEvent), self.events))
-            tiene_el_mismo_pedido = list(filter(lambda x: x.pedido == kwargs['pedido'], eventos_entregar_pedido))
-            if len(tiene_el_mismo_pedido) > 0:
-                return
-
         event = self.event_factory.get_event(event, kwargs)
 
         self.fel.append(event)
@@ -205,11 +241,6 @@ class Simulacion(metaclass=Singleton):
     def get_camioneta_by_pizza(self, pizza):
         camionetas = list(filter(lambda x: x.get_pizza(pizza) is not None, self.camionetas))
         return None if len(camionetas) == 0 else camionetas[0]
-
-    def rechazar_pedido(self, pedido: Pedido) -> None:
-        pedido.entregado = False
-        pedido.hora_entrega = self.time
-        pedido.camioneta.pedido_en_curso = None
 
 
     def rechazar_cliente(self, cliente):
@@ -228,19 +259,18 @@ class Simulacion(metaclass=Singleton):
 
         return None
 
-    def ordenar_camionetas_por_ubicacion(self, ubicacion, method_name):
+    @property
+    def camionetas_disponibles(self):
+        return list(filter(lambda x: x.disponible, self.camionetas))
+
+    def ordenar_camionetas_por_ubicacion(self, ubicacion, criterio_para_volver_a_restaurante):
 
         distancias = {}
-
-        camionetas_disponibles = list(filter(lambda x: x.disponible, self.camionetas))
-        for camioneta in camionetas_disponibles:
-            metodo = getattr(camioneta, method_name)
+        for camioneta in self.camionetas_disponibles:
+            metodo = getattr(camioneta, criterio_para_volver_a_restaurante)
             ubicacion_camioneta = metodo()
             distancia = self.obtener_distancia(ubicacion, ubicacion_camioneta)
             distancias[camioneta] = distancia
-
-        if None in list(map(lambda x: x[1], distancias.items())):
-            raise Exception("ordenar_camionetas_por_ubicacion: No es posible ordenar las camionetas", [camionetas_disponibles, ubicacion, method_name])
 
         aux = sorted(distancias.items(), key=lambda x: x[1])
         camionetas = []
@@ -260,7 +290,7 @@ class Simulacion(metaclass=Singleton):
 
     def get_tipos_disponibles_en_camionetas(self):
         pizzas_disponibles = list(
-            itertools.chain(*map(lambda x: x.get_pizzas_disponibles(), self.camionetas)))
+            itertools.chain(*map(lambda x: x.pizzas_disponibles, self.camionetas)))
         tipos_de_pizza_disponibles = list(set(map(lambda x: x.tipo, pizzas_disponibles)))
         return tipos_de_pizza_disponibles if tipos_de_pizza_disponibles else [self.utils.generar_pizza()]
 
@@ -463,12 +493,16 @@ class Simulacion(metaclass=Singleton):
         return evento
 
     def finalizar_dia(self):
+        self.pedidos_en_espera = []
         desperdicios = list(itertools.chain(*map(lambda x: x.pizzas, self.camionetas)))
         list(map(lambda x: self.add_desperdicio(x, self.dia), desperdicios))
-        list(map(lambda x: x.finalizar_dia(), self.camionetas))
+        pedidos_en_camioneta = list(itertools.chain(*map(lambda x: x.pedidos, self.camionetas)))
+
         pedidos_perdidos = list(map(lambda x: x.pedido, list(filter(lambda x: isinstance(x, EnviarPedidoEvent) or isinstance(x, EntregarPedidoEvent), self.fel))))
-        for pedido in pedidos_perdidos:
+        for pedido in pedidos_perdidos + pedidos_en_camioneta:
             pedido.hora_entrega = self.time
+            pedido.ubicacion_origen = [0, 0]
+        list(map(lambda x: x.finalizar_dia(), self.camionetas))
 
     def atender_pedidos_en_espera(self, camioneta):
         pedidos_en_espera = self.pedidos_en_espera[0: camioneta.cantidad_de_pizzas_a_cargar]

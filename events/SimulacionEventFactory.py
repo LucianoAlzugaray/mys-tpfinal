@@ -53,5 +53,3 @@ class SimulacionEventFactory(object):
             evento = PizzaVenceEvent(kwargs['pizza'])
             evento.attach(VencerPizza())
             return evento
-        else:
-            pass

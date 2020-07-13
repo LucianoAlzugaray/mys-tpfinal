@@ -8,6 +8,4 @@ class RechazarPedido(Actividad):
         pedido = evento.pedido
         cliente = evento.cliente
         if not cliente.acepta_pedido(pedido):
-            from Simulacion import Simulacion
-            simulacion = Simulacion()
-            simulacion.rechazar_pedido(pedido)
+            pedido.camioneta.rechazar_pedido(pedido)

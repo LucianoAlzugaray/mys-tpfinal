@@ -5,16 +5,10 @@ from models.actividades.Actividad import Actividad
 class EntregarPedido(Actividad):
 
     def _ejecutar(self, evento: EntregarPedidoEvent):
-        from Simulacion import Simulacion
-        simulacion = Simulacion()
 
-        if not evento.pedido.entregado:
-            evento.pedido.camioneta.entregar_pedido()
+        if evento.cliente.acepta_pedido(evento.pedido):
+            evento.pedido.camioneta.entregar_pedido(evento.pedido)
 
-
-            # En enviar pedido no se si despachamos el pedido en curso
-
-            # En la creacion del evento EnviarPedido se asigna mal el peido
 
 
 

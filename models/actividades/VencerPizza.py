@@ -9,9 +9,5 @@ class VencerPizza(Actividad):
         from Simulacion import Simulacion
         simulacion = Simulacion()
         simulacion.add_desperdicio(evento.pizza, evento.hora)
-        #
-        #
-        # camioneta = simulacion.get_camioneta_by_pizza(evento.pizza)
-        # if camioneta.pedido_en_curso is not None:
-        #     if len(camioneta.get_pizzas_disponibles()) >
+
 

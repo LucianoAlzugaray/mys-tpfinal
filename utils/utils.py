@@ -17,7 +17,6 @@ class Utils:
     def tiempo_entrega():
         return math.trunc(np.random.exponential(10))
 
-
     ## Obtiene si se convenció al cliente o no de cambiar el tipo de pizza
     @staticmethod
     def convencer_al_cliente():

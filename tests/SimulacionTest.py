@@ -108,7 +108,7 @@ class SimulacionTest(unittest.TestCase):
 
         simulacion.utils = TestableUtils()
         for k, camioneta in enumerate(simulacion.camionetas):
-            camioneta.descargarse()
+            camioneta.pizzas = []
             self.asignar_pedido_a_camioneta(TipoPizza.ANANA, k)
 
         for evento in list(filter(lambda x: isinstance(x, EnviarPedidoEvent), simulacion.fel)):
@@ -140,7 +140,7 @@ class SimulacionTest(unittest.TestCase):
 
         simulacion.utils = TestableUtils()
         for k, camioneta in enumerate(simulacion.camionetas):
-            camioneta.descargarse()
+            camioneta.pizzas = []
             self.asignar_pedido_a_camioneta(TipoPizza.ANANA, k)
 
         self.assertEqual(True, True)

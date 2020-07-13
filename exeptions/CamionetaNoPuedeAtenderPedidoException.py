@@ -1,0 +1,2 @@
+class CamionetaNoPuedeAtenderPedidoException(BaseException):
+    pass

@@ -47,23 +47,6 @@ class CamionetaTest(unittest.TestCase):
         self.camioneta.cargar_pizzas()
         self.assertEqual(40, len(self.camioneta.pizzas))
 
-    def test_sabe_reservar_una_pizza(self):
-        simulacion = self.get_simulacion()
-        cantidad_de_eventos = len(simulacion.fel)
-
-        self.camioneta = Camioneta()
-        self.camioneta.pizzas.append(simulacion.generar_pizza(TipoPizza.ANANA))
-
-        self.assertEqual(cantidad_de_eventos + 1, len(simulacion.fel))
-
-        cliente = Cliente()
-        cliente.ubicacion = [1414, 1414]
-        pedido = Pedido(cliente, simulacion.time, self.camioneta, TipoPizza.ANANA)
-        self.camioneta.reservar_pizza(pedido)
-        self.assertEqual(len(self.camioneta.pizzas_reservadas), 1)
-
-        self.assertRaises(NoHayTipoPizzaEnCamionetaException, self.camioneta.reservar_pizza, pedido)
-
     def get_simulacion(self):
         from Simulacion import Simulacion
         from Configuracion import Configuracion
