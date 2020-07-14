@@ -374,7 +374,7 @@ class Simulacion(metaclass=Singleton):
         if len(result) > 0:
             return result[0]
 
-        raise Exception("get_pedido_by_pizza: Se pinchó para la mierda")
+        raise Exception("get_pedido_by_pizza: No hay pedido para esta pizza.")
 
 
     @property
