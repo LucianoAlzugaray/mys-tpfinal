@@ -1,8 +1,7 @@
 import itertools
-import json
 import math
 import os
-from datetime import datetime, time, timedelta
+from datetime import time, timedelta
 from functools import reduce
 import numpy as np
 import pandas as pd
@@ -11,7 +10,6 @@ from events.EnviarPedidoEvent import EnviarPedidoEvent
 from events.PizzaVenceEvent import PizzaVenceEvent
 from events.SimulacionEventFactory import SimulacionEventFactory
 from models.Cliente import Cliente
-from models.Pedido import Pedido
 from models.Pizza import Pizza
 from models.TipoPizza import TipoPizza
 from models.meta.Singleton import Singleton
@@ -381,6 +379,7 @@ class Simulacion(metaclass=Singleton):
     def horas_por_dia(self):
         return self.CANTIDAD_HORAS_LABORALES
 
+    '''Devuelve la diferencia con la hora actual en minutos a partir de un datetime'''
     def get_diferencia_hora_actual(self, dt_hora):
         return self.reloj.get_diferencia_hora_actual(dt_hora)
 

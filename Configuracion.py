@@ -33,3 +33,31 @@ class Configuracion:
             "cantidadExperimentos": cls.CANTIDAD_DE_EXPERIMENTOS,
             "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES
         }
+
+    @classmethod
+    def get_estrategia_con_menor_cantidad_de_pizzas_cargadas_por_horno(cls):
+        return {
+            "inicio": cls.INICIO,
+            "fin": cls.FIN,
+            "volverAlRestaurante": cls.VOLVER_AL_RESTAURANTE,
+            "pedidosPorHora": cls.PEDIDOS_POR_HORA,
+            "hornosPorCamioneta": cls.HORNOS_POR_CAMIONETA,
+            "pizzasPorHorno": 10,
+            "cantidadCamionetas": cls.CANTIDAD_DE_CAMIONETAS,
+            "cantidadExperimentos": cls.CANTIDAD_DE_EXPERIMENTOS,
+            "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES
+        }
+
+    @classmethod
+    def get_estrategia_con_menor_cantidad_de_pizzas_cargadas_por_horno_y_mas_camionetas(cls):
+        return {
+            "inicio": cls.INICIO,
+            "fin": cls.FIN,
+            "volverAlRestaurante": cls.VOLVER_AL_RESTAURANTE,
+            "pedidosPorHora": cls.PEDIDOS_POR_HORA,
+            "hornosPorCamioneta": cls.HORNOS_POR_CAMIONETA,
+            "pizzasPorHorno": 10,
+            "cantidadCamionetas": 8,
+            "cantidadExperimentos": cls.CANTIDAD_DE_EXPERIMENTOS,
+            "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES
+        }
