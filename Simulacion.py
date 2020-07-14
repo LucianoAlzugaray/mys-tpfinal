@@ -429,15 +429,19 @@ class Simulacion(metaclass=Singleton):
     '''devuelve la cantidad de clientes atendidos (que recibieron una pizza) por hora'''
     def clientes_atendidos_por_hora(self):
 
-        clientes_atendidos_por_hora = []
-        for hora in range(self.horas_por_dia):
-            # TODO pedido.hora_entrega.hour por el timestamp, hacer diccionario?
-            # TODO 10 cambiar a hora de inicio
-            clientes_atendidos = list(
-                filter(lambda pedido: pedido.hora_entrega.hour == (hora + 10), self.pedidos_entregados()))
-            clientes_atendidos_por_hora.append(len(clientes_atendidos))
+        clientes_atendidos_por_hora_por_dia = []
+        for dia in range(self.dias_a_simular):
+            clientes_atendidos_por_hora = []
+            for hora in range(self.horas_por_dia):
+                # TODO pedido.hora_entrega.hour por el timestamp, hacer diccionario?
+                # TODO 10 cambiar a hora de inicio
+                clientes_atendidos = list(
+                    filter(lambda pedido: pedido.hora_entrega.hour == (hora + 10) and pedido.hora_entrega.day == dia, self.pedidos_entregados()))
+                clientes_atendidos_por_hora.append(len(clientes_atendidos))
 
-        return clientes_atendidos_por_hora
+            clientes_atendidos_por_hora_por_dia.append(np.mean(clientes_atendidos_por_hora))
+
+        return clientes_atendidos_por_hora_por_dia
 
     '''las camionetas deberian llevar su distancia recorrida'''
     def distacia_recorrida(self):
@@ -490,7 +494,10 @@ class Simulacion(metaclass=Singleton):
 
     def finalizar_dia(self):
 
-        self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / self.pedidos_del_dia) * 100)
+        if self.pedidos_del_dia > 0:
+            self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / self.pedidos_del_dia) * 100)
+        elif self.desperdicios_del_dia > 0:
+            self.porcentaje_desperdicio_diario.append(100)
         self.pedidos_en_espera = []
         self.fel = []
 
