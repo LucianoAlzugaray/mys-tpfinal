@@ -61,3 +61,17 @@ class Configuracion:
             "cantidadExperimentos": cls.CANTIDAD_DE_EXPERIMENTOS,
             "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES
         }
+
+    @classmethod
+    def get_estrategia_de_prueba(cls):
+        return {
+            "inicio": cls.INICIO,
+            "fin": datetime.strptime('4/1/20 23:00:00', '%d/%m/%y %H:%M:%S'),
+            "volverAlRestaurante": cls.VOLVER_AL_RESTAURANTE,
+            "pedidosPorHora": 5,
+            "hornosPorCamioneta": cls.HORNOS_POR_CAMIONETA,
+            "pizzasPorHorno": 5,
+            "cantidadCamionetas": 2,
+            "cantidadExperimentos": cls.CANTIDAD_DE_EXPERIMENTOS,
+            "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES
+        }

@@ -30,7 +30,7 @@ class Simulacion(metaclass=Singleton):
     HORA_DE_CIERRE = 23
     MINUTOS_DE_CIERRE = 0
     HORA_FIN_TOMA_DE_PEDIDOS = 22
-    MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
+    MINUTOS_FIN_TOMA_DE_PEDIDOS = 00
 
     def __init__(self):
         self.dias_a_simular = None
@@ -433,7 +433,9 @@ class Simulacion(metaclass=Singleton):
 
     '''El porcentaje de desperdicios a nivel corrida'''
     def porcentaje_desperdicio(self):
-        return np.mean(self.porcentaje_desperdicio_diario)
+        #return np.mean(self.porcentaje_desperdicio_diario)
+        return (len(self.desperdicios) / self.cantidad_pizzas_producidas_en_la_simulacion) * 100
+
 
     '''devuelve la cantidad de clientes atendidos (que recibieron una pizza) por hora'''
     def clientes_atendidos_por_hora(self):
@@ -481,7 +483,9 @@ class Simulacion(metaclass=Singleton):
 
     @property
     def desperdicios_del_dia(self):
-        return len(list(filter(lambda x: x.hora.date() == (self.time - timedelta(days=1)).date(), self.desperdicios)))
+        #return len(list(filter(lambda x: x.hora.date() == (self.time - timedelta(days=1)).date(), self.desperdicios)))
+        desperdicios_del_dia = list(filter(lambda x: x.hora.date() == (self.time - timedelta(days=1)).date(), self.desperdicios))
+        return len(desperdicios_del_dia)
 
     @property
     def pedidos_del_dia(self):
@@ -504,13 +508,6 @@ class Simulacion(metaclass=Singleton):
 
     def finalizar_dia(self):
 
-        if self.cantidad_pizzas_del_dia > 0:
-        #if self.pedidos_del_dia > 0:
-            #self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / self.pedidos_del_dia) * 100)
-            self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / self.cantidad_pizzas_del_dia) * 100)
-        elif self.desperdicios_del_dia > 0:
-            self.porcentaje_desperdicio_diario.append(100)
-        self.cantidad_pizzas_producidas_en_la_simulacion += self.cantidad_pizzas_del_dia
         self.pedidos_en_espera = []
         self.fel = []
 
@@ -524,6 +521,15 @@ class Simulacion(metaclass=Singleton):
             pedido.hora_entrega = self.time
             pedido.ubicacion_origen = [0, 0]
         list(map(lambda x: x.finalizar_dia(), self.camionetas))
+
+        if self.cantidad_pizzas_del_dia > 0:
+        #if self.pedidos_del_dia > 0:
+            #self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / self.pedidos_del_dia) * 100)
+            self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / self.cantidad_pizzas_del_dia) * 100)
+        elif self.desperdicios_del_dia > 0:
+            self.porcentaje_desperdicio_diario.append(100)
+
+        self.cantidad_pizzas_producidas_en_la_simulacion += self.cantidad_pizzas_del_dia
 
     def get_tasa_de_sobreproduccion(self):
         pass
