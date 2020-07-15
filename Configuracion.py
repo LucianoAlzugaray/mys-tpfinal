@@ -68,10 +68,10 @@ class Configuracion:
             "inicio": cls.INICIO,
             "fin": datetime.strptime('4/1/20 23:00:00', '%d/%m/%y %H:%M:%S'),
             "volverAlRestaurante": cls.VOLVER_AL_RESTAURANTE,
-            "pedidosPorHora": 5,
+            "pedidosPorHora": 3,
             "hornosPorCamioneta": cls.HORNOS_POR_CAMIONETA,
             "pizzasPorHorno": 5,
-            "cantidadCamionetas": 2,
+            "cantidadCamionetas": 1,
             "cantidadExperimentos": cls.CANTIDAD_DE_EXPERIMENTOS,
             "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES
         }
