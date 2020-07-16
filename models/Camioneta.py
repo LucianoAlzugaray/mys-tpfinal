@@ -1,8 +1,6 @@
 import math
 from datetime import timedelta
 
-from exeptions.CamionetaNoPuedeAtenderPedidoException import CamionetaNoPuedeAtenderPedidoException
-from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
 from events.EventType import EventType
 from models.Pedido import Pedido
 
@@ -28,6 +26,7 @@ class Camioneta:
             self.generar_evento_enviar_pedido(pedido)
 
     def enviar_pedido(self, pedido: Pedido):
+        self.distancia_recorrida += self.obtener_distancia(self.ubicacion, pedido.cliente.ubicacion)
         self.ubicacion = pedido.cliente.ubicacion
         if not self._tengo_pizzas_para_entregar(pedido):
             self.generar_evento_volver_a_restaurante(pedido)
@@ -97,6 +96,7 @@ class Camioneta:
         simulacion.dispatch(EventType.ENTREGAR_PEDIDO, {'hora': simulacion.time + timedelta(minutes=simulacion.utils.tiempo_entrega()), 'pedido': pedido})
 
     def volver_a_pizzeria(self):
+        self.distancia_recorrida += self.obtener_distancia(self.ubicacion, [0, 0])
         self.ubicacion = [0, 0]
 
     # generacion de eventos
@@ -119,7 +119,6 @@ class Camioneta:
     def cargar_pizzas(self):
         from Simulacion import Simulacion
         simulacion = Simulacion()
-
         if simulacion.pedidos_en_espera:
             self.cargar_pedidos_en_espera()
         else:
@@ -152,7 +151,6 @@ class Camioneta:
     def remover_pizzas_vencidas(self):
         self.pizzas = list(filter(lambda x: not x.vencida, self.pizzas))
 
-
     # condiciones
     def tiene_tipo(self, tipo):
         return len(list(filter(lambda x: x.tipo == tipo, self.pizzas_no_vencidas))) > 0
@@ -180,14 +178,11 @@ class Camioneta:
         pizzas_de_tipo = list(filter(lambda x: x.tipo == pedido.tipo_pizza, self.pizzas))
         return len(pizzas_de_tipo) > len(pedidos)
 
-
-
-
     # Lógica de manejo de las distancias
     def obtener_distancia(self, punto1, punto2):
         cateto1 = punto2[0] - punto1[0]
         cateto2 = punto2[1] - punto1[1]
-        return math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2))
+        return math.trunc(math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2)))
 
     def obtener_tiempo_demora_en_volver(self):
         from Simulacion import Simulacion
@@ -204,7 +199,6 @@ class Camioneta:
 
     def get_ubicacion(self):
         return self.ubicacion
-
 
     def finalizar_dia(self):
         self.pedidos = []
