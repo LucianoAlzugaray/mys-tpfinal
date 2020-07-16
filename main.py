@@ -14,22 +14,23 @@ CANTIDAD_DE_EXPERIMENTOS = 10
 FIN = datetime.strptime('31/12/20 23:00:00', '%d/%m/%y %H:%M:%S')
 INICIO = datetime.strptime('1/1/20 09:00:00', '%d/%m/%y %H:%M:%S')
 TIPOS_PIZZA_DISPONIBLES = [TipoPizza.ANANA, TipoPizza.CALABRESA, TipoPizza.FUGAZZETA, TipoPizza.MOZZARELLA, TipoPizza.NAPOLITANA]
+RANGO_ATENCION = 2000
 
 def iniciar_simulacion(configuraciones):
     tipos_de_pizza = []
-    if configuraciones["anana"]:
+    if not hasattr(configuraciones,"anana") or configuraciones["anana"]:
         tipo_de_pizza = {'tipo': TipoPizza.ANANA, 'probabilidad': 0.05}
         tipos_de_pizza.append(tipo_de_pizza)
-    elif configuraciones["napolitana"]:
+    if not hasattr(configuraciones, "napolitana") or configuraciones["napolitana"]:
         tipo_de_pizza = {'tipo': TipoPizza.CALABRESA, 'probabilidad': 0.20}
         tipos_de_pizza.append(tipo_de_pizza)
-    elif configuraciones["fugazzeta"]:
+    if not hasattr(configuraciones, "fugazzeta") or configuraciones["fugazzeta"]:
         tipo_de_pizza = {'tipo': TipoPizza.NAPOLITANA, 'probabilidad': 0.20}
         tipos_de_pizza.append(tipo_de_pizza)
-    elif configuraciones["mozzarella"]:
+    if not hasattr(configuraciones, "mozzarella") or configuraciones["mozzarella"]:
         tipo_de_pizza = {'tipo': TipoPizza.FUGAZZETA, 'probabilidad': 0.20}
         tipos_de_pizza.append(tipo_de_pizza)
-    elif configuraciones["calabresa"]:
+    if not hasattr(configuraciones, "calabresa") or configuraciones["calabresa"]:
         tipo_de_pizza = {'tipo': TipoPizza.MOZZARELLA, 'probabilidad': 0.20}
         tipos_de_pizza.append(tipo_de_pizza)
 
@@ -42,12 +43,14 @@ def iniciar_simulacion(configuraciones):
         "pizzasPorHorno": configuraciones["pizzasPorHorno"] if configuraciones["pizzasPorHorno"] is not None else PIZZAS_POR_HORNO,
         "cantidadCamionetas": configuraciones["cantidadCamionetas"] if configuraciones["cantidadCamionetas"] is not None else CANTIDAD_DE_CAMIONETAS,
         "cantidadExperimentos": configuraciones["cantidadExperimentos"] if configuraciones["cantidadExperimentos"] is not None else CANTIDAD_DE_EXPERIMENTOS,
-        "tipos_de_pizza": tipos_de_pizza
+        "tipos_de_pizza": tipos_de_pizza,
+        "nombre_experimento": configuraciones["nombreExperimento"] if configuraciones["nombreExperimento"] is not None else "",
+        "rangoAtencion": configuraciones["rangoAtencion"] if configuraciones["rangoAtencion"] is not None else RANGO_ATENCION
     }
 
     from Configuracion import Configuracion
     simulacion = Simulacion()
-    simulacion.configurate(configuraciones)
+    simulacion.configurate(configuracion)
     simulacion.run()
 
 

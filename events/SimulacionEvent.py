@@ -14,3 +14,11 @@ class SimulacionEvent(object):
     def notify(self) -> None:
         for actividad in self.actividades:
             actividad.run(self)
+
+    def to_dict(self):
+        return {
+            "id": id(self),
+            "tipo": self.__class__,
+            "ubicacion": "" if not hasattr(self,'ubicacion') else self.ubicacion,
+            "hora": self.hora
+        }
