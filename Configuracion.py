@@ -4,12 +4,14 @@ from models.TipoPizza import TipoPizza
 
 
 class Configuracion:
+    NOMBRE_EXPERIMENTO = "Experimento"
     PIZZAS_POR_HORNO = 20
     PEDIDOS_POR_HORA = 20
     HORNOS_POR_CAMIONETA = 1
     CANTIDAD_DE_CAMIONETAS = 4
     VOLVER_AL_RESTAURANTE = False
     CANTIDAD_DE_EXPERIMENTOS = 1
+    RANGO_DE_ATENCION = 2000
     FIN = datetime.strptime('1/2/20 23:00:00', '%d/%m/%y %H:%M:%S')
     INICIO = datetime.strptime('1/1/20 11:00:00', '%d/%m/%y %H:%M:%S')
     TIPOS_PIZZA_DISPONIBLES = [
@@ -31,7 +33,9 @@ class Configuracion:
             "pizzasPorHorno": cls.PIZZAS_POR_HORNO,
             "cantidadCamionetas": cls.CANTIDAD_DE_CAMIONETAS,
             "cantidadExperimentos": cls.CANTIDAD_DE_EXPERIMENTOS,
-            "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES
+            "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES,
+            "nombre_experimento": cls.NOMBRE_EXPERIMENTO,
+            "rangoAtencion": cls.RANGO_DE_ATENCION
         }
 
     @classmethod
@@ -45,7 +49,9 @@ class Configuracion:
             "pizzasPorHorno": 10,
             "cantidadCamionetas": cls.CANTIDAD_DE_CAMIONETAS,
             "cantidadExperimentos": cls.CANTIDAD_DE_EXPERIMENTOS,
-            "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES
+            "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES,
+            "nombre_experimento" : cls.NOMBRE_EXPERIMENTO,
+            "rangoAtencion": cls.RANGO_DE_ATENCION
         }
 
     @classmethod
@@ -59,7 +65,9 @@ class Configuracion:
             "pizzasPorHorno": 10,
             "cantidadCamionetas": 8,
             "cantidadExperimentos": cls.CANTIDAD_DE_EXPERIMENTOS,
-            "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES
+            "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES,
+            "nombre_experimento" : cls.NOMBRE_EXPERIMENTO,
+            "rangoAtencion": cls.RANGO_DE_ATENCION
         }
 
     @classmethod
@@ -73,5 +81,7 @@ class Configuracion:
             "pizzasPorHorno": 5,
             "cantidadCamionetas": 1,
             "cantidadExperimentos": cls.CANTIDAD_DE_EXPERIMENTOS,
-            "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES
+            "tipos_de_pizza": cls.TIPOS_PIZZA_DISPONIBLES,
+            "nombre_experimento": cls.NOMBRE_EXPERIMENTO,
+            "rangoAtencion": cls.RANGO_DE_ATENCION
         }

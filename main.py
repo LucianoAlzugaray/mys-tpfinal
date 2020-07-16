@@ -55,7 +55,7 @@ def iniciar_simulacion(configuraciones):
 
 
 def on_message(client, user_data, msg):
-    print("Llegó una petición de simulación")
+    print("Llego una peticion de simulacion")
     configuracion = json.loads(msg.payload.decode('utf-8'))
     iniciar_simulacion(configuracion)
 

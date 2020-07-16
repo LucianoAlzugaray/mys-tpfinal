@@ -182,7 +182,7 @@ class Simulacion(metaclass=Singleton):
         if len(self.pedidos) == 0:
             return
         tiempo_espera = self.tiempo_espera()
-        porcentaje_desperdicio = self.porcentaje_desperdicio() / dia
+        porcentaje_desperdicio = self.porcentaje_desperdicio()
         pedidos_entregados = self.pedidos_entregados()
         pedidos_perdidos = self.pedidos_perdidos()
         distacia_recorrida = self.distacia_recorrida()
@@ -448,7 +448,7 @@ class Simulacion(metaclass=Singleton):
 
     '''El porcentaje de desperdicios a nivel corrida'''
     def porcentaje_desperdicio(self):
-        return math.trunc(np.mean(self.porcentaje_desperdicio_diario))
+        return np.mean(self.porcentaje_desperdicio_diario)
 
     '''devuelve la cantidad de clientes atendidos (que recibieron una pizza) por hora'''
 
