@@ -182,7 +182,7 @@ class Camioneta:
     def obtener_distancia(self, punto1, punto2):
         cateto1 = punto2[0] - punto1[0]
         cateto2 = punto2[1] - punto1[1]
-        return math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2))
+        return math.trunc(math.sqrt(math.pow(cateto1, 2) + math.pow(cateto2, 2)))
 
     def obtener_tiempo_demora_en_volver(self):
         from Simulacion import Simulacion

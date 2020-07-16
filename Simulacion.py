@@ -160,10 +160,10 @@ class Simulacion(metaclass=Singleton):
         row = {
             "corrida": experimento.__str__(),
             "esperaClientes": self.tiempo_espera(),
-            "clientesHora": np.mean(self.clientes_atendidos_por_hora()),
-            "pizzasDia": len(self.pedidos_entregados()) / self.reloj.dias_transcurridos,
+            "clientesHora": math.trunc(np.mean(self.clientes_atendidos_por_hora())),
+            "pizzasDia": math.trunc(len(self.pedidos_entregados()) / self.reloj.dias_transcurridos),
             "desperdicios": self.porcentaje_desperdicio(),
-            "distanciasRecorridas": self.distacia_recorrida(),
+            "distanciasRecorridas": math.trunc(self.distacia_recorrida()/1000),
             "recargaCamionetas": self.tiempo_entre_recargas()
         }
 
@@ -186,7 +186,7 @@ class Simulacion(metaclass=Singleton):
         self.client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
         self.client.publish("pedidos-entregados", len(pedidos_entregados))
         self.client.publish("pedidos-rechazados", len(pedidos_perdidos))
-        self.client.publish("distancias-recorridas", distacia_recorrida)
+        self.client.publish("distancias-recorridas", math.trunc(distacia_recorrida/1000))
         self.client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
         self.client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
         self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
@@ -424,7 +424,7 @@ class Simulacion(metaclass=Singleton):
 
     '''El porcentaje de desperdicios a nivel corrida'''
     def porcentaje_desperdicio(self):
-        return np.mean(self.porcentaje_desperdicio_diario)
+        return math.trunc(np.mean(self.porcentaje_desperdicio_diario))
 
     '''devuelve la cantidad de clientes atendidos (que recibieron una pizza) por hora'''
     def clientes_atendidos_por_hora(self):
@@ -457,7 +457,7 @@ class Simulacion(metaclass=Singleton):
         tiempo_promedio_entre_recargas = np.mean(lista_de_tiempos_promedio_entre_recargas)
         if(math.isnan(tiempo_promedio_entre_recargas)):
             return 0
-        return tiempo_promedio_entre_recargas
+        return math.trunc(tiempo_promedio_entre_recargas)
 
     def generar_pizza(self, tipo_pizza):
         pizza = Pizza(tipo_pizza, self.time)
