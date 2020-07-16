@@ -33,7 +33,7 @@ class Simulacion(metaclass=Singleton):
     HORA_DE_CIERRE = 23
     MINUTOS_DE_CIERRE = 0
     HORA_FIN_TOMA_DE_PEDIDOS = 22
-    MINUTOS_FIN_TOMA_DE_PEDIDOS = 30
+    MINUTOS_FIN_TOMA_DE_PEDIDOS = 00
 
     def __init__(self):
         self.dias_a_simular = None
@@ -58,6 +58,8 @@ class Simulacion(metaclass=Singleton):
         self.utils = Utils()
         self.reloj = Reloj()
         self.event_factory = SimulacionEventFactory()
+        self.pizzas_del_dia = []
+        self.pizzas_producidas_en_la_simulacion = []
 
         self.data = {
             "desperdicios": None,
@@ -133,7 +135,6 @@ class Simulacion(metaclass=Singleton):
         for experimento in range(self.experimentos):
             for dia in range(self.dias_a_simular):
                 self.iniciar_dia()
-
                 while not self.termino_dia():
                     evento = self.next_event()
                     if evento is not None:
@@ -141,8 +142,10 @@ class Simulacion(metaclass=Singleton):
 
                 self.finalizar_dia()
                 print(f"PUBLICANDO RESULTADOS DEL DIA {self.time.date()}")
+
                 self.publicar_resultados_dia(dia + 1)
             print(f"PUBLICANDO RESULTADOS DEL EXPERIMENTO {experimento + 1}")
+
             self.publicar_resultados_experimento(experimento)
             self.guardar_datos(experimento)
             self.clean_experimento()
@@ -164,10 +167,10 @@ class Simulacion(metaclass=Singleton):
         row = {
             "corrida": (experimento + 1).__str__(),
             "esperaClientes": self.tiempo_espera(),
-            "clientesHora": np.mean(self.clientes_atendidos_por_hora()),
-            "pizzasDia": len(self.pedidos_entregados()) / self.reloj.dias_transcurridos,
+            "clientesHora": math.trunc(np.mean(self.clientes_atendidos_por_hora())),
+            "pizzasDia": math.trunc(len(self.pedidos_entregados()) / self.reloj.dias_transcurridos),
             "desperdicios": self.porcentaje_desperdicio(),
-            "distanciasRecorridas": self.distacia_recorrida(),
+            "distanciasRecorridas": math.trunc(self.distacia_recorrida()/1000),
             "recargaCamionetas": self.tiempo_entre_recargas()
         }
 
@@ -190,13 +193,12 @@ class Simulacion(metaclass=Singleton):
         self.client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
         self.client.publish("pedidos-entregados", len(pedidos_entregados))
         self.client.publish("pedidos-rechazados", len(pedidos_perdidos))
-        self.client.publish("distancias-recorridas", distacia_recorrida)
+        self.client.publish("distancias-recorridas", math.trunc(distacia_recorrida/1000))
         self.client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
         self.client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
         self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
         self.client.publish("dia-actual", dia)
 
-    # TODO: armar los csv de pedidos y desperdicios
     def guardar_datos(self, experimento):
         pedidos_data = [pedido.to_dict() for pedido in self.pedidos]
         desperdicios_data = [pizza.to_dict() for pizza in self.desperdicios]
@@ -345,6 +347,7 @@ class Simulacion(metaclass=Singleton):
         self.reloj.iniciar_dia()
         self.generar_eventos_de_llamada()
         self.inicializar_camionetas()
+        self.pizzas_del_dia = []
 
     def generar_eventos_de_llamada(self):
         list(map(lambda hora_de_pedido: self.generar_llamo_cliente_event(hora_de_pedido),
@@ -443,10 +446,9 @@ class Simulacion(metaclass=Singleton):
         media = np.mean(minutos_espera)
         return math.trunc(media.seconds / 60)
 
-    '''El porcentaje de desperdicios a nivel corrida (365 dias)'''
-
+    '''El porcentaje de desperdicios a nivel corrida'''
     def porcentaje_desperdicio(self):
-        return np.mean(self.porcentaje_desperdicio_diario)
+        return math.trunc(np.mean(self.porcentaje_desperdicio_diario))
 
     '''devuelve la cantidad de clientes atendidos (que recibieron una pizza) por hora'''
 
@@ -483,17 +485,19 @@ class Simulacion(metaclass=Singleton):
         tiempo_promedio_entre_recargas = np.mean(lista_de_tiempos_promedio_entre_recargas)
         if (math.isnan(tiempo_promedio_entre_recargas)):
             return 0
-        return tiempo_promedio_entre_recargas
+        return math.trunc(tiempo_promedio_entre_recargas)
 
     def generar_pizza(self, tipo_pizza):
         pizza = Pizza(tipo_pizza, self.time)
         self.dispatch(EventType.PIZZA_VENCE, {'pizza': pizza})
+        self.pizzas_del_dia.append(pizza)
         return pizza
 
     '''Obtiene el porcentaje de desperdicios en el dia'''
 
     def add_desperdicio(self, pizza, hora):
-        self.desperdicios.append(pizza)
+        if pizza not in self.desperdicios:
+            self.desperdicios.append(pizza)
 
     @property
     def desperdicios_del_dia(self):
@@ -519,7 +523,6 @@ class Simulacion(metaclass=Singleton):
         return evento
 
     def finalizar_dia(self):
-
         if self.pedidos_del_dia > 0:
             self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / self.pedidos_del_dia) * 100)
         elif self.desperdicios_del_dia > 0:
@@ -547,3 +550,23 @@ class Simulacion(metaclass=Singleton):
             pedido.camioneta = camioneta
             self.add_pedido(pedido)
             self.pedidos_en_espera.remove(pedido)
+
+    @property
+    def pizzas_repetidas_en_desperdicio(self):
+        hay_pizzas_repetidas = False
+        for pizza1 in self.desperdicios:
+            contador_de_repeticiones = 0
+            for pizza2 in self.desperdicios:
+                if pizza1 == pizza2:
+                    contador_de_repeticiones +=1
+            if contador_de_repeticiones > 1:
+                hay_pizzas_repetidas = True
+        return hay_pizzas_repetidas
+
+    @property
+    def get_pizzas_que_no_estan_en_el_dia_from_desperdicios(self):
+        pizzas_que_no_estan_en_el_dia = []
+        for pizza_desperdiciada in self.desperdicios:
+            if not pizza_desperdiciada in self.pizzas_del_dia:
+                pizzas_que_no_estan_en_el_dia.append(pizza_desperdiciada)
+        return pizzas_que_no_estan_en_el_dia
