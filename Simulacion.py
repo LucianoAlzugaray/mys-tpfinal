@@ -145,10 +145,11 @@ class Simulacion(metaclass=Singleton):
 
                 self.publicar_resultados_dia(dia + 1)
             print(f"PUBLICANDO RESULTADOS DEL EXPERIMENTO {experimento + 1}")
-
+            print(f"Cantidad de pizzas producidas en la simulacion = {len(self.pizzas_producidas_en_la_simulacion)}")
             self.publicar_resultados_experimento(experimento)
             self.guardar_datos(experimento)
             self.clean_experimento()
+
         self.exportar_datos()
 
     @property
@@ -169,7 +170,7 @@ class Simulacion(metaclass=Singleton):
             "esperaClientes": self.tiempo_espera(),
             "clientesHora": math.trunc(np.mean(self.clientes_atendidos_por_hora())),
             "pizzasDia": math.trunc(len(self.pedidos_entregados()) / self.reloj.dias_transcurridos),
-            "desperdicios": self.porcentaje_desperdicio(),
+            "desperdicios": self.porcentaje_produccion_sobre_pedidos(),
             "distanciasRecorridas": math.trunc(self.distacia_recorrida()/1000),
             "recargaCamionetas": self.tiempo_entre_recargas()
         }
@@ -182,7 +183,7 @@ class Simulacion(metaclass=Singleton):
         if len(self.pedidos) == 0:
             return
         tiempo_espera = self.tiempo_espera()
-        porcentaje_desperdicio = self.porcentaje_desperdicio()
+        porcentaje_desperdicio = self.porcentaje_produccion_sobre_pedidos()
         pedidos_entregados = self.pedidos_entregados()
         pedidos_perdidos = self.pedidos_perdidos()
         distacia_recorrida = self.distacia_recorrida()
@@ -447,7 +448,7 @@ class Simulacion(metaclass=Singleton):
         return math.trunc(media.seconds / 60)
 
     '''El porcentaje de desperdicios a nivel corrida'''
-    def porcentaje_desperdicio(self):
+    def porcentaje_produccion_sobre_pedidos(self):
         return np.mean(self.porcentaje_desperdicio_diario)
 
     '''devuelve la cantidad de clientes atendidos (que recibieron una pizza) por hora'''
@@ -522,7 +523,16 @@ class Simulacion(metaclass=Singleton):
         self.fel.remove(evento)
         return evento
 
+    @property
+    def porcentaje_pedidos_entregados(self):
+        return (len(self.pedidos_entregados())*100) / len(self.pizzas_producidas_en_la_simulacion)
+
+    @property
+    def porcentaje_desperdicio(self):
+        return 100 - self.porcentaje_pedidos_entregados
+
     def finalizar_dia(self):
+        self.pizzas_producidas_en_la_simulacion = self.pizzas_producidas_en_la_simulacion + self.pizzas_del_dia
         if self.pedidos_del_dia > 0:
             self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / self.pedidos_del_dia) * 100)
         elif self.desperdicios_del_dia > 0:
