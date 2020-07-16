@@ -11,7 +11,7 @@ class MyTestCase(unittest.TestCase):
         from Configuracion import Configuracion
 
         simulacion = Simulacion()
-        simulacion.configurate(Configuracion.get_estrategia_de_prueba())
+        simulacion.configurate(Configuracion.get_default_configuration())
 
         simulacion.run()
 

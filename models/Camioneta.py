@@ -1,8 +1,6 @@
 import math
 from datetime import timedelta
 
-from exeptions.CamionetaNoPuedeAtenderPedidoException import CamionetaNoPuedeAtenderPedidoException
-from exeptions.NoHayTipoPizzaEnCamionetaException import NoHayTipoPizzaEnCamionetaException
 from events.EventType import EventType
 from models.Pedido import Pedido
 
@@ -28,6 +26,7 @@ class Camioneta:
             self.generar_evento_enviar_pedido(pedido)
 
     def enviar_pedido(self, pedido: Pedido):
+        self.distancia_recorrida += self.obtener_distancia(self.ubicacion, pedido.cliente.ubicacion)
         self.ubicacion = pedido.cliente.ubicacion
         if not self._tengo_pizzas_para_entregar(pedido):
             self.generar_evento_volver_a_restaurante(pedido)
@@ -97,6 +96,7 @@ class Camioneta:
         simulacion.dispatch(EventType.ENTREGAR_PEDIDO, {'hora': simulacion.time + timedelta(minutes=simulacion.utils.tiempo_entrega()), 'pedido': pedido})
 
     def volver_a_pizzeria(self):
+        self.distancia_recorrida += self.obtener_distancia(self.ubicacion, [0, 0])
         self.ubicacion = [0, 0]
 
     # generacion de eventos

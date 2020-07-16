@@ -136,16 +136,8 @@ class Simulacion(metaclass=Singleton):
 
                 self.finalizar_dia()
                 print(f"PUBLICANDO RESULTADOS DEL DIA {self.time.date()}")
-                print("--------------------------------------------------")
-                print(f"Cantidad de pizzas del dia = {len(self.pizzas_del_dia)}")
-                print(f"El desperdicio del dia es = {self.desperdicios_del_dia}")
-                print(f"El acumulado de pizzas es = {len(self.pizzas_producidas_en_la_simulacion)}")
-                print(f"El acumulado de desperdicios es = {len(self.desperdicios)}")
-                print("--------------------------------------------------")
                 self.publicar_resultados_dia()
             print(f"PUBLICANDO RESULTADOS DEL EXPERIMENTO {experimento+1}")
-            print(f"Cantidad de pizzas producidas en la simulacion = {len(self.pizzas_producidas_en_la_simulacion)}")
-            print(f"Cantidad de desperdicios de la simulacion = {len(self.desperdicios)}")
 
             self.publicar_resultados_experimento(experimento)
             self.guardar_datos(experimento)
@@ -199,7 +191,6 @@ class Simulacion(metaclass=Singleton):
         self.client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
         self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
 
-    # TODO: armar los csv de pedidos y desperdicios
     def guardar_datos(self, experimento):
         pedidos_data = [pedido.to_dict() for pedido in self.pedidos]
         desperdicios_data = [pizza.to_dict() for pizza in self.desperdicios]
@@ -433,9 +424,7 @@ class Simulacion(metaclass=Singleton):
 
     '''El porcentaje de desperdicios a nivel corrida'''
     def porcentaje_desperdicio(self):
-        #return np.mean(self.porcentaje_desperdicio_diario)
-        return (len(self.desperdicios) / len(self.pizzas_producidas_en_la_simulacion)) * 100
-
+        return np.mean(self.porcentaje_desperdicio_diario)
 
     '''devuelve la cantidad de clientes atendidos (que recibieron una pizza) por hora'''
     def clientes_atendidos_por_hora(self):
@@ -483,9 +472,7 @@ class Simulacion(metaclass=Singleton):
 
     @property
     def desperdicios_del_dia(self):
-        #return len(list(filter(lambda x: x.hora.date() == (self.time - timedelta(days=1)).date(), self.desperdicios)))
-        desperdicios_del_dia = list(filter(lambda x: x.hora.date() == (self.time - timedelta(days=1)).date(), self.desperdicios))
-        return len(desperdicios_del_dia)
+        return len(list(filter(lambda x: x.hora.date() == (self.time - timedelta(days=1)).date(), self.desperdicios)))
 
     @property
     def pedidos_del_dia(self):
@@ -507,33 +494,23 @@ class Simulacion(metaclass=Singleton):
         return evento
 
     def finalizar_dia(self):
-
+        if self.pedidos_del_dia > 0:
+            self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / self.pedidos_del_dia) * 100)
+        elif self.desperdicios_del_dia > 0:
+            self.porcentaje_desperdicio_diario.append(100)
         self.pedidos_en_espera = []
         self.fel = []
 
         desperdicios = list(itertools.chain(*map(lambda x: x.pizzas, self.camionetas)))
-        desperdicios_sin_agregar_aun = list(filter(lambda x: x not in self.desperdicios, desperdicios))
-        list(map(lambda x: self.add_desperdicio(x, self.dia), desperdicios_sin_agregar_aun))
+        list(map(lambda x: self.add_desperdicio(x, self.dia), desperdicios))
         pedidos_en_camioneta = list(itertools.chain(*map(lambda x: x.pedidos, self.camionetas)))
 
-        pedidos_perdidos = list(map(lambda x: x.pedido, list(filter(lambda x: isinstance(x, EnviarPedidoEvent) or isinstance(x, EntregarPedidoEvent), self.fel))))
+        pedidos_perdidos = list(map(lambda x: x.pedido, list(
+            filter(lambda x: isinstance(x, EnviarPedidoEvent) or isinstance(x, EntregarPedidoEvent), self.fel))))
         for pedido in pedidos_perdidos + pedidos_en_camioneta:
             pedido.hora_entrega = self.time
             pedido.ubicacion_origen = [0, 0]
         list(map(lambda x: x.finalizar_dia(), self.camionetas))
-
-        #if len(self.pizzas_del_dia) > 0:
-        if self.pedidos_del_dia > 0:
-            #self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / self.pedidos_del_dia) * 100)
-            self.porcentaje_desperdicio_diario.append((self.desperdicios_del_dia / len(self.pizzas_del_dia)) * 100)
-        elif self.desperdicios_del_dia > 0:
-            # TODO : ver si esta bien esta condicion
-            self.porcentaje_desperdicio_diario.append(100)
-
-        self.pizzas_producidas_en_la_simulacion = self.pizzas_producidas_en_la_simulacion + self.pizzas_del_dia
-
-    def get_tasa_de_sobreproduccion(self):
-        pass
 
     def atender_pedidos_en_espera(self, camioneta):
         pedidos_en_espera = self.pedidos_en_espera[0: camioneta.cantidad_de_pizzas_a_cargar]
