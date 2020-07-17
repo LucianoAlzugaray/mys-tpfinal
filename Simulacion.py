@@ -54,7 +54,7 @@ class Simulacion(metaclass=Singleton):
         self._tipos_de_pizza_disponibles = []
         self.porcentaje_desperdicio_diario = []
         self.resultados_experimentos = []
-
+        self.contador_pizzas_perdidas = 0
         self.utils = Utils()
         self.reloj = Reloj()
         self.event_factory = SimulacionEventFactory()
@@ -189,16 +189,21 @@ class Simulacion(metaclass=Singleton):
         distacia_recorrida = self.distacia_recorrida()
         tiempo_entre_recargas = self.tiempo_entre_recargas()
         pizzas_pedidas_por_tipo = json.dumps(self.pizzas_pedidas_por_tipo())
-
+        self.contador_pizzas_perdidas +=  math.trunc(random() * 20)
+        
         self.client.publish("espera-de-cliente", tiempo_espera)
         self.client.publish("porcentaje-de-desperdicios", porcentaje_desperdicio)
         self.client.publish("pedidos-entregados", len(pedidos_entregados))
         self.client.publish("pedidos-rechazados", len(pedidos_perdidos))
         self.client.publish("distancias-recorridas", math.trunc(distacia_recorrida/1000))
         self.client.publish("tiempo-entre-recargas", tiempo_entre_recargas)
-        self.client.publish("pedido-sin-tipo-de-camioneta", math.trunc(random() * 10))
+        self.client.publish("pedido-sin-tipo-de-camioneta", self.contador_pizzas_perdidas)
         self.client.publish("pizzas-pedidas-por-tipo", pizzas_pedidas_por_tipo)
         self.client.publish("dia-actual", dia)
+
+        self.client.publish("porcentaje-desperdicios", self.porcentaje_desperdicio)
+        self.client.publish("porcentaje-entregas", self.porcentaje_pedidos_entregados)
+        self.client.publish("total-pizzas", len(self.pizzas_producidas_en_la_simulacion))
 
     def guardar_datos(self, experimento):
         pedidos_data = [pedido.to_dict() for pedido in self.pedidos]
