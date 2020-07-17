@@ -47,7 +47,7 @@ $ python -m unittest discover tests -p '*Test.py'
 
 Otra forma para correr la simulación es ejecutar el test "test_simulacion" situado en el archivo "SimulacionE2ETest.py" (linea 9 de SimulacionE2ETest.py).
 
-#####NOTA: 
+####NOTA: 
 Si se ejecuta de este modo los valores de entrada son los definidos en el test y no en el dashboard.
 
 ### Forma de seleccionar una nueva estrategia
@@ -58,7 +58,7 @@ Las estrategias definidas son:
 * get_estrategia_con_menor_cantidad_de_pizzas_cargadas_por_horno
 * get_estrategia_con_menor_cantidad_de_pizzas_cargadas_por_horno_y_mas_camionetas
 
-#####Ejemplo
+####Ejemplo
 Si desea utilizar la estrategia de "get_estrategia_con_menor_cantidad_de_pizzas_cargadas_por_horno", deberá quedarle la linea 14 de "SimulacionE2ETest.py" de la siguiente forma:
 
         simulacion.configurate(Configuracion.get_estrategia_con_menor_cantidad_de_pizzas_cargadas_por_horno())
